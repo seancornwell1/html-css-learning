@@ -1,63 +1,78 @@
-/**
- * Structure-of-arrays enemy storage. Live enemies are kept dense in
- * `slots[0..count)` (swap-remove), so iteration is cache-friendly and
- * allocation-free. Order is deterministic.
- */
+import { DenseIndex } from './dense-index';
+
+/** Structure-of-arrays enemy storage (see DenseIndex). */
 export class EnemyPool {
-  readonly capacity: number;
+  readonly index: DenseIndex;
   readonly id: Uint32Array;
   readonly kind: Uint8Array;
   readonly x: Float64Array;
   readonly y: Float64Array;
   readonly hp: Float64Array;
-  /** Dense list of live slot indices. */
-  readonly slots: Int32Array;
-  count = 0;
-  private readonly free: Int32Array;
-  private freeCount: number;
-  /** Position of each slot inside `slots` (for O(1) removal). */
-  private readonly where: Int32Array;
+  readonly maxHp: Float64Array;
+  /** Contact damage, already scaled for the minute it spawned in. */
+  readonly damage: Float64Array;
+  /** Knockback velocity, px/s; decays every tick. */
+  readonly kbx: Float64Array;
+  readonly kby: Float64Array;
+  /** Behaviour timer (e.g. hop phase), seconds. */
+  readonly timer: Float64Array;
+  /** Behaviour direction (e.g. hop heading), unit vector. */
+  readonly dirX: Float64Array;
+  readonly dirY: Float64Array;
   private nextId = 1;
 
   constructor(capacity: number) {
-    this.capacity = capacity;
+    this.index = new DenseIndex(capacity);
     this.id = new Uint32Array(capacity);
     this.kind = new Uint8Array(capacity);
     this.x = new Float64Array(capacity);
     this.y = new Float64Array(capacity);
     this.hp = new Float64Array(capacity);
-    this.slots = new Int32Array(capacity);
-    this.where = new Int32Array(capacity).fill(-1);
-    this.free = new Int32Array(capacity);
-    for (let i = 0; i < capacity; i++) this.free[i] = capacity - 1 - i;
-    this.freeCount = capacity;
+    this.maxHp = new Float64Array(capacity);
+    this.damage = new Float64Array(capacity);
+    this.kbx = new Float64Array(capacity);
+    this.kby = new Float64Array(capacity);
+    this.timer = new Float64Array(capacity);
+    this.dirX = new Float64Array(capacity);
+    this.dirY = new Float64Array(capacity);
+  }
+
+  get count(): number {
+    return this.index.count;
+  }
+
+  get slots(): Int32Array {
+    return this.index.slots;
+  }
+
+  get capacity(): number {
+    return this.index.capacity;
   }
 
   /** Returns the slot index, or -1 when full. */
-  spawn(kind: number, x: number, y: number, hp: number): number {
-    if (this.freeCount === 0) return -1;
-    const slot = this.free[--this.freeCount] as number;
+  spawn(kind: number, x: number, y: number, hp: number, damage = 0): number {
+    const slot = this.index.alloc();
+    if (slot < 0) return -1;
     this.id[slot] = this.nextId++;
     this.kind[slot] = kind;
     this.x[slot] = x;
     this.y[slot] = y;
     this.hp[slot] = hp;
-    this.where[slot] = this.count;
-    this.slots[this.count++] = slot;
+    this.maxHp[slot] = hp;
+    this.damage[slot] = damage;
+    this.kbx[slot] = 0;
+    this.kby[slot] = 0;
+    this.timer[slot] = 0;
+    this.dirX[slot] = 0;
+    this.dirY[slot] = 0;
     return slot;
   }
 
   remove(slot: number): void {
-    const at = this.where[slot] as number;
-    if (at < 0) return;
-    const last = this.slots[--this.count] as number;
-    this.slots[at] = last;
-    this.where[last] = at;
-    this.where[slot] = -1;
-    this.free[this.freeCount++] = slot;
+    this.index.release(slot);
   }
 
   isAlive(slot: number): boolean {
-    return (this.where[slot] as number) >= 0;
+    return this.index.isAlive(slot);
   }
 }

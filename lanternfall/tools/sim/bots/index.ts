@@ -1,7 +1,9 @@
+import { AverageBot } from './average';
 import type { Bot } from './bot';
-import { StubBot } from './stub';
+import { NaiveBot } from './naive';
+import { SkilledBot } from './skilled';
 
-export const BOT_NAMES = ['stub'] as const;
+export const BOT_NAMES = ['naive', 'average', 'skilled'] as const;
 export type BotName = (typeof BOT_NAMES)[number];
 
 export function isBotName(name: string): name is BotName {
@@ -10,7 +12,11 @@ export function isBotName(name: string): name is BotName {
 
 export function createBot(name: BotName, seed: number): Bot {
   switch (name) {
-    case 'stub':
-      return new StubBot(seed);
+    case 'naive':
+      return new NaiveBot(seed);
+    case 'average':
+      return new AverageBot(seed);
+    case 'skilled':
+      return new SkilledBot(seed);
   }
 }

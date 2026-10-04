@@ -4,7 +4,7 @@ export const PLAYER_BASE = {
   /** px/s */
   moveSpeed: 150,
   radius: 12,
-  pickupRadius: 48,
+  pickupRadius: 85,
   /** Seconds of invulnerability after taking a hit. */
   iframes: 0.5,
 } as const;

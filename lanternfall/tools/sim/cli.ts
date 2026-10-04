@@ -4,6 +4,7 @@ import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 import { Worker } from 'node:worker_threads';
+import { build } from 'esbuild';
 import { BOT_NAMES, isBotName, type BotName } from './bots/index';
 import { groupStats, sortRuns, suiteHash, toMarkdown, type Check, type Report } from './report';
 import { runOne, type RunJob, type RunResult } from './run';
@@ -25,6 +26,7 @@ const { values } = parseArgs({
     label: { type: 'string', default: 'latest' },
     workers: { type: 'string' },
     compare: { type: 'string' },
+    note: { type: 'string', multiple: true },
   },
 });
 
@@ -48,7 +50,26 @@ for (const character of characters) {
   }
 }
 
-function runInWorkers(all: RunJob[]): Promise<RunResult[]> {
+/**
+ * Bundle the worker to plain JS once per invocation. Running the sim through
+ * tsx in workers costs ~20% (module getters on every data access, loader
+ * hooks); a bundle runs at full speed.
+ */
+async function bundleWorker(): Promise<string> {
+  const outfile = join(here, '../../node_modules/.cache/lanternfall-sim/worker.mjs');
+  await build({
+    entryPoints: [join(here, 'worker.ts')],
+    bundle: true,
+    platform: 'node',
+    format: 'esm',
+    target: 'node22',
+    outfile,
+    logLevel: 'warning',
+  });
+  return outfile;
+}
+
+function runInWorkers(all: RunJob[], workerFile: string): Promise<RunResult[]> {
   const chunks: RunJob[][] = Array.from({ length: Math.min(workerCount, all.length) }, () => []);
   all.forEach((job, i) => chunks[i % chunks.length]?.push(job));
   const results: RunResult[] = [];
@@ -57,9 +78,7 @@ function runInWorkers(all: RunJob[]): Promise<RunResult[]> {
     chunks.map(
       (chunk) =>
         new Promise<void>((resolve, reject) => {
-          const w = new Worker(new URL('./worker-boot.mjs', import.meta.url), {
-            workerData: chunk,
-          });
+          const w = new Worker(workerFile, { workerData: chunk });
           w.on('message', (r: RunResult) => {
             results.push(r);
             done++;
@@ -83,7 +102,7 @@ async function main(): Promise<void> {
   console.log(
     `Lanternfall sim: ${jobs.length} runs (${characters.join(',')} × ${bots.join(',')} × ${seedsPerGroup} seeds), ${workerCount} workers`,
   );
-  const runs = sortRuns(await runInWorkers(jobs));
+  const runs = sortRuns(await runInWorkers(jobs, await bundleWorker()));
   const checks: Check[] = [];
 
   const errors = runs.filter((r) => r.status === 'error');
@@ -96,7 +115,8 @@ async function main(): Promise<void> {
         : `${errors.length} errors, first: ${errors[0]?.error}`,
   });
 
-  // Re-run a sample in this process (a different thread) and compare hashes.
+  // Re-run a sample in this thread, from source via tsx rather than the
+  // bundle, and compare hashes: catches nondeterminism and transform bugs.
   const sample = runs.filter((r) => r.seed <= DETERMINISM_SAMPLES);
   const mismatched = sample.filter((r) => runOne(r).hash !== r.hash);
   checks.push({
@@ -136,6 +156,7 @@ async function main(): Promise<void> {
     speed,
     groups: groupStats(runs),
     checks,
+    notes: values.note ?? [],
     runs,
   };
   mkdirSync(reportDir, { recursive: true });

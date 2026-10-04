@@ -63,7 +63,7 @@ Run ends: death (meta currency kept) or Dawn at 10:00 (victory + bonus).
 | Passive max level | 5 (Paper Doll: 2) |
 | Choices per level-up | 3 (4 with Luck ≥ 30% roll) |
 | XP to next level | `5 + 10·(L−1)` up to L20, then +13 per level, and every requirement ×1.5 from L40 |
-| Base player | 100 HP, 0 armor, 150 px/s move, 48 px pickup radius, 0 regen |
+| Base player | 100 HP, 0 armor, 150 px/s move, 85 px pickup radius, 0 regen |
 | Invulnerability after hit | 0.5 s |
 | Victory | Alive at 10:00 ("Dawn") |
 | Final boss | Arrives at 9:00. Killing it early ends the night at once, with a bonus and a secret check |
@@ -187,8 +187,21 @@ damage × `(1 + 0.05m)`.
 | 10:00 | **Dawn**: victory | Optional Long Night begins |
 
 Spawn director: a per-second **budget** curve. Enemies cost points and spawn
-on a ring just outside the visible area (§8.4). A hard cap of 500 live enemies
-recycles the oldest, furthest enemy.
+in packs on a ring just outside the visible area (§8.4). 65% of packs spawn
+in the half-circle ahead of the player's movement. If fewer than a per-minute
+`minAlive` enemies exist, packs spawn regardless of budget. The live-enemy cap
+is 500. Enemies further than 1.25× the spawn radius are recycled onto the ring
+ahead of the player.
+
+**Anti-kiting rules** (added in M1 after the balance sim showed that running
+in a straight line forever was a dominant strategy):
+- Chasers **lead** the player. They steer toward where the player will be in
+  up to `lead` seconds (per enemy type; wisps 0.5 s, walkers 1 s), scaled by
+  distance. Packs ahead of a fleeing player cut off its path.
+- **Encirclement rings** spawn as a closed wall at radius 420 (visible), sized
+  so there is no gap to slip through. You cut your way out.
+
+All director numbers live in `src/data/director.ts` and `src/data/timeline.ts`.
 
 ## 7. Power-ups, pickups & art
 
@@ -266,8 +279,10 @@ targeting, depending on the weapon. There is no manual aim in v1.
 
 ### 8.4 Fairness across aspect ratios
 The camera shows a **fixed world area** (about 1,100 × 620 world units, rotated
-in portrait). Enemies spawn on a ring at `0.5·max(viewW, viewH) + 80`. That way
-phones, portrait players and wide monitors see the same threat density.
+in portrait), scaled to *cover* the screen, so you never see more than that
+area. Enemies spawn on a ring at the view's half-diagonal + 40 (≈ 671 units),
+outside even the corners. That way phones, portrait players and wide monitors
+see the same threat density.
 
 ## 9. Meta-progression & secrets
 

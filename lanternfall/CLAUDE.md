@@ -15,6 +15,8 @@ decision changes, update the doc in the same commit.
 | `npm run sim -- --full` | Full sim (200 seeds); required at M5, M8 and M10 |
 | `npm run sim -- --char akari --bot skilled --seeds 20` | Targeted runs while tuning |
 | `npm run sim -- --label M2 --compare M1` | Also assert every shared run is bit-identical to an earlier report |
+| `npm run sim -- --note "..."` | Add an observation to the report (repeatable) |
+| `npx tsx tools/sim/diag.ts <bot> <seed>` | Per-30 s trace of one run (alive, kills, level, HP, distance), for tuning |
 | `npm run shot -- <url> <outDir>` | Playwright screenshots (portrait, landscape, desktop); fails on console errors. Serve first with `npm run build && npx vite preview --port 4173` |
 
 ## Architecture rules (do not break these)
@@ -30,7 +32,9 @@ decision changes, update the doc in the same commit.
    the timeline, SFX and music patterns live in `src/data/` as typed objects.
    Balance changes should normally touch only `src/data/`.
 5. **Hot paths don't allocate.** Use pools, a spatial hash and plain number
-   fields (no `Vec2` objects created per frame in sim loops).
+   fields (no `Vec2` objects created per frame in sim loops). Use `len2` from
+   `src/sim/vec.ts`, never `Math.hypot`, in per-entity code (hypot is several
+   times slower in V8).
 6. **Rendering never changes outcomes.** The determinism hash for a seed and
    intent log must be identical with and without rendering.
 
@@ -59,13 +63,18 @@ decision changes, update the doc in the same commit.
 
 ## Balance simulation
 - Lives in `tools/sim/`. Bots: `naive`, `average`, `skilled` (see
-  GAME_DESIGN §10; M0 has only a `stub` bot). It runs with worker_threads
-  (loaded through `worker-boot.mjs`, which registers tsx) and writes
+  GAME_DESIGN §10). Workers run an esbuild bundle of `tools/sim/worker.ts`
+  (built on each invocation; tsx in workers is ~20% slower), and writes
   `sim-reports/<label>.json` and `sim-reports/<label>.md`. Commit both: the
   JSON holds the per-run hashes that `--compare` checks against.
 - Built-in checks: no crashes or non-finite state, determinism (a sample of
-  seeds re-run on another thread), speed ≥ 30× real time, and `--compare`
-  when given. The exit code is non-zero if any check fails.
+  seeds re-run in the main thread from source, so bundle and source must
+  agree), speed ≥ 30× real time, and `--compare` when given.
+- Bots are deliberately human-like: reaction delays (naive 200 ms, average
+  100 ms, skilled 50 ms) and comfort zones. Skilled = the average kiting field
+  plus a 1 s lookahead veto and an open-space scan.
+- A quick sim (50 seeds × 3 bots) takes ~5 min on 4 cores; run it in the
+  background and wait on the report file. The exit code is non-zero if any check fails.
 - **Target bands** (no meta, per character, survival to 10:00): naive < 5%,
   average 10–25%, skilled 50–70%; skilled + max meta 80–90%.
   These bands are enforced **from M5 onward**. Before M5 the sim checks only
@@ -91,7 +100,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M | Name | Status |
 |---|---|---|
 | M0 | Scaffold | ✅ done (`sim-reports/M0.md`) |
-| M1 | Core loop | not started |
+| M1 | Core loop | ✅ done (`sim-reports/M1.md`) |
 | M2 | Look & feel | not started |
 | M3 | Arsenal I | not started |
 | M4 | Arsenal II | not started |

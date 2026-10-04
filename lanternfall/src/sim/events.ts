@@ -1,19 +1,36 @@
 /**
  * Sim → presentation events. Render, audio and UI consume these and never
- * mutate sim state (CLAUDE.md, rule 2).
+ * mutate sim state (CLAUDE.md, rule 2). Headless runs disable them.
  */
 export type SimEvent =
-  | { type: 'enemy_spawned'; id: number; kind: number; x: number; y: number }
-  | { type: 'enemy_killed'; id: number; kind: number; x: number; y: number }
+  | { type: 'enemy_spawned'; slot: number; kind: number; x: number; y: number }
+  | { type: 'enemy_hit'; slot: number; damage: number; x: number; y: number }
+  | { type: 'enemy_killed'; slot: number; kind: number; x: number; y: number }
+  | {
+      type: 'sweep';
+      weapon: number;
+      x: number;
+      y: number;
+      angle: number;
+      radius: number;
+      arc: number;
+    }
+  | { type: 'projectile_fired'; weapon: number; x: number; y: number }
+  | { type: 'ember_collected'; value: number }
+  | { type: 'level_up'; level: number }
+  | { type: 'upgrade_chosen'; label: string }
   | { type: 'player_hit'; damage: number; hp: number }
   | { type: 'player_died'; time: number }
-  | { type: 'victory'; time: number };
+  | { type: 'victory'; time: number }
+  | { type: 'encircle'; kind: number };
 
 export class EventQueue {
   private items: SimEvent[] = [];
 
+  constructor(public enabled = true) {}
+
   push(event: SimEvent): void {
-    this.items.push(event);
+    if (this.enabled) this.items.push(event);
   }
 
   /** Hand all pending events to `fn`, then clear the queue. */

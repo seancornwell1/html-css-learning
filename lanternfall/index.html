@@ -16,13 +16,31 @@
   </head>
   <body>
     <canvas id="game"></canvas>
-    <div id="hud" aria-live="polite">
-      <span id="hud-time">0:00</span>
-      <span id="hud-hp">100</span>
+    <div id="hud">
+      <div id="xp-bar"><div id="xp-fill"></div></div>
+      <div id="hud-row">
+        <span id="hud-level">Lv 1</span>
+        <span id="hud-time">0:00</span>
+        <div id="hp-bar" role="meter" aria-label="Health" aria-valuemin="0" aria-valuemax="100">
+          <div id="hp-fill"></div>
+        </div>
+      </div>
     </div>
-    <div id="overlay" hidden>
-      <p id="overlay-title"></p>
-      <p id="overlay-hint">Press R or tap to try again</p>
+    <button id="pause-btn" type="button" aria-label="Pause">II</button>
+    <div id="stick-base" hidden><div id="stick-knob"></div></div>
+    <div id="levelup" class="modal" hidden>
+      <p class="levelup-title">Level 2</p>
+      <div id="levelup-cards"></div>
+      <p class="hint">Tap a card, then tap again to take it · keys 1–3</p>
+    </div>
+    <div id="pause" class="modal" hidden>
+      <p class="modal-title">Paused</p>
+      <p class="hint">Esc / P or tap to resume</p>
+    </div>
+    <div id="gameover" class="modal" hidden>
+      <p class="modal-title" id="gameover-title"></p>
+      <p id="gameover-stats"></p>
+      <p class="hint">Press R or tap to try again</p>
     </div>
     <script type="module" src="./src/main.ts"></script>
   </body>
