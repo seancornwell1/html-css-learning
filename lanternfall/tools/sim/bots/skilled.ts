@@ -3,7 +3,7 @@ import type { Intent } from '../../../src/sim/intent';
 import type { Sim } from '../../../src/sim/sim';
 import { len2 } from '../../../src/sim/vec';
 import type { Bot } from './bot';
-import { effectiveSpeed, lootField, meleeReach, priorityChoice } from './sense';
+import { effectiveSpeed, lootField, meleeReach, nearestPickup, priorityChoice } from './sense';
 
 /** Reaction time: re-decides every 3 ticks (50 ms). */
 const THINK_EVERY = 3;
@@ -91,7 +91,18 @@ export class SkilledBot implements Bot {
       fx = rx;
       fy = ry;
     }
-    if (closest > safe) {
+    // Reliquaries are worth fighting for: go for one unless enemies are on top of us.
+    const chest = nearestPickup(sim, 1e6);
+    let tolerance = 0;
+    if (chest >= 0 && closest > safe * 0.4) {
+      // Worth a hit or two when healthy.
+      if (p.hp > sim.stats.maxHp * 0.5) tolerance = 3;
+      const dx = (sim.pickups.x[chest] as number) - p.x;
+      const dy = (sim.pickups.y[chest] as number) - p.y;
+      const d = len2(dx, dy) || 1;
+      fx = fx * 0.5 + (dx / d) * 1.5;
+      fy = fy * 0.5 + (dy / d) * 1.5;
+    } else if (closest > safe) {
       const strength = lootField(sim, 450, this.loot);
       if (strength > 0) {
         const k = Math.min(1.4, 0.6 + strength);
@@ -104,7 +115,7 @@ export class SkilledBot implements Bot {
     let wantY = fl > 0.05 ? fy / fl : 0;
 
     // 2. Veto: if that heading touches an enemy soon, take the closest safe one.
-    if (this.contactRisk(sim, n, wantX, wantY) > 0) {
+    if (this.contactRisk(sim, n, wantX, wantY) > tolerance) {
       let best = Infinity;
       // Blocked: try strafing the other way next time.
       this.strafe = -this.strafe;
