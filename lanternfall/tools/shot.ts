@@ -7,7 +7,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
-const url = process.argv[2] ?? 'http://localhost:4173/?seed=1';
+const url = process.argv[2] ?? 'http://localhost:4173/?seed=1&notice=skip';
 const outDir = process.argv[3] ?? 'screenshots';
 const preinstalled = '/opt/pw-browsers/chromium';
 
@@ -56,11 +56,35 @@ for (const vp of viewports) {
   if (shown) {
     await page.screenshot({ path: `${outDir}/${vp.name}-levelup.png` });
     await page.keyboard.press('Digit1');
+    await page.keyboard.down('KeyW');
+    await page.waitForTimeout(3000);
+    await page.keyboard.up('KeyW');
+    if (await page.isVisible('#levelup:not([hidden])')) await page.keyboard.press('Digit1');
+    await page.waitForTimeout(500);
+    await page.screenshot({ path: `${outDir}/${vp.name}-play.png` });
+    const ms = await page.evaluate(() => (window as { __frameMs?: number }).__frameMs ?? -1);
+    console.log(`${vp.name}: ~${ms.toFixed(1)} ms/frame (headless, software GL)`);
   } else {
     errors.push(`${vp.name}: no level-up within 20 s`);
   }
   await page.close();
 }
+// Extra desktop captures: the first-launch notice and the Canvas2D fallback.
+const extra = await browser.newPage({
+  viewport: { width: 1280, height: 720 },
+  deviceScaleFactor: 2,
+});
+extra.on('pageerror', (e) => errors.push(`extra: ${e.message}`));
+extra.on('console', (m) => m.type() === 'error' && errors.push(`extra: ${m.text()}`));
+await extra.goto(url.replace(/[?&]notice=skip/, ''));
+await extra.waitForSelector('#notice:not([hidden])', { timeout: 5000 });
+await extra.screenshot({ path: `${outDir}/notice.png` });
+await extra.goto(`${url}&fx=off`);
+await extra.keyboard.down('KeyD');
+await extra.waitForTimeout(3000);
+await extra.keyboard.up('KeyD');
+await extra.screenshot({ path: `${outDir}/fallback-2d.png` });
+await extra.close();
 await browser.close();
 if (errors.length) {
   console.error(errors.join('\n'));

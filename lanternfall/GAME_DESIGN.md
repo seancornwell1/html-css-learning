@@ -243,20 +243,34 @@ are no downloaded sprites, rips or traced references. Fonts are OFL-licensed and
 bundled with their licence file.
 
 ### 7.4 Screen effects ("heavy, but switchable")
-- **WebGL post-FX pass:** bloom (gold only, via a luminance and hue mask),
-  manga **screentone** halftone in shadows, film grain, vignette, and chromatic
-  aberration spikes on damage.
-- **Impact frames:** 2–3 frames of full inversion with radial speed lines on
-  evolutions, boss arrivals, Lantern Burst and the killing blow.
-- **Hit-stop:** 30–60 ms on elite hits, crits and player damage.
-- **Screen shake:** trauma-based and capped.
-- **Ink:** kill splatters decay into `ash` decals (pooled, max 200).
-- **Accessibility:** *Reduce flashing* replaces inversions with a soft fade and
-  caps the frequency at 3 Hz, as photosensitivity guidance requires. There is
-  also a shake slider (0–100%), a post-FX quality setting (Off / Low / High) and
-  a photosensitivity notice at first launch.
-- **Fallback:** without WebGL, the game uses Canvas2D only, with no post-FX and
-  identical gameplay.
+- **WebGL2 post-FX pass** (`src/render/postfx.ts`): bloom on gold only (a
+  warm, bright, saturated mask at quarter resolution), manga **screentone**
+  that turns mid tones (the lantern's light falloff, fading decals) into
+  halftone dots at a ~4 CSS px pitch, film grain and a vignette.
+  **Chromatic aberration** only appears as a brief spike on damage and
+  impacts, so the palette stays black, white and gold the rest of the time.
+- **Impact frames:** 2–3 frames of full inversion with radial speed lines.
+  M2 uses them for encirclement rings, the killing blow and Dawn; evolutions,
+  boss arrivals and Lantern Burst join later.
+- **Hit-stop:** 60 ms on player damage, 30 ms when 6+ enemies die in one tick,
+  300 ms on death. Hit-stop pauses sim stepping in the browser loop. It never
+  changes the rules (the sim is bit-identical with or without it).
+- **Screen shake:** trauma-based (offset ∝ trauma², linear decay) and capped.
+- **Ink:** kill splatters land in bone, decay to `ash` and fade over 9 s
+  (ring buffer, max 200).
+- **Readability:** the player carries a gold rim and the lantern, the one
+  figure with light on it. Enemies flash `ash` when hit.
+- **Flash safety:** full-screen flashes are **always** capped at 3 Hz. With
+  *Reduce flashing* on, inversions become a soft ash fade, impact frames keep
+  only faint speed lines, and the 10 Hz invulnerability blink becomes
+  translucency.
+- **Settings (pause menu):** Reduce flashing, Screen shake 0–100%, Effects
+  High / Low / Off. A first-launch notice offers Reduce flashing before play.
+  Settings persist through the versioned save (`src/meta/save.ts`).
+- **Quality levels:** High = full post-FX at DPR ≤ 2. Low = no bloom, DPR ≤
+  1.25. Off = Canvas2D only (inversion via a `difference` blend, speed lines
+  drawn as strokes), DPR ≤ 2. A missing WebGL2 or a lost context falls back
+  to Off automatically, with identical gameplay.
 
 ## 8. Controls & platforms
 

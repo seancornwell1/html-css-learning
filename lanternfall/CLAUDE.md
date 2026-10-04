@@ -52,6 +52,18 @@ decision changes, update the doc in the same commit.
 - All audio is synthesized with WebAudio; there are no sample files. Start the
   AudioContext on the first user gesture.
 
+## Rendering
+- `Display` owns the visible canvas inside `#stage` and picks WebGL2 post-FX
+  or Canvas2D. `Renderer` draws the world to `display.ctx`, then calls
+  `display.present(fx)`. Sprites are baked by `SpriteCache` per device scale.
+  Never load image files.
+- Feel effects (shake, flashes, hit-stop, decals) react to sim events in
+  `Renderer.onEvent`. Hit-stop only delays stepping in `main.ts`.
+- Debug URL params: `?seed=N`, `?fx=off|low|high` (does not touch the save),
+  `?notice=skip`. `window.__frameMs` holds the smoothed frame time.
+- Headless Chromium uses software GL, so its frame times (~100–250 ms) are
+  not a performance signal. Measure on a real phone (M9).
+
 ## Mobile
 - Floating joystick in the lower 60% of the screen. Keep tap targets ≥ 48 px
   (upgrade cards ≥ 64 px). Respect `env(safe-area-inset-*)`.
@@ -101,7 +113,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 |---|---|---|
 | M0 | Scaffold | ✅ done (`sim-reports/M0.md`) |
 | M1 | Core loop | ✅ done (`sim-reports/M1.md`) |
-| M2 | Look & feel | not started |
+| M2 | Look & feel | ✅ done (`sim-reports/M2.md`, bit-identical to M1) |
 | M3 | Arsenal I | not started |
 | M4 | Arsenal II | not started |
 | M5 | Night & roster | not started |

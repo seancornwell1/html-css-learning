@@ -15,7 +15,7 @@
     <link rel="stylesheet" href="./src/ui/style.css" />
   </head>
   <body>
-    <canvas id="game"></canvas>
+    <div id="stage"></div>
     <div id="hud">
       <div id="xp-bar"><div id="xp-fill"></div></div>
       <div id="hud-row">
@@ -35,7 +35,39 @@
     </div>
     <div id="pause" class="modal" hidden>
       <p class="modal-title">Paused</p>
-      <p class="hint">Esc / P or tap to resume</p>
+      <div class="settings">
+        <label class="setting">
+          <span>Reduce flashing</span>
+          <input type="checkbox" id="set-reduce-flash" />
+        </label>
+        <label class="setting">
+          <span>Screen shake</span>
+          <input type="range" id="set-shake" min="0" max="100" step="10" />
+        </label>
+        <label class="setting">
+          <span>Effects</span>
+          <select id="set-effects">
+            <option value="high">High</option>
+            <option value="low">Low</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+      </div>
+      <button id="resume-btn" class="btn" type="button">Resume</button>
+      <p class="hint">Esc / P</p>
+    </div>
+    <div id="notice" class="modal" hidden>
+      <p class="modal-title">Before you play</p>
+      <p class="notice-text">
+        Lanternfall uses flashing light, full-screen inversion and screen shake. If you are
+        sensitive to flashing images, turn on Reduce flashing. You can change this any time from the
+        pause menu.
+      </p>
+      <label class="setting">
+        <span>Reduce flashing</span>
+        <input type="checkbox" id="notice-reduce-flash" />
+      </label>
+      <button id="notice-ok" class="btn" type="button">Light the lantern</button>
     </div>
     <div id="gameover" class="modal" hidden>
       <p class="modal-title" id="gameover-title"></p>

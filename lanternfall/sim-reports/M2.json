@@ -1,0 +1,2637 @@
+{
+ "label": "M2",
+ "createdAt": "2026-10-04T18:58:41.434Z",
+ "seedsPerGroup": 50,
+ "suiteHash": "6558c1e4",
+ "speed": 107.97492518960304,
+ "groups": [
+  {
+   "character": "akari",
+   "bot": "average",
+   "runs": 50,
+   "survival": 0.3,
+   "medianTime": 525.3166666666667,
+   "p25Time": 459.5,
+   "p75Time": 600,
+   "meanKills": 7260.06,
+   "meanLevel": 20.26,
+   "meanLevelAt5": 18.66,
+   "damageShare": {
+    "lantern_flail": 0.6517275185129382,
+    "ofuda_volley": 0.34827248148706175
+   },
+   "errors": 0
+  },
+  {
+   "character": "akari",
+   "bot": "naive",
+   "runs": 50,
+   "survival": 0,
+   "medianTime": 236.6,
+   "p25Time": 163.11666666666667,
+   "p75Time": 263,
+   "meanKills": 1725.36,
+   "meanLevel": 10.98,
+   "meanLevelAt5": 10.98,
+   "damageShare": {
+    "lantern_flail": 0.7566059682004496,
+    "ofuda_volley": 0.24339403179955044
+   },
+   "errors": 0
+  },
+  {
+   "character": "akari",
+   "bot": "skilled",
+   "runs": 50,
+   "survival": 0.84,
+   "medianTime": 600,
+   "p25Time": 600,
+   "p75Time": 600,
+   "meanKills": 914.46,
+   "meanLevel": 7.8,
+   "meanLevelAt5": 4.74,
+   "damageShare": {
+    "lantern_flail": 0.4164912195688018,
+    "ofuda_volley": 0.5835087804311981
+   },
+   "errors": 0
+  }
+ ],
+ "checks": [
+  {
+   "name": "No crashes / non-finite state",
+   "pass": true,
+   "detail": "all runs clean"
+  },
+  {
+   "name": "Determinism (same seed ⇒ same hash)",
+   "pass": true,
+   "detail": "30/30 re-runs matched"
+  },
+  {
+   "name": "Speed ≥ 30× real time",
+   "pass": true,
+   "detail": "108×"
+  },
+  {
+   "name": "Bit-identical to M1",
+   "pass": true,
+   "detail": "150/150 shared runs identical"
+  }
+ ],
+ "notes": [
+  "M2 is presentation only: src/sim and src/data are unchanged since M1, and every run must be bit-identical to M1."
+ ],
+ "runs": [
+  {
+   "seed": 1,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 469.7,
+   "kills": 4229,
+   "level": 13,
+   "levelAt5": 13,
+   "damage": {
+    "lantern_flail": 36836,
+    "ofuda_volley": 26302
+   },
+   "minHp": 0,
+   "hash": 1518177290,
+   "wallMs": 2772.093115
+  },
+  {
+   "seed": 2,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9097,
+   "level": 18,
+   "levelAt5": 18,
+   "damage": {
+    "lantern_flail": 109093,
+    "ofuda_volley": 60062
+   },
+   "minHp": 0.975055555555544,
+   "hash": 1833027948,
+   "wallMs": 2889.779752
+  },
+  {
+   "seed": 3,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 442.2,
+   "kills": 6503,
+   "level": 17,
+   "levelAt5": 16,
+   "damage": {
+    "lantern_flail": 69696,
+    "ofuda_volley": 33536
+   },
+   "minHp": 0,
+   "hash": 48674819,
+   "wallMs": 1451.392128
+  },
+  {
+   "seed": 4,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 474.46666666666664,
+   "kills": 7204,
+   "level": 21,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 77843,
+    "ofuda_volley": 41245
+   },
+   "minHp": 0,
+   "hash": 3283688879,
+   "wallMs": 1680.469442
+  },
+  {
+   "seed": 5,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9349,
+   "level": 22,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 111304,
+    "ofuda_volley": 58581
+   },
+   "minHp": 28.422749999999997,
+   "hash": 3511349969,
+   "wallMs": 2897.983873
+  },
+  {
+   "seed": 6,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 8723,
+   "level": 17,
+   "levelAt5": 15,
+   "damage": {
+    "lantern_flail": 104039,
+    "ofuda_volley": 56383
+   },
+   "minHp": 17.249083333333346,
+   "hash": 815570006,
+   "wallMs": 3194.402452
+  },
+  {
+   "seed": 7,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 518.0333333333333,
+   "kills": 8208,
+   "level": 20,
+   "levelAt5": 20,
+   "damage": {
+    "lantern_flail": 93440,
+    "ofuda_volley": 48402
+   },
+   "minHp": 0,
+   "hash": 254962099,
+   "wallMs": 1792.38514
+  },
+  {
+   "seed": 8,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 525.3166666666667,
+   "kills": 8253,
+   "level": 24,
+   "levelAt5": 23,
+   "damage": {
+    "lantern_flail": 97746,
+    "ofuda_volley": 49805
+   },
+   "minHp": 0,
+   "hash": 282431600,
+   "wallMs": 1983.775673
+  },
+  {
+   "seed": 9,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9398,
+   "level": 25,
+   "levelAt5": 23,
+   "damage": {
+    "lantern_flail": 110845,
+    "ofuda_volley": 59149
+   },
+   "minHp": 34.80827777777776,
+   "hash": 888242580,
+   "wallMs": 2964.895353
+  },
+  {
+   "seed": 10,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 531.4166666666666,
+   "kills": 8576,
+   "level": 24,
+   "levelAt5": 23,
+   "damage": {
+    "lantern_flail": 98734,
+    "ofuda_volley": 51743
+   },
+   "minHp": 0,
+   "hash": 3548888001,
+   "wallMs": 1930.020902
+  },
+  {
+   "seed": 11,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 485.18333333333334,
+   "kills": 7395,
+   "level": 18,
+   "levelAt5": 18,
+   "damage": {
+    "lantern_flail": 80953,
+    "ofuda_volley": 41578
+   },
+   "minHp": 0,
+   "hash": 840136857,
+   "wallMs": 1918.968245
+  },
+  {
+   "seed": 12,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 449.9,
+   "kills": 3339,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 29703,
+    "ofuda_volley": 19145
+   },
+   "minHp": 0,
+   "hash": 2652146190,
+   "wallMs": 3776.919319
+  },
+  {
+   "seed": 13,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 540.4666666666667,
+   "kills": 8446,
+   "level": 25,
+   "levelAt5": 25,
+   "damage": {
+    "lantern_flail": 96684,
+    "ofuda_volley": 52568
+   },
+   "minHp": 0,
+   "hash": 1848201971,
+   "wallMs": 2114.573908
+  },
+  {
+   "seed": 14,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 489.8,
+   "kills": 7664,
+   "level": 22,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 85325,
+    "ofuda_volley": 43752
+   },
+   "minHp": 0,
+   "hash": 2660612687,
+   "wallMs": 1991.598305
+  },
+  {
+   "seed": 15,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 320.68333333333334,
+   "kills": 2709,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 21374,
+    "ofuda_volley": 12894
+   },
+   "minHp": 0,
+   "hash": 4179930186,
+   "wallMs": 1458.601622
+  },
+  {
+   "seed": 16,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 506.78333333333336,
+   "kills": 8116,
+   "level": 22,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 89580,
+    "ofuda_volley": 46188
+   },
+   "minHp": 0,
+   "hash": 3036179947,
+   "wallMs": 1888.109138
+  },
+  {
+   "seed": 17,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 573.4666666666667,
+   "kills": 9056,
+   "level": 33,
+   "levelAt5": 28,
+   "damage": {
+    "lantern_flail": 111903,
+    "ofuda_volley": 56987
+   },
+   "minHp": 0,
+   "hash": 3843743362,
+   "wallMs": 2460.737472
+  },
+  {
+   "seed": 18,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 503.4166666666667,
+   "kills": 7494,
+   "level": 19,
+   "levelAt5": 18,
+   "damage": {
+    "lantern_flail": 80160,
+    "ofuda_volley": 46229
+   },
+   "minHp": 0,
+   "hash": 2979107849,
+   "wallMs": 1900.910671
+  },
+  {
+   "seed": 19,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 565.4,
+   "kills": 8776,
+   "level": 21,
+   "levelAt5": 20,
+   "damage": {
+    "lantern_flail": 101913,
+    "ofuda_volley": 55372
+   },
+   "minHp": 0,
+   "hash": 1297600208,
+   "wallMs": 2610.414177
+  },
+  {
+   "seed": 20,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9351,
+   "level": 25,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 110435,
+    "ofuda_volley": 60835
+   },
+   "minHp": 29.666888888888884,
+   "hash": 1315529531,
+   "wallMs": 2857.873051
+  },
+  {
+   "seed": 21,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 293.4,
+   "kills": 2115,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 17079,
+    "ofuda_volley": 9263
+   },
+   "minHp": 0,
+   "hash": 2407933586,
+   "wallMs": 1922.246169
+  },
+  {
+   "seed": 22,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9593,
+   "level": 23,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 116253,
+    "ofuda_volley": 60644
+   },
+   "minHp": 17.8301111111111,
+   "hash": 855394506,
+   "wallMs": 2791.515503
+  },
+  {
+   "seed": 23,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 8937,
+   "level": 19,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 106283,
+    "ofuda_volley": 58253
+   },
+   "minHp": 47.60519444444445,
+   "hash": 3581253290,
+   "wallMs": 2991.555655
+  },
+  {
+   "seed": 24,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 597.2833333333333,
+   "kills": 9519,
+   "level": 33,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 117176,
+    "ofuda_volley": 59041
+   },
+   "minHp": 0,
+   "hash": 3883467522,
+   "wallMs": 2685.485327
+  },
+  {
+   "seed": 25,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 306.93333333333334,
+   "kills": 3016,
+   "level": 14,
+   "levelAt5": 14,
+   "damage": {
+    "lantern_flail": 29566,
+    "ofuda_volley": 11408
+   },
+   "minHp": 0,
+   "hash": 11789576,
+   "wallMs": 1191.866039
+  },
+  {
+   "seed": 26,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9203,
+   "level": 19,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 111667,
+    "ofuda_volley": 58453
+   },
+   "minHp": 40.90797222222221,
+   "hash": 1728481698,
+   "wallMs": 2999.679839
+  },
+  {
+   "seed": 27,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 574.8,
+   "kills": 8827,
+   "level": 24,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 102072,
+    "ofuda_volley": 57380
+   },
+   "minHp": 0,
+   "hash": 1200850507,
+   "wallMs": 2498.433716
+  },
+  {
+   "seed": 28,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9170,
+   "level": 22,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 113803,
+    "ofuda_volley": 60631
+   },
+   "minHp": 46.07661111111109,
+   "hash": 847828502,
+   "wallMs": 2822.959018
+  },
+  {
+   "seed": 29,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 299.01666666666665,
+   "kills": 2118,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 17539,
+    "ofuda_volley": 7588
+   },
+   "minHp": 0,
+   "hash": 3971591704,
+   "wallMs": 1938.977918
+  },
+  {
+   "seed": 30,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 381.6166666666667,
+   "kills": 2608,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 24745,
+    "ofuda_volley": 12009
+   },
+   "minHp": 0,
+   "hash": 1130357949,
+   "wallMs": 3238.655975
+  },
+  {
+   "seed": 31,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 8826,
+   "level": 20,
+   "levelAt5": 20,
+   "damage": {
+    "lantern_flail": 102992,
+    "ofuda_volley": 58734
+   },
+   "minHp": 11.988111111111106,
+   "hash": 2892953031,
+   "wallMs": 2978.471227
+  },
+  {
+   "seed": 32,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 8992,
+   "level": 22,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 110296,
+    "ofuda_volley": 57457
+   },
+   "minHp": 44.99511111111112,
+   "hash": 341460095,
+   "wallMs": 2836.160836
+  },
+  {
+   "seed": 33,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 459.5,
+   "kills": 6789,
+   "level": 23,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 68357,
+    "ofuda_volley": 40298
+   },
+   "minHp": 0,
+   "hash": 1221050739,
+   "wallMs": 1297.176189
+  },
+  {
+   "seed": 34,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 514.6833333333333,
+   "kills": 8168,
+   "level": 39,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 94682,
+    "ofuda_volley": 49537
+   },
+   "minHp": 0,
+   "hash": 460924425,
+   "wallMs": 2015.090256
+  },
+  {
+   "seed": 35,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 449.68333333333334,
+   "kills": 6825,
+   "level": 17,
+   "levelAt5": 17,
+   "damage": {
+    "lantern_flail": 72377,
+    "ofuda_volley": 36968
+   },
+   "minHp": 0,
+   "hash": 3149837088,
+   "wallMs": 1306.938312
+  },
+  {
+   "seed": 36,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 356.23333333333335,
+   "kills": 2874,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 25796,
+    "ofuda_volley": 11629
+   },
+   "minHp": 0,
+   "hash": 3885182730,
+   "wallMs": 2036.630515
+  },
+  {
+   "seed": 37,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 328.35,
+   "kills": 2834,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 22953,
+    "ofuda_volley": 13302
+   },
+   "minHp": 0,
+   "hash": 617719869,
+   "wallMs": 1331.796642
+  },
+  {
+   "seed": 38,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 592.1666666666666,
+   "kills": 9248,
+   "level": 23,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 114935,
+    "ofuda_volley": 57030
+   },
+   "minHp": 0,
+   "hash": 31157627,
+   "wallMs": 2862.03333
+  },
+  {
+   "seed": 39,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 8959,
+   "level": 29,
+   "levelAt5": 20,
+   "damage": {
+    "lantern_flail": 101687,
+    "ofuda_volley": 60405
+   },
+   "minHp": 10.370888888888883,
+   "hash": 3249809888,
+   "wallMs": 2694.450387
+  },
+  {
+   "seed": 40,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 400.76666666666665,
+   "kills": 3485,
+   "level": 13,
+   "levelAt5": 13,
+   "damage": {
+    "lantern_flail": 28676,
+    "ofuda_volley": 20472
+   },
+   "minHp": 0,
+   "hash": 3125238834,
+   "wallMs": 2046.526818
+  },
+  {
+   "seed": 41,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 499.48333333333335,
+   "kills": 7297,
+   "level": 16,
+   "levelAt5": 16,
+   "damage": {
+    "lantern_flail": 76609,
+    "ofuda_volley": 45463
+   },
+   "minHp": 0,
+   "hash": 2279570729,
+   "wallMs": 1807.100182
+  },
+  {
+   "seed": 42,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 466.1333333333333,
+   "kills": 6803,
+   "level": 20,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 72899,
+    "ofuda_volley": 39890
+   },
+   "minHp": 0,
+   "hash": 3469728597,
+   "wallMs": 1760.133494
+  },
+  {
+   "seed": 43,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 521.2333333333333,
+   "kills": 8481,
+   "level": 24,
+   "levelAt5": 23,
+   "damage": {
+    "lantern_flail": 93516,
+    "ofuda_volley": 49196
+   },
+   "minHp": 0,
+   "hash": 3173987192,
+   "wallMs": 2041.684497
+  },
+  {
+   "seed": 44,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9689,
+   "level": 26,
+   "levelAt5": 23,
+   "damage": {
+    "lantern_flail": 120644,
+    "ofuda_volley": 61067
+   },
+   "minHp": 3.475555555555541,
+   "hash": 2159849377,
+   "wallMs": 2774.510002
+  },
+  {
+   "seed": 45,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9279,
+   "level": 23,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 112305,
+    "ofuda_volley": 59309
+   },
+   "minHp": 12.37883333333333,
+   "hash": 1089442494,
+   "wallMs": 2646.259337
+  },
+  {
+   "seed": 46,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 263.06666666666666,
+   "kills": 1960,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 16236,
+    "ofuda_volley": 6214
+   },
+   "minHp": 0,
+   "hash": 3102760185,
+   "wallMs": 1094.486991
+  },
+  {
+   "seed": 47,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 570.8833333333333,
+   "kills": 8991,
+   "level": 23,
+   "levelAt5": 21,
+   "damage": {
+    "lantern_flail": 106794,
+    "ofuda_volley": 56451
+   },
+   "minHp": 0,
+   "hash": 1426607100,
+   "wallMs": 2790.976439
+  },
+  {
+   "seed": 48,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 570.4166666666666,
+   "kills": 8796,
+   "level": 19,
+   "levelAt5": 19,
+   "damage": {
+    "lantern_flail": 107758,
+    "ofuda_volley": 54529
+   },
+   "minHp": 0,
+   "hash": 3695961658,
+   "wallMs": 2702.372015
+  },
+  {
+   "seed": 49,
+   "bot": "average",
+   "character": "akari",
+   "status": "dead",
+   "time": 522.1833333333333,
+   "kills": 8229,
+   "level": 24,
+   "levelAt5": 24,
+   "damage": {
+    "lantern_flail": 89770,
+    "ofuda_volley": 48998
+   },
+   "minHp": 0,
+   "hash": 3157741440,
+   "wallMs": 1925.974259
+  },
+  {
+   "seed": 50,
+   "bot": "average",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 9486,
+   "level": 23,
+   "levelAt5": 22,
+   "damage": {
+    "lantern_flail": 109217,
+    "ofuda_volley": 60508
+   },
+   "minHp": 28.55355555555557,
+   "hash": 2137856596,
+   "wallMs": 2959.499348
+  },
+  {
+   "seed": 1,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 276.5833333333333,
+   "kills": 2569,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 24043,
+    "ofuda_volley": 8658
+   },
+   "minHp": 0,
+   "hash": 4246960280,
+   "wallMs": 1079.3792
+  },
+  {
+   "seed": 2,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 232.38333333333333,
+   "kills": 1889,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 16677,
+    "ofuda_volley": 4114
+   },
+   "minHp": 0,
+   "hash": 790493202,
+   "wallMs": 853.409288
+  },
+  {
+   "seed": 3,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 142.36666666666667,
+   "kills": 851,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 3447,
+    "ofuda_volley": 3572
+   },
+   "minHp": 0,
+   "hash": 2193704988,
+   "wallMs": 729.444911
+  },
+  {
+   "seed": 4,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 238.5,
+   "kills": 1866,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 17516,
+    "ofuda_volley": 3281
+   },
+   "minHp": 0,
+   "hash": 1789635449,
+   "wallMs": 1108.030005
+  },
+  {
+   "seed": 5,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 276.1166666666667,
+   "kills": 2438,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 22499,
+    "ofuda_volley": 7849
+   },
+   "minHp": 0,
+   "hash": 4273620176,
+   "wallMs": 725.690051
+  },
+  {
+   "seed": 6,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 249.2,
+   "kills": 2008,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 18197,
+    "ofuda_volley": 4837
+   },
+   "minHp": 0,
+   "hash": 1514156568,
+   "wallMs": 550.091416
+  },
+  {
+   "seed": 7,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 245.18333333333334,
+   "kills": 2043,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 14682,
+    "ofuda_volley": 7936
+   },
+   "minHp": 0,
+   "hash": 4292466734,
+   "wallMs": 751.134381
+  },
+  {
+   "seed": 8,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 183.58333333333334,
+   "kills": 1106,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 5933,
+    "ofuda_volley": 4612
+   },
+   "minHp": 0,
+   "hash": 580784696,
+   "wallMs": 694.350316
+  },
+  {
+   "seed": 9,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 241.18333333333334,
+   "kills": 1785,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 12653,
+    "ofuda_volley": 6935
+   },
+   "minHp": 0,
+   "hash": 3833622064,
+   "wallMs": 655.449449
+  },
+  {
+   "seed": 10,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 275.9166666666667,
+   "kills": 2437,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 25481,
+    "ofuda_volley": 5437
+   },
+   "minHp": 0,
+   "hash": 3997400768,
+   "wallMs": 762.492693
+  },
+  {
+   "seed": 11,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 114.15,
+   "kills": 741,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 5003,
+    "ofuda_volley": 867
+   },
+   "minHp": 0,
+   "hash": 178589958,
+   "wallMs": 532.368564
+  },
+  {
+   "seed": 12,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 274.5833333333333,
+   "kills": 2250,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 22418,
+    "ofuda_volley": 5104
+   },
+   "minHp": 0,
+   "hash": 3370578472,
+   "wallMs": 869.589558
+  },
+  {
+   "seed": 13,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 229.1,
+   "kills": 1700,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 9660,
+    "ofuda_volley": 7927
+   },
+   "minHp": 0,
+   "hash": 1965053357,
+   "wallMs": 558.371493
+  },
+  {
+   "seed": 14,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 156,
+   "kills": 1064,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 6713,
+    "ofuda_volley": 2608
+   },
+   "minHp": 0,
+   "hash": 2410514391,
+   "wallMs": 464.433111
+  },
+  {
+   "seed": 15,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 259.6,
+   "kills": 2306,
+   "level": 14,
+   "levelAt5": 14,
+   "damage": {
+    "lantern_flail": 16235,
+    "ofuda_volley": 9429
+   },
+   "minHp": 0,
+   "hash": 3023126165,
+   "wallMs": 664.642226
+  },
+  {
+   "seed": 16,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 118.58333333333333,
+   "kills": 748,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 2987,
+    "ofuda_volley": 3158
+   },
+   "minHp": 0,
+   "hash": 3159765627,
+   "wallMs": 301.341744
+  },
+  {
+   "seed": 17,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 136.55,
+   "kills": 950,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 5717,
+    "ofuda_volley": 2893
+   },
+   "minHp": 0,
+   "hash": 2400197081,
+   "wallMs": 199.225005
+  },
+  {
+   "seed": 18,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 146.06666666666666,
+   "kills": 807,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 2793,
+    "ofuda_volley": 4022
+   },
+   "minHp": 0,
+   "hash": 4166315488,
+   "wallMs": 580.987486
+  },
+  {
+   "seed": 19,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 201.38333333333333,
+   "kills": 1346,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 8334,
+    "ofuda_volley": 5277
+   },
+   "minHp": 0,
+   "hash": 1682170150,
+   "wallMs": 573.080796
+  },
+  {
+   "seed": 20,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 236.8,
+   "kills": 1778,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 11092,
+    "ofuda_volley": 7615
+   },
+   "minHp": 0,
+   "hash": 2191417525,
+   "wallMs": 807.683268
+  },
+  {
+   "seed": 21,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 202.38333333333333,
+   "kills": 1377,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 8604,
+    "ofuda_volley": 4809
+   },
+   "minHp": 0,
+   "hash": 1425777047,
+   "wallMs": 655.847387
+  },
+  {
+   "seed": 22,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 258.6,
+   "kills": 2064,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 20751,
+    "ofuda_volley": 3472
+   },
+   "minHp": 0,
+   "hash": 3868347148,
+   "wallMs": 936.37183
+  },
+  {
+   "seed": 23,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 272.5833333333333,
+   "kills": 2426,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 25450,
+    "ofuda_volley": 3733
+   },
+   "minHp": 0,
+   "hash": 1668912083,
+   "wallMs": 736.432648
+  },
+  {
+   "seed": 24,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 94,
+   "kills": 477,
+   "level": 9,
+   "levelAt5": 9,
+   "damage": {
+    "lantern_flail": 2345,
+    "ofuda_volley": 1445
+   },
+   "minHp": 0,
+   "hash": 206098803,
+   "wallMs": 146.40297
+  },
+  {
+   "seed": 25,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 130.18333333333334,
+   "kills": 784,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 3236,
+    "ofuda_volley": 3490
+   },
+   "minHp": 0,
+   "hash": 1157815555,
+   "wallMs": 285.528626
+  },
+  {
+   "seed": 26,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 238.75,
+   "kills": 1841,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 16624,
+    "ofuda_volley": 3490
+   },
+   "minHp": 0,
+   "hash": 3745048898,
+   "wallMs": 589.604948
+  },
+  {
+   "seed": 27,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 184.38333333333333,
+   "kills": 1198,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 6461,
+    "ofuda_volley": 4247
+   },
+   "minHp": 0,
+   "hash": 1448567109,
+   "wallMs": 573.241333
+  },
+  {
+   "seed": 28,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 96.6,
+   "kills": 613,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 3158,
+    "ofuda_volley": 1602
+   },
+   "minHp": 0,
+   "hash": 396947739,
+   "wallMs": 201.782882
+  },
+  {
+   "seed": 29,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 288.78333333333336,
+   "kills": 2641,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 30433,
+    "ofuda_volley": 2638
+   },
+   "minHp": 0,
+   "hash": 2607756595,
+   "wallMs": 845.671366
+  },
+  {
+   "seed": 30,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 229.18333333333334,
+   "kills": 1607,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 14058,
+    "ofuda_volley": 2502
+   },
+   "minHp": 0,
+   "hash": 306018340,
+   "wallMs": 867.50761
+  },
+  {
+   "seed": 31,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 268.53333333333336,
+   "kills": 2309,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 22389,
+    "ofuda_volley": 5078
+   },
+   "minHp": 0,
+   "hash": 2593181445,
+   "wallMs": 720.988137
+  },
+  {
+   "seed": 32,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 163.11666666666667,
+   "kills": 1083,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 5370,
+    "ofuda_volley": 4371
+   },
+   "minHp": 0,
+   "hash": 2868399506,
+   "wallMs": 418.848634
+  },
+  {
+   "seed": 33,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 191.55,
+   "kills": 1348,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 9339,
+    "ofuda_volley": 3442
+   },
+   "minHp": 0,
+   "hash": 129762270,
+   "wallMs": 595.139454
+  },
+  {
+   "seed": 34,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 387.96666666666664,
+   "kills": 4490,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 57822,
+    "ofuda_volley": 8804
+   },
+   "minHp": 0,
+   "hash": 4270508344,
+   "wallMs": 1058.853289
+  },
+  {
+   "seed": 35,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 241.71666666666667,
+   "kills": 1952,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 13980,
+    "ofuda_volley": 7348
+   },
+   "minHp": 0,
+   "hash": 1448444951,
+   "wallMs": 692.286051
+  },
+  {
+   "seed": 36,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 188.78333333333333,
+   "kills": 1305,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 8532,
+    "ofuda_volley": 4416
+   },
+   "minHp": 0,
+   "hash": 2195004759,
+   "wallMs": 492.045115
+  },
+  {
+   "seed": 37,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 249.76666666666668,
+   "kills": 1741,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 11347,
+    "ofuda_volley": 7191
+   },
+   "minHp": 0,
+   "hash": 1192008155,
+   "wallMs": 881.91716
+  },
+  {
+   "seed": 38,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 263,
+   "kills": 2120,
+   "level": 10,
+   "levelAt5": 10,
+   "damage": {
+    "lantern_flail": 21454,
+    "ofuda_volley": 3395
+   },
+   "minHp": 0,
+   "hash": 3208680297,
+   "wallMs": 684.834596
+  },
+  {
+   "seed": 39,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 263.4,
+   "kills": 2479,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 25076,
+    "ofuda_volley": 3923
+   },
+   "minHp": 0,
+   "hash": 1777229834,
+   "wallMs": 516.86941
+  },
+  {
+   "seed": 40,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 137.11666666666667,
+   "kills": 928,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 5829,
+    "ofuda_volley": 2402
+   },
+   "minHp": 0,
+   "hash": 2408484796,
+   "wallMs": 238.504455
+  },
+  {
+   "seed": 41,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 263.53333333333336,
+   "kills": 2256,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 21800,
+    "ofuda_volley": 5154
+   },
+   "minHp": 0,
+   "hash": 161047558,
+   "wallMs": 649.384098
+  },
+  {
+   "seed": 42,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 214.35,
+   "kills": 1706,
+   "level": 13,
+   "levelAt5": 13,
+   "damage": {
+    "lantern_flail": 12589,
+    "ofuda_volley": 5778
+   },
+   "minHp": 0,
+   "hash": 2228968136,
+   "wallMs": 441.893521
+  },
+  {
+   "seed": 43,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 274.3833333333333,
+   "kills": 2308,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 23227,
+    "ofuda_volley": 5207
+   },
+   "minHp": 0,
+   "hash": 610037037,
+   "wallMs": 762.179477
+  },
+  {
+   "seed": 44,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 129.8,
+   "kills": 868,
+   "level": 12,
+   "levelAt5": 12,
+   "damage": {
+    "lantern_flail": 4487,
+    "ofuda_volley": 2772
+   },
+   "minHp": 0,
+   "hash": 4186838993,
+   "wallMs": 305.437459
+  },
+  {
+   "seed": 45,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 348.35,
+   "kills": 3650,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 44574,
+    "ofuda_volley": 5104
+   },
+   "minHp": 0,
+   "hash": 18595124,
+   "wallMs": 1180.357653
+  },
+  {
+   "seed": 46,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 222.8,
+   "kills": 1611,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 9523,
+    "ofuda_volley": 7498
+   },
+   "minHp": 0,
+   "hash": 760171113,
+   "wallMs": 685.65376
+  },
+  {
+   "seed": 47,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 254.68333333333334,
+   "kills": 2049,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 18925,
+    "ofuda_volley": 4753
+   },
+   "minHp": 0,
+   "hash": 3054607435,
+   "wallMs": 644.024865
+  },
+  {
+   "seed": 48,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 156.66666666666666,
+   "kills": 1034,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 5422,
+    "ofuda_volley": 3413
+   },
+   "minHp": 0,
+   "hash": 2359845858,
+   "wallMs": 541.712999
+  },
+  {
+   "seed": 49,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 236.6,
+   "kills": 1776,
+   "level": 11,
+   "levelAt5": 11,
+   "damage": {
+    "lantern_flail": 15607,
+    "ofuda_volley": 4151
+   },
+   "minHp": 0,
+   "hash": 918572475,
+   "wallMs": 686.069762
+  },
+  {
+   "seed": 50,
+   "bot": "naive",
+   "character": "akari",
+   "status": "dead",
+   "time": 216.38333333333333,
+   "kills": 1545,
+   "level": 9,
+   "levelAt5": 9,
+   "damage": {
+    "lantern_flail": 11951,
+    "ofuda_volley": 3862
+   },
+   "minHp": 0,
+   "hash": 1892975104,
+   "wallMs": 639.689834
+  },
+  {
+   "seed": 1,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 473,
+   "level": 5,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 1075,
+    "ofuda_volley": 6418
+   },
+   "minHp": 77.01316666666668,
+   "hash": 666154790,
+   "wallMs": 9550.674696
+  },
+  {
+   "seed": 2,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 578.75,
+   "kills": 749,
+   "level": 6,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 4534,
+    "ofuda_volley": 7672
+   },
+   "minHp": 0,
+   "hash": 2176646594,
+   "wallMs": 8984.939102
+  },
+  {
+   "seed": 3,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 564.7333333333333,
+   "kills": 857,
+   "level": 8,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 5826,
+    "ofuda_volley": 9128
+   },
+   "minHp": 0,
+   "hash": 37136757,
+   "wallMs": 8479.53092
+  },
+  {
+   "seed": 4,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 574,
+   "level": 6,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 1857,
+    "ofuda_volley": 7261
+   },
+   "minHp": 81.63366666666667,
+   "hash": 4110840393,
+   "wallMs": 9220.273927
+  },
+  {
+   "seed": 5,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 714,
+   "level": 8,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 3893,
+    "ofuda_volley": 8572
+   },
+   "minHp": 47.89975000000001,
+   "hash": 3464094477,
+   "wallMs": 9277.73711
+  },
+  {
+   "seed": 6,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 720,
+   "level": 9,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 6967,
+    "ofuda_volley": 7141
+   },
+   "minHp": 35.54675,
+   "hash": 2146409004,
+   "wallMs": 8898.872046
+  },
+  {
+   "seed": 7,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1321,
+   "level": 8,
+   "levelAt5": 7,
+   "damage": {
+    "lantern_flail": 11335,
+    "ofuda_volley": 11192
+   },
+   "minHp": 7.698444444444435,
+   "hash": 695823927,
+   "wallMs": 8743.941849
+  },
+  {
+   "seed": 8,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 954,
+   "level": 7,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 5906,
+    "ofuda_volley": 10163
+   },
+   "minHp": 3.3214722222222015,
+   "hash": 2182284015,
+   "wallMs": 8777.51635
+  },
+  {
+   "seed": 9,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 581.8833333333333,
+   "kills": 698,
+   "level": 6,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 4514,
+    "ofuda_volley": 6888
+   },
+   "minHp": 0,
+   "hash": 2790468311,
+   "wallMs": 9009.09899
+  },
+  {
+   "seed": 10,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 77,
+   "level": 2,
+   "levelAt5": 1,
+   "damage": {
+    "lantern_flail": 147,
+    "ofuda_volley": 962
+   },
+   "minHp": 80.25508333333333,
+   "hash": 2746208601,
+   "wallMs": 8764.419054
+  },
+  {
+   "seed": 11,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 844,
+   "level": 7,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 6337,
+    "ofuda_volley": 8326
+   },
+   "minHp": 41.13783333333332,
+   "hash": 241131467,
+   "wallMs": 8955.802541
+  },
+  {
+   "seed": 12,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 723,
+   "level": 7,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 6023,
+    "ofuda_volley": 6444
+   },
+   "minHp": 13.366555555555559,
+   "hash": 3379538130,
+   "wallMs": 8853.986842
+  },
+  {
+   "seed": 13,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 545.1166666666667,
+   "kills": 1077,
+   "level": 8,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 9188,
+    "ofuda_volley": 8739
+   },
+   "minHp": 0,
+   "hash": 2504360031,
+   "wallMs": 8761.999068
+  },
+  {
+   "seed": 14,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1054,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 9894,
+    "ofuda_volley": 9141
+   },
+   "minHp": 5.233500000000015,
+   "hash": 3030698813,
+   "wallMs": 9713.019215
+  },
+  {
+   "seed": 15,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 839,
+   "level": 8,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 5847,
+    "ofuda_volley": 8339
+   },
+   "minHp": 36.554000000000016,
+   "hash": 3429311087,
+   "wallMs": 8747.150579
+  },
+  {
+   "seed": 16,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 547.7,
+   "kills": 1062,
+   "level": 7,
+   "levelAt5": 7,
+   "damage": {
+    "lantern_flail": 7340,
+    "ofuda_volley": 8472
+   },
+   "minHp": 0,
+   "hash": 2637458295,
+   "wallMs": 7973.262381
+  },
+  {
+   "seed": 17,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 593,
+   "level": 6,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 1922,
+    "ofuda_volley": 6994
+   },
+   "minHp": 50.94344444444447,
+   "hash": 1842990915,
+   "wallMs": 9527.696565
+  },
+  {
+   "seed": 18,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1265,
+   "level": 9,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 9629,
+    "ofuda_volley": 14052
+   },
+   "minHp": 38.29661111111111,
+   "hash": 2684377206,
+   "wallMs": 9044.162591
+  },
+  {
+   "seed": 19,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 488,
+   "level": 7,
+   "levelAt5": 2,
+   "damage": {
+    "lantern_flail": 2438,
+    "ofuda_volley": 4793
+   },
+   "minHp": 80.04283333333333,
+   "hash": 1774712797,
+   "wallMs": 9336.044969
+  },
+  {
+   "seed": 20,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 2330,
+   "level": 13,
+   "levelAt5": 7,
+   "damage": {
+    "lantern_flail": 26477,
+    "ofuda_volley": 18909
+   },
+   "minHp": 32.08441666666667,
+   "hash": 3899063109,
+   "wallMs": 8881.870349
+  },
+  {
+   "seed": 21,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 611,
+   "level": 8,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 3075,
+    "ofuda_volley": 7802
+   },
+   "minHp": 57.54302777777778,
+   "hash": 1042222293,
+   "wallMs": 9542.386096
+  },
+  {
+   "seed": 22,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 652,
+   "level": 7,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 3575,
+    "ofuda_volley": 6841
+   },
+   "minHp": 74.80594444444445,
+   "hash": 2023080118,
+   "wallMs": 9511.361281
+  },
+  {
+   "seed": 23,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 550.2166666666667,
+   "kills": 898,
+   "level": 9,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 7779,
+    "ofuda_volley": 7416
+   },
+   "minHp": 0,
+   "hash": 1343154914,
+   "wallMs": 7993.728014
+  },
+  {
+   "seed": 24,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 628,
+   "level": 7,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 2635,
+    "ofuda_volley": 7477
+   },
+   "minHp": 62.386055555555544,
+   "hash": 1314824619,
+   "wallMs": 9202.387574
+  },
+  {
+   "seed": 25,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1069,
+   "level": 7,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 6511,
+    "ofuda_volley": 11140
+   },
+   "minHp": 7.656555555555549,
+   "hash": 1198886278,
+   "wallMs": 9694.290323
+  },
+  {
+   "seed": 26,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 980,
+   "level": 9,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 8296,
+    "ofuda_volley": 9240
+   },
+   "minHp": 10.788805555555554,
+   "hash": 3233488541,
+   "wallMs": 9496.915142
+  },
+  {
+   "seed": 27,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 555,
+   "level": 7,
+   "levelAt5": 2,
+   "damage": {
+    "lantern_flail": 3431,
+    "ofuda_volley": 4418
+   },
+   "minHp": 88.24255555555555,
+   "hash": 4082458418,
+   "wallMs": 9441.147533
+  },
+  {
+   "seed": 28,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 974,
+   "level": 9,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 9095,
+    "ofuda_volley": 9461
+   },
+   "minHp": 40.87358333333331,
+   "hash": 2719404216,
+   "wallMs": 9257.537496
+  },
+  {
+   "seed": 29,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 820,
+   "level": 7,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 5956,
+    "ofuda_volley": 7541
+   },
+   "minHp": 54.24716666666668,
+   "hash": 400868860,
+   "wallMs": 9431.573772
+  },
+  {
+   "seed": 30,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 984,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 7296,
+    "ofuda_volley": 9472
+   },
+   "minHp": 57.9095,
+   "hash": 3193399784,
+   "wallMs": 9209.179005
+  },
+  {
+   "seed": 31,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 991,
+   "level": 7,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 4805,
+    "ofuda_volley": 11200
+   },
+   "minHp": 24.14047222222223,
+   "hash": 806158803,
+   "wallMs": 9159.473661
+  },
+  {
+   "seed": 32,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1109,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 8293,
+    "ofuda_volley": 10671
+   },
+   "minHp": 26.86933333333332,
+   "hash": 2302872549,
+   "wallMs": 9381.296036
+  },
+  {
+   "seed": 33,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 904,
+   "level": 7,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 4350,
+    "ofuda_volley": 9209
+   },
+   "minHp": 69.60361111111112,
+   "hash": 3070318985,
+   "wallMs": 9370.556735
+  },
+  {
+   "seed": 34,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 696,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 5251,
+    "ofuda_volley": 7107
+   },
+   "minHp": 53.329055555555556,
+   "hash": 2924229586,
+   "wallMs": 9613.111383
+  },
+  {
+   "seed": 35,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 606,
+   "level": 6,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 2757,
+    "ofuda_volley": 7190
+   },
+   "minHp": 80.45494444444445,
+   "hash": 941149570,
+   "wallMs": 9277.012878
+  },
+  {
+   "seed": 36,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1018,
+   "level": 7,
+   "levelAt5": 7,
+   "damage": {
+    "lantern_flail": 4896,
+    "ofuda_volley": 12284
+   },
+   "minHp": 0.254611111111096,
+   "hash": 236038864,
+   "wallMs": 8935.66977
+  },
+  {
+   "seed": 37,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 643,
+   "level": 7,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 3865,
+    "ofuda_volley": 6465
+   },
+   "minHp": 50.84616666666666,
+   "hash": 2599103664,
+   "wallMs": 9358.491674
+  },
+  {
+   "seed": 38,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1587,
+   "level": 11,
+   "levelAt5": 8,
+   "damage": {
+    "lantern_flail": 12231,
+    "ofuda_volley": 16352
+   },
+   "minHp": 4.255277777777794,
+   "hash": 2635914500,
+   "wallMs": 9750.394466
+  },
+  {
+   "seed": 39,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 931,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 5577,
+    "ofuda_volley": 9868
+   },
+   "minHp": 60.3091111111111,
+   "hash": 2040107778,
+   "wallMs": 9287.814481
+  },
+  {
+   "seed": 40,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 535,
+   "level": 7,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 2663,
+    "ofuda_volley": 6103
+   },
+   "minHp": 62.22077777777778,
+   "hash": 4073817407,
+   "wallMs": 9475.745316
+  },
+  {
+   "seed": 41,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 938,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 5418,
+    "ofuda_volley": 9713
+   },
+   "minHp": 43.98966666666666,
+   "hash": 3129919410,
+   "wallMs": 9931.136053
+  },
+  {
+   "seed": 42,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 599.3,
+   "kills": 1211,
+   "level": 10,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 9004,
+    "ofuda_volley": 13656
+   },
+   "minHp": 0,
+   "hash": 2537320674,
+   "wallMs": 9993.941125
+  },
+  {
+   "seed": 43,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 628,
+   "level": 9,
+   "levelAt5": 3,
+   "damage": {
+    "lantern_flail": 4314,
+    "ofuda_volley": 6800
+   },
+   "minHp": 64.38638888888889,
+   "hash": 2576854885,
+   "wallMs": 9183.278746
+  },
+  {
+   "seed": 44,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1064,
+   "level": 10,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 8553,
+    "ofuda_volley": 11212
+   },
+   "minHp": 34.80083333333335,
+   "hash": 3546618852,
+   "wallMs": 10167.468741
+  },
+  {
+   "seed": 45,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "dead",
+   "time": 536.95,
+   "kills": 1422,
+   "level": 10,
+   "levelAt5": 8,
+   "damage": {
+    "lantern_flail": 10998,
+    "ofuda_volley": 13168
+   },
+   "minHp": 0,
+   "hash": 446088944,
+   "wallMs": 8170.92794
+  },
+  {
+   "seed": 46,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1035,
+   "level": 8,
+   "levelAt5": 5,
+   "damage": {
+    "lantern_flail": 6893,
+    "ofuda_volley": 10113
+   },
+   "minHp": 5.096222222222236,
+   "hash": 934831782,
+   "wallMs": 9483.64939
+  },
+  {
+   "seed": 47,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1114,
+   "level": 8,
+   "levelAt5": 6,
+   "damage": {
+    "lantern_flail": 8810,
+    "ofuda_volley": 10297
+   },
+   "minHp": 8.965305555555542,
+   "hash": 2221027940,
+   "wallMs": 10563.032808
+  },
+  {
+   "seed": 48,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 1017,
+   "level": 8,
+   "levelAt5": 4,
+   "damage": {
+    "lantern_flail": 8471,
+    "ofuda_volley": 8072
+   },
+   "minHp": 25.29930555555554,
+   "hash": 2990993205,
+   "wallMs": 10427.911735
+  },
+  {
+   "seed": 49,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 385,
+   "level": 6,
+   "levelAt5": 2,
+   "damage": {
+    "lantern_flail": 2751,
+    "ofuda_volley": 3675
+   },
+   "minHp": 24.951722222222212,
+   "hash": 1310411989,
+   "wallMs": 9928.962625
+  },
+  {
+   "seed": 50,
+   "bot": "skilled",
+   "character": "akari",
+   "status": "won",
+   "time": 600,
+   "kills": 2306,
+   "level": 14,
+   "levelAt5": 9,
+   "damage": {
+    "lantern_flail": 17909,
+    "ofuda_volley": 24011
+   },
+   "minHp": 46.339944444444455,
+   "hash": 3028500643,
+   "wallMs": 9575.609489
+  }
+ ]
+}
