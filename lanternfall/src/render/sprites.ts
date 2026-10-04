@@ -1,5 +1,6 @@
 import { Rng } from '../sim/rng';
 import { PALETTE } from './palette';
+import { inkFinish, type InkOptions } from './ink';
 import * as shapes from './shapes';
 
 /**
@@ -25,7 +26,7 @@ export const KASA_POSE = { rest: 0, crouch: 1, air: 2 } as const;
 type Tint = 'bone' | 'ash';
 type Draw = (ctx: CanvasRenderingContext2D) => void;
 
-function bake(scale: number, halfW: number, halfH: number, draw: Draw): Sprite {
+function bake(scale: number, halfW: number, halfH: number, draw: Draw, ink?: InkOptions): Sprite {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.ceil(halfW * 2 * scale));
   canvas.height = Math.max(1, Math.ceil(halfH * 2 * scale));
@@ -33,6 +34,7 @@ function bake(scale: number, halfW: number, halfH: number, draw: Draw): Sprite {
   if (!ctx) throw new Error('Canvas2D unavailable');
   ctx.setTransform(scale, 0, 0, scale, halfW * scale, halfH * scale);
   draw(ctx);
+  if (ink) inkFinish(canvas, scale, ink);
   return { canvas, ox: halfW * scale, oy: halfH * scale };
 }
 
@@ -225,23 +227,102 @@ export interface EnemyArt {
   /** 'rotate': 16 rotations × frames (faces away from the player); 'mirror': 2 × frames. */
   layout: 'rotate' | 'mirror';
   draw: (ctx: CanvasRenderingContext2D, frame: number, fill: string) => void;
+  /** Woodblock finish (keyline + textile motif); omitted = keyline only. */
+  ink?: InkOptions;
 }
 
 export const ENEMY_ROTATIONS = 16;
 export const LOOK_ROTATIONS = 16;
 
 export const ENEMY_ART: Record<string, EnemyArt> = {
-  wisp: { halfW: 26, halfH: 26, frames: WISP_FRAMES, layout: 'rotate', draw: wisp },
-  faceless_walker: { halfW: 16, halfH: 24, frames: WALKER_FRAMES, layout: 'mirror', draw: walker },
-  hopping_kasa: { halfW: 16, halfH: 24, frames: 3, layout: 'mirror', draw: kasa },
-  bride_of_the_reservoir: { halfW: 38, halfH: 34, frames: 2, layout: 'mirror', draw: shapes.bride },
-  drowned: { halfW: 20, halfH: 26, frames: 2, layout: 'mirror', draw: shapes.drowned },
-  carrion_crow: { halfW: 15, halfH: 15, frames: 2, layout: 'rotate', draw: shapes.crow },
-  long_neck: { halfW: 38, halfH: 34, frames: 3, layout: 'mirror', draw: shapes.longNeck },
-  lantern_mouth: { halfW: 14, halfH: 19, frames: 2, layout: 'mirror', draw: shapes.lanternMouth },
-  bone_colossus: { halfW: 32, halfH: 54, frames: 2, layout: 'mirror', draw: shapes.colossus },
-  mother_of_lanterns: { halfW: 46, halfH: 46, frames: 2, layout: 'mirror', draw: shapes.mother },
-  lantern_eater: { halfW: 26, halfH: 24, frames: 2, layout: 'mirror', draw: shapes.lanternEater },
+  wisp: {
+    halfW: 26,
+    halfH: 26,
+    frames: WISP_FRAMES,
+    layout: 'rotate',
+    draw: wisp,
+    ink: { thin: 0.5, thick: 1.2 },
+  },
+  faceless_walker: {
+    halfW: 16,
+    halfH: 24,
+    frames: WALKER_FRAMES,
+    layout: 'mirror',
+    draw: walker,
+    ink: { motif: 'asanoha' },
+  },
+  hopping_kasa: {
+    halfW: 16,
+    halfH: 24,
+    frames: 3,
+    layout: 'mirror',
+    draw: kasa,
+    ink: { motif: 'kikko', motifAlpha: 0.25, thin: 0.4, thick: 0.9 },
+  },
+  bride_of_the_reservoir: {
+    halfW: 38,
+    halfH: 34,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.bride,
+    ink: { motif: 'sakura', motifAlpha: 0.45, thick: 2.4 },
+  },
+  drowned: {
+    halfW: 20,
+    halfH: 26,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.drowned,
+    ink: { motif: 'seigaiha' },
+  },
+  carrion_crow: {
+    halfW: 15,
+    halfH: 15,
+    frames: 2,
+    layout: 'rotate',
+    draw: shapes.crow,
+    ink: { thin: 0.4, thick: 1 },
+  },
+  long_neck: {
+    halfW: 38,
+    halfH: 34,
+    frames: 3,
+    layout: 'mirror',
+    draw: shapes.longNeck,
+    ink: { motif: 'asanoha', thin: 0.4, thick: 0.9 },
+  },
+  lantern_mouth: {
+    halfW: 14,
+    halfH: 19,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.lanternMouth,
+    ink: { thin: 0.5, thick: 1.4 },
+  },
+  bone_colossus: {
+    halfW: 32,
+    halfH: 54,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.colossus,
+    ink: { motif: 'kikko', thin: 0.4, thick: 1 },
+  },
+  mother_of_lanterns: {
+    halfW: 46,
+    halfH: 46,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.mother,
+    ink: { motif: 'seigaiha', motifAlpha: 0.4, thick: 3 },
+  },
+  lantern_eater: {
+    halfW: 26,
+    halfH: 24,
+    frames: 2,
+    layout: 'mirror',
+    draw: shapes.lanternEater,
+    ink: { motif: 'sakura', thick: 2.4 },
+  },
 };
 
 /** Rotated projectile looks (16 rotations each, facing +x at index 0). */
@@ -297,8 +378,13 @@ export class SpriteCache {
         id,
         tints.map(([, fill]) => {
           if (art.layout === 'mirror') {
-            return mirrored(scale, art.halfW, art.halfH, art.frames, (c, f) =>
-              art.draw(c, f, fill),
+            return mirrored(
+              scale,
+              art.halfW,
+              art.halfH,
+              art.frames,
+              (c, f) => art.draw(c, f, fill),
+              art.ink ?? {},
             );
           }
           const out: Sprite[] = [];
@@ -306,10 +392,16 @@ export class SpriteCache {
           for (let r = 0; r < ENEMY_ROTATIONS; r++) {
             for (let f = 0; f < art.frames; f++) {
               out.push(
-                bake(scale, half, half, (ctx) => {
-                  ctx.rotate((r / ENEMY_ROTATIONS) * Math.PI * 2);
-                  art.draw(ctx, f, fill);
-                }),
+                bake(
+                  scale,
+                  half,
+                  half,
+                  (ctx) => {
+                    ctx.rotate((r / ENEMY_ROTATIONS) * Math.PI * 2);
+                    art.draw(ctx, f, fill);
+                  },
+                  art.ink ?? {},
+                ),
               );
             }
           }
@@ -317,7 +409,10 @@ export class SpriteCache {
         }),
       );
     }
-    this.player = mirrored(scale, 15, 25, PLAYER_FRAMES, (c, f) => player(c, f));
+    this.player = mirrored(scale, 15, 25, PLAYER_FRAMES, (c, f) => player(c, f), {
+      motif: 'sakura',
+      motifAlpha: 0.3,
+    });
     this.looks.clear();
     for (const [id, look] of Object.entries(LOOKS)) {
       const out: Sprite[] = [];
@@ -357,15 +452,22 @@ function mirrored(
   halfH: number,
   frames: number,
   draw: (ctx: CanvasRenderingContext2D, frame: number) => void,
+  ink?: InkOptions,
 ): Sprite[] {
   const out: Sprite[] = [];
   for (const mirror of [1, -1]) {
     for (let f = 0; f < frames; f++) {
       out.push(
-        bake(scale, halfW, halfH, (ctx) => {
-          ctx.scale(mirror, 1);
-          draw(ctx, f);
-        }),
+        bake(
+          scale,
+          halfW,
+          halfH,
+          (ctx) => {
+            ctx.scale(mirror, 1);
+            draw(ctx, f);
+          },
+          ink,
+        ),
       );
     }
   }

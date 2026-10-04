@@ -3,7 +3,9 @@ import type { FxParams } from './effects';
 /**
  * WebGL2 post-processing over the Canvas2D world (GAME_DESIGN §7.4):
  * gold-only bloom, manga screentone in the mid-dark tones, chromatic
- * aberration, film grain, vignette, palette inversion and impact speed lines.
+ * aberration, vignette, palette inversion and impact speed lines, finished
+ * like a woodblock print (§7.3.1): washi paper grain and fibres instead of
+ * film grain, and a slightly misregistered gold plate.
  * "low" skips the bloom blur passes.
  */
 const VERT = `#version 300 es
@@ -67,6 +69,33 @@ float hash(vec2 p) {
   return fract(p.x * p.y);
 }
 
+float vnoise(vec2 p) {
+  vec2 i = floor(p);
+  vec2 f = fract(p);
+  f = f * f * (3.0 - 2.0 * f);
+  return mix(
+    mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x),
+    mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x),
+    f.y
+  );
+}
+
+/** Washi: soft cloudy pulp plus long thin kozo fibres. Fixed to the screen,
+ *  like the paper a print sits on. Returns roughly -1..1. */
+float washi(vec2 px) {
+  float pulp = vnoise(px / 90.0) * 0.6 + vnoise(px / 23.0) * 0.4;
+  vec2 q = mat2(0.94, -0.34, 0.34, 0.94) * px;
+  float fibre = smoothstep(0.82, 0.97, vnoise(vec2(q.x / 140.0, q.y / 2.2)));
+  fibre += smoothstep(0.86, 0.98, vnoise(vec2(q.y / 120.0, q.x / 2.6) + 17.0)) * 0.7;
+  return (pulp - 0.5) * 1.2 + fibre;
+}
+
+/** How "gold plate" a colour is (warm, bright). */
+float goldness(vec3 c) {
+  return clamp((c.r - c.b) * 2.2, 0.0, 1.0) * step(c.g, c.r + 0.02) *
+    smoothstep(0.2, 0.5, dot(c, vec3(0.299, 0.587, 0.114)));
+}
+
 void main() {
   vec2 d = uv - 0.5;
   float aspect = res.x / res.y;
@@ -93,6 +122,11 @@ void main() {
     c = mix(c, toned, band);
   }
 
+  // Misregistered gold plate: a faint offset ghost of every gold shape.
+  vec3 shifted = texture(src, uv + vec2(1.6, -1.2) / res).rgb;
+  float ghost = goldness(shifted) * (1.0 - goldness(c));
+  c = mix(c, shifted * vec3(1.0, 0.86, 0.6), ghost * 0.28);
+
   if (useBloom > 0.5) c += texture(bloom, uv).rgb * 1.05;
 
   // Impact speed lines radiating from the centre.
@@ -108,8 +142,13 @@ void main() {
   float v = smoothstep(0.45, 1.05, length(d * vec2(aspect, 1.0)) * 1.25);
   c = mix(c, INK, v * 0.45);
 
-  // Grain.
-  c += (hash(gl_FragCoord.xy + fract(time * 7.13) * 100.0) - 0.5) * 0.045;
+  // Paper: light tones take the washi texture (bone becomes paper), dark
+  // tones get a faint indigo-ink cast and pulp, plus a little live grain.
+  float paper = washi(gl_FragCoord.xy / max(dotPx / 3.0, 1.0));
+  float l2 = dot(c, vec3(0.299, 0.587, 0.114));
+  c *= 1.0 + paper * 0.05 * smoothstep(0.3, 0.9, l2);
+  c += vec3(0.010, 0.012, 0.024) * (0.6 + paper) * (1.0 - smoothstep(0.0, 0.25, l2));
+  c += (hash(gl_FragCoord.xy + fract(time * 7.13) * 100.0) - 0.5) * 0.02;
 
   // Reduced-flashing substitute: a soft ash wash.
   c = mix(c, ASH, fade * 0.3);
