@@ -93,3 +93,33 @@ describe('passive data', () => {
     }
   });
 });
+
+describe('hidden unions', () => {
+  it('two evolved ingredients + a reliquary fuse into a union and free a slot', () => {
+    const sim = new Sim({ seed: 6, events: false });
+    sim.grant([
+      { id: 'moth_lords_veil', level: 1 },
+      { id: 'nine_tailed_inferno', level: 1 },
+    ]);
+    sim.pickups.drop(PICKUP.reliquary, 0, 0);
+    sim.step(IDLE_INTENT);
+    expect(sim.weapons.map((w) => WEAPONS[w.weapon]?.id)).toEqual(['lantern_festival']);
+  });
+
+  it('Lanternfall only forms for Akari', () => {
+    const grant = [
+      { id: 'sunfall_censer', level: 1 },
+      { id: 'eye_of_the_still_pond', level: 1 },
+    ];
+    const ren = new Sim({ seed: 7, events: false, character: 'ren' });
+    ren.grant(grant);
+    ren.pickups.drop(PICKUP.reliquary, 0, 0);
+    ren.step(IDLE_INTENT);
+    expect(ren.weapons.some((w) => WEAPONS[w.weapon]?.id === 'lanternfall')).toBe(false);
+    const akari = new Sim({ seed: 7, events: false, character: 'akari' });
+    akari.grant(grant);
+    akari.pickups.drop(PICKUP.reliquary, 0, 0);
+    akari.step(IDLE_INTENT);
+    expect(akari.weapons.map((w) => WEAPONS[w.weapon]?.id)).toEqual(['lanternfall']);
+  });
+});

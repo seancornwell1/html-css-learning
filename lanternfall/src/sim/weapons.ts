@@ -35,6 +35,12 @@ export function updateWeapons(sim: Sim): void {
       continue;
     }
     w.fired++;
+    const rain = def.effects?.rain ?? 0;
+    if (rain > 0) {
+      const m = randomEnemies(sim, rain, SCREEN_RANGE);
+      for (let i = 0; i < m; i++)
+        strikeAt(sim, pickBuf[i] as number, s.damage * sim.stats.might, w.weapon);
+    }
     // fire() may set its own cooldown (orbits); otherwise use the stat.
     if (w.cooldown <= 0) w.cooldown = Math.max(0.05, s.cooldown * sim.stats.cooldown);
   }
@@ -400,12 +406,6 @@ function fireFan(sim: Sim, def: WeaponDef, w: OwnedWeapon, s: WeaponStats): bool
     const a = face + (i - (count - 1) / 2) * s.arc;
     if (spawnShot(sim, w, s, MODE.straight, a, speed) < 0) break;
   }
-  const rain = def.effects?.rain ?? 0;
-  if (rain > 0) {
-    const m = randomEnemies(sim, rain, SCREEN_RANGE);
-    for (let i = 0; i < m; i++)
-      strikeAt(sim, pickBuf[i] as number, s.damage * sim.stats.might, w.weapon);
-  }
   if (sim.events.enabled)
     sim.events.push({ type: 'projectile_fired', weapon: w.weapon, x: p.x, y: p.y });
   return true;
@@ -447,7 +447,7 @@ function fireBoomerang(sim: Sim, def: WeaponDef, w: OwnedWeapon, s: WeaponStats)
   const p = sim.player;
   const count = amountOf(sim, s);
   const speed = s.speed * sim.stats.projSpeed;
-  const spiral = (def.effects?.chase ?? 0) > 0;
+  const spiral = def.effects?.spiral === true;
   let base = Math.atan2(p.faceY, p.faceX);
   if (!spiral) {
     const t = nearestEnemy(sim, p.x, p.y, 420);
@@ -585,7 +585,7 @@ function fireTrail(sim: Sim, _def: WeaponDef, w: OwnedWeapon, s: WeaponStats): b
 function fireWander(sim: Sim, def: WeaponDef, w: OwnedWeapon, s: WeaponStats): boolean {
   const p = sim.player;
   const speed = s.speed * sim.stats.projSpeed;
-  if (def.effects?.chase) {
+  if (def.effects?.dragon) {
     // Dragon: one great fish crosses the screen through the player's position.
     const a = sim.combatRng.range(0, Math.PI * 2);
     const sx = p.x - Math.cos(a) * 600;
@@ -600,7 +600,7 @@ function fireWander(sim: Sim, def: WeaponDef, w: OwnedWeapon, s: WeaponStats): b
     const slot = spawnShot(sim, w, s, MODE.wander, a, speed);
     if (slot < 0) break;
     sim.projectiles.a[slot] = sim.combatRng.range(0, 100);
-    if (def.effects?.chase) sim.projectiles.radius[slot] = 10 * sim.stats.area;
+    if (def.effects?.dragon) sim.projectiles.radius[slot] = 10 * sim.stats.area;
   }
   return true;
 }

@@ -15,6 +15,7 @@ import {
   suiteHash,
   toMarkdown,
   type Check,
+  type GroupStats,
   type Report,
 } from './report';
 import { runOne, type RunJob, type RunResult } from './run';
@@ -38,6 +39,7 @@ const { values } = parseArgs({
     compare: { type: 'string' },
     note: { type: 'string', multiple: true },
     gate: { type: 'string', multiple: true },
+    rescore: { type: 'string' },
   },
 });
 
@@ -109,6 +111,73 @@ function runInWorkers(all: RunJob[], workerFile: string): Promise<RunResult[]> {
   });
 }
 
+/** Opt-in milestone gates (`--gate share|evolutions|bands`). */
+function gateChecks(runs: RunResult[], groups: GroupStats[], gates: Set<string>): Check[] {
+  const checks: Check[] = [];
+  if (gates.has('share')) {
+    const over = groups.flatMap((g) =>
+      Object.entries(g.damageShare)
+        .filter(([, f]) => f > MAX_WEAPON_SHARE)
+        .map(([id, f]) => `${g.character}/${g.bot} ${id} ${(f * 100).toFixed(0)}%`),
+    );
+    checks.push({
+      name: `No weapon over ${MAX_WEAPON_SHARE * 100}% damage share`,
+      pass: over.length === 0,
+      detail: over.length === 0 ? 'all groups under the cap' : over.join('; '),
+    });
+  }
+  if (gates.has('evolutions')) {
+    // Plan §14 (M4): every evolution reached by the skilled bot. Unions are
+    // hidden secrets and meant to be rare, so they are reported, not gated.
+    const reached = evolutionCounts(runs, 'skilled');
+    const all = WEAPONS.filter((w) => w.evolvedFrom).map((w) => w.id);
+    const missing = all.filter((id) => !reached[id]);
+    const unions = WEAPONS.filter((w) => w.unionOf).map(
+      (w) => `${w.id} ${evolutionCounts(runs)[w.id] ?? 0}`,
+    );
+    checks.push({
+      name: 'Every evolution reached by the skilled bot',
+      pass: missing.length === 0,
+      detail:
+        (missing.length === 0
+          ? `${all.length}/${all.length} reached`
+          : `missing: ${missing.join(', ')}`) + `; unions (all bots): ${unions.join(', ')}`,
+    });
+  }
+  if (gates.has('bands')) {
+    for (const g of groups) {
+      const band = BANDS[g.bot as keyof typeof BANDS];
+      if (!band) continue;
+      const pass = g.survival >= band[0] && g.survival <= band[1];
+      checks.push({
+        name: `Band ${g.character}/${g.bot} ${band[0] * 100}–${band[1] * 100}%`,
+        pass,
+        detail: `${(g.survival * 100).toFixed(1)}% survived`,
+      });
+    }
+  }
+  return checks;
+}
+
+/** Re-apply gates to a saved report's runs (no re-simulation). */
+function rescore(label: string): void {
+  const path = join(reportDir, `${label}.json`);
+  const old = JSON.parse(readFileSync(path, 'utf8')) as Report;
+  const groups = groupStats(old.runs);
+  const base = old.checks.filter((c) => !/damage share|evolution|^Band /i.test(c.name));
+  const report: Report = {
+    ...old,
+    groups,
+    notes: [...old.notes, ...(values.note ?? [])],
+    checks: [...base, ...gateChecks(old.runs, groups, new Set(values.gate ?? []))],
+  };
+  writeFileSync(path, JSON.stringify(report, null, 1) + '\n');
+  const md = toMarkdown(report);
+  writeFileSync(join(reportDir, `${label}.md`), md);
+  console.log(md);
+  if (report.checks.some((c) => !c.pass)) process.exitCode = 1;
+}
+
 async function main(): Promise<void> {
   console.log(
     `Lanternfall sim: ${jobs.length} runs (${characters.join(',')} × ${bots.join(',')} × ${seedsPerGroup} seeds), ${workerCount} workers`,
@@ -160,44 +229,7 @@ async function main(): Promise<void> {
   }
 
   const groups = groupStats(runs);
-  const gates = new Set(values.gate ?? []);
-  if (gates.has('share')) {
-    const over = groups.flatMap((g) =>
-      Object.entries(g.damageShare)
-        .filter(([, f]) => f > MAX_WEAPON_SHARE)
-        .map(([id, f]) => `${g.character}/${g.bot} ${id} ${(f * 100).toFixed(0)}%`),
-    );
-    checks.push({
-      name: `No weapon over ${MAX_WEAPON_SHARE * 100}% damage share`,
-      pass: over.length === 0,
-      detail: over.length === 0 ? 'all groups under the cap' : over.join('; '),
-    });
-  }
-  if (gates.has('evolutions')) {
-    const reached = evolutionCounts(runs, 'skilled');
-    const all = WEAPONS.filter((w) => w.evolvedFrom || w.unionOf).map((w) => w.id);
-    const missing = all.filter((id) => !reached[id]);
-    checks.push({
-      name: 'Every evolution and union reached by the skilled bot',
-      pass: missing.length === 0,
-      detail:
-        missing.length === 0
-          ? `${all.length}/${all.length} reached`
-          : `missing: ${missing.join(', ')}`,
-    });
-  }
-  if (gates.has('bands')) {
-    for (const g of groups) {
-      const band = BANDS[g.bot as keyof typeof BANDS];
-      if (!band) continue;
-      const pass = g.survival >= band[0] && g.survival <= band[1];
-      checks.push({
-        name: `Band ${g.character}/${g.bot} ${band[0] * 100}–${band[1] * 100}%`,
-        pass,
-        detail: `${(g.survival * 100).toFixed(1)}% survived`,
-      });
-    }
-  }
+  checks.push(...gateChecks(runs, groups, new Set(values.gate ?? [])));
 
   const report: Report = {
     label: values.label,
@@ -219,4 +251,5 @@ async function main(): Promise<void> {
   if (checks.some((c) => !c.pass)) process.exitCode = 1;
 }
 
-await main();
+if (values.rescore) rescore(values.rescore);
+else await main();

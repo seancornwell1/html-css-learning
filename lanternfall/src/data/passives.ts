@@ -62,7 +62,36 @@ const ARSENAL_I: readonly PassiveDef[] = [
   },
 ];
 
-export const PASSIVES: readonly PassiveDef[] = [...ARSENAL_I];
+const ARSENAL_II: readonly PassiveDef[] = [
+  {
+    id: 'folded_wind',
+    name: 'Folded Wind',
+    stat: 'projSpeed',
+    perLevel: five(0.1),
+    text: '+10% projectile speed.',
+  },
+  { id: 'lacquer_mask', name: 'Lacquer Mask', stat: 'armor', perLevel: five(1), text: '+1 armor.' },
+  { id: 'rice_ball', name: 'Rice Ball', stat: 'maxHp', perLevel: five(15), text: '+15 max HP.' },
+  {
+    id: 'lodestone',
+    name: 'Lodestone',
+    stat: 'magnet',
+    perLevel: five(0.2),
+    text: '+20% pickup radius.',
+  },
+  { id: 'lucky_coin', name: 'Lucky Coin', stat: 'luck', perLevel: five(0.08), text: '+8% luck.' },
+  { id: 'candle_stub', name: 'Candle Stub', stat: 'growth', perLevel: five(0.08), text: '+8% XP.' },
+  {
+    id: 'offering_box',
+    name: 'Offering Box',
+    stat: 'greed',
+    perLevel: five(0.1),
+    text: '+10% coins.',
+  },
+  { id: 'paper_doll', name: 'Paper Doll', stat: 'revival', perLevel: [1, 1], text: '+1 revival.' },
+];
+
+export const PASSIVES: readonly PassiveDef[] = [...ARSENAL_I, ...ARSENAL_II];
 
 const INDEX = new Map(PASSIVES.map((p, i) => [p.id, i]));
 

@@ -151,6 +151,8 @@ announced with a full-screen gold impact frame (§7.4).
 | 16 | Paper Doll (max Lv 2) | +1 Revival per level |
 
 ### 5.4 Hidden unions (secret, undocumented in game until discovered)
+Unions are rare by design. In the M4 sim (600 runs), Lanternfall formed 8
+times and the other two once each.
 Two **evolved** weapons in the slots, plus a Reliquary, fuse into one weapon
 and free up a slot.
 | Union | Ingredients | Effect |

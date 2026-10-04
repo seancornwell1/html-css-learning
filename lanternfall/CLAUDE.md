@@ -16,6 +16,9 @@ decision changes, update the doc in the same commit.
 | `npm run sim -- --char akari --bot skilled --seeds 20` | Targeted runs while tuning |
 | `npm run sim -- --label M2 --compare M1` | Also assert every shared run is bit-identical to an earlier report |
 | `npm run sim -- --note "..."` | Add an observation to the report (repeatable) |
+| `npm run sim -- --gate share\|evolutions\|bands` | Milestone gates (repeatable) |
+| `npm run sim -- --rescore M4 --gate ...` | Re-apply gates to a saved report without re-simulating |
+| `npx tsx tools/sim/diag-evo.ts <bot> <seed>` | Trace reliquaries, loadouts and evolutions in one run |
 | `npx tsx tools/sim/diag.ts <bot> <seed>` | Per-30 s trace of one run (alive, kills, level, HP, distance), for tuning |
 | `npm run shot -- <url> <outDir>` | Playwright screenshots (portrait, landscape, desktop); fails on console errors. Serve first with `npm run build && npx vite preview --port 4173` |
 
@@ -99,7 +102,9 @@ decision changes, update the doc in the same commit.
   100 ms, skilled 50 ms) and comfort zones. Skilled = the average kiting field
   plus a 1 s lookahead veto and an open-space scan.
 - A quick sim (50 seeds × 3 bots) takes ~5 min on 4 cores; run it in the
-  background and wait on the report file. The exit code is non-zero if any check fails.
+  background and wait on the report file. **Don't edit `src/sim` or
+  `src/data` while a sim runs**: the final determinism re-check runs from
+  source and would report a false mismatch. The exit code is non-zero if any check fails.
 - **Target bands** (no meta, per character, survival to 10:00): naive < 5%,
   average 10–25%, skilled 50–70%; skilled + max meta 80–90%.
   These bands are enforced **from M5 onward**. Before M5 the sim checks only
@@ -128,7 +133,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M1 | Core loop | ✅ done (`sim-reports/M1.md`) |
 | M2 | Look & feel | ✅ done (`sim-reports/M2.md`, bit-identical to M1) |
 | M3 | Arsenal I | ✅ done (`sim-reports/M3.md`) |
-| M4 | Arsenal II | not started |
+| M4 | Arsenal II | ✅ done (`sim-reports/M4.md`) |
 | M5 | Night & roster | not started |
 | M6 | Power-ups | not started |
 | M7 | Audio | not started |
