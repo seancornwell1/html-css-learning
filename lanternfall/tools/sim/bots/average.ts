@@ -4,7 +4,7 @@ import type { Intent } from '../../../src/sim/intent';
 import { Rng } from '../../../src/sim/rng';
 import type { Sim } from '../../../src/sim/sim';
 import type { Bot } from './bot';
-import { nearestEmber, priorityChoice } from './sense';
+import { nearestEmber, nearestPickup, priorityChoice } from './sense';
 
 /** Reaction time: re-decides every 6 ticks (100 ms). */
 const THINK_EVERY = 6;
@@ -56,8 +56,16 @@ export class AverageBot implements Bot {
       fy += (dy / len) * w;
     }
     if (closest > SAFE_RADIUS) {
-      const em = nearestEmber(sim, 450);
-      if (em >= 0) {
+      // Pickups (reliquaries, food) first, then embers.
+      const pk = nearestPickup(sim, 500);
+      const em = pk >= 0 ? -1 : nearestEmber(sim, 450);
+      if (pk >= 0) {
+        const dx = (sim.pickups.x[pk] as number) - p.x;
+        const dy = (sim.pickups.y[pk] as number) - p.y;
+        const d = len2(dx, dy) || 1;
+        fx += (dx / d) * 1.2;
+        fy += (dy / d) * 1.2;
+      } else if (em >= 0) {
         const dx = (sim.embers.x[em] as number) - p.x;
         const dy = (sim.embers.y[em] as number) - p.y;
         const d = len2(dx, dy) || 1;
