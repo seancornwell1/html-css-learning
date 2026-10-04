@@ -138,7 +138,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M2 | Look & feel | ✅ done (`sim-reports/M2.md`, bit-identical to M1) |
 | M3 | Arsenal I | ✅ done (`sim-reports/M3.md`) |
 | M4 | Arsenal II | ✅ done (`sim-reports/M4.md`) |
-| M5 | Night & roster | not started |
+| M5 | Night & roster | ⚠️ committed, bands failing (`sim-reports/M5.md`); awaiting user decision on the skilled band |
 | M6 | Power-ups | not started |
 | M7 | Audio | not started |
 | M8 | Meta & secrets | not started |
