@@ -1,4 +1,6 @@
-import { ENEMIES } from '../../../src/data/enemies';
+import { BEHAVIOUR, ENEMIES } from '../../../src/data/enemies';
+import { STATE } from '../../../src/sim/enemy-ai';
+import { HAZARD } from '../../../src/sim/hazard-pool';
 import { PASSIVES } from '../../../src/data/passives';
 import { WEAPONS, weaponStatsAt } from '../../../src/data/weapons';
 import type { Sim } from '../../../src/sim/sim';
@@ -60,6 +62,7 @@ export function priorityChoice(
   sim: Sim,
   options: readonly UpgradeOption[],
   planEvolutions = false,
+  focusWeapons = 3,
 ): number {
   const ownedPassiveIds = new Set(sim.passives.map((p) => PASSIVES[p.passive]?.id));
   const pairedPassives = new Set(
@@ -72,9 +75,13 @@ export function priorityChoice(
     switch (o.type) {
       case 'weapon_new': {
         const def = WEAPONS[o.weapon];
-        score = sim.weapons.length < 3 ? 70 : 30;
-        if (planEvolutions && def?.evolvePassive && ownedPassiveIds.has(def.evolvePassive))
-          score += 25;
+        if (planEvolutions) {
+          // Focus: a few weapons, each with its evolution partner.
+          score = sim.weapons.length < focusWeapons ? 66 : 4;
+          if (def?.evolvePassive && ownedPassiveIds.has(def.evolvePassive)) score += 25;
+        } else {
+          score = sim.weapons.length < 3 ? 70 : 30;
+        }
         break;
       }
       case 'weapon_level':
@@ -88,7 +95,10 @@ export function priorityChoice(
         const id = PASSIVES[o.passive]?.id ?? '';
         score = 40;
         if (id === 'cracked_noh_mask') score = 5; // curse makes the night harder
-        if (planEvolutions && pairedPassives.has(id)) score += 30;
+        if (planEvolutions) {
+          if (pairedPassives.has(id)) score += 30;
+          else if (!GOOD_PASSIVES.has(id)) score = 8;
+        }
         break;
       }
       case 'passive_level': {
@@ -109,6 +119,18 @@ export function priorityChoice(
   });
   return best;
 }
+
+/** Passives worth taking even without an evolution partner. */
+const GOOD_PASSIVES = new Set([
+  'whetstone',
+  'prayer_beads',
+  'ink_well',
+  'iron_wick',
+  'rice_ball',
+  'lacquer_mask',
+  'pure_water',
+  'candle_stub',
+]);
 
 /** Nearest pickup slot within `range`, or -1. */
 export function nearestPickup(sim: Sim, range: number): number {
@@ -177,4 +199,92 @@ export function lootField(sim: Sim, range: number, out: { x: number; y: number }
   out.x = bx;
   out.y = by;
   return best > 0 ? 1 : 0;
+}
+
+const predicted = { x: 0, y: 0 };
+
+/**
+ * Where enemy `slot` will be in `t` seconds if the player is at (px, py)
+ * then. Chasers home in on the player (straight-line extrapolation would
+ * call a sidestep safe when it is not); flyers keep their line; telegraphing
+ * lungers/chargers dash along their locked heading.
+ */
+export function predictEnemy(
+  sim: Sim,
+  slot: number,
+  t: number,
+  px: number,
+  py: number,
+): { x: number; y: number } {
+  const e = sim.enemies;
+  const def = ENEMIES[e.kind[slot] as number];
+  let x = e.x[slot] as number;
+  let y = e.y[slot] as number;
+  const state = e.state[slot] as number;
+  const b = def?.behaviour;
+  if ((b === 'lunge' || b === 'mother') && (state === STATE.windup || state === STATE.act)) {
+    const lead = state === STATE.windup ? (e.stateT[slot] as number) : 0;
+    const after = Math.max(0, t - lead);
+    const speed = b === 'lunge' ? BEHAVIOUR.lunge.speed : BEHAVIOUR.mother.chargeSpeed;
+    const dashT = b === 'lunge' ? BEHAVIOUR.lunge.dash : BEHAVIOUR.mother.chargeTime;
+    const d = speed * Math.min(after, dashT);
+    x += (e.dirX[slot] as number) * d;
+    y += (e.dirY[slot] as number) * d;
+  } else if (b === 'flank' || e.march[slot] === 1 || b === 'ranged') {
+    x += (e.vx[slot] as number) * t;
+    y += (e.vy[slot] as number) * t;
+  } else {
+    const tx = px - x;
+    const ty = py - y;
+    const td = Math.sqrt(tx * tx + ty * ty) || 1;
+    const step = Math.min(
+      td,
+      effectiveSpeed(e.kind[slot] as number) * (e.speedMul[slot] as number) * t,
+    );
+    x += (tx / td) * step;
+    y += (ty / td) * step;
+  }
+  predicted.x = x;
+  predicted.y = y;
+  return predicted;
+}
+
+/**
+ * Hazard risk at (x, y) at time t from now: pending slams that will go off
+ * by then and puddles. Shots are handled by `shotRisk`.
+ */
+export function hazardRisk(sim: Sim, x: number, y: number, t: number): number {
+  const h = sim.hazards;
+  let risk = 0;
+  for (let i = 0; i < h.count; i++) {
+    const s = h.slots[i] as number;
+    const dx = x - (h.x[s] as number);
+    const dy = y - (h.y[s] as number);
+    const r = (h.radius[s] as number) + sim.player.radius + 6;
+    if (dx * dx + dy * dy > r * r) continue;
+    if (h.kind[s] === HAZARD.slam) {
+      const delay = h.delay[s] as number;
+      if (delay > 0 && delay <= t + 0.15) risk += 4;
+    } else {
+      risk += 0.3;
+    }
+  }
+  return risk;
+}
+
+/** Shots that will be within reach of (x, y) at time t. */
+export function shotRisk(sim: Sim, x: number, y: number, t: number): number {
+  const sh = sim.enemyShots;
+  let risk = 0;
+  for (let i = 0; i < sh.count; i++) {
+    const s = sh.slots[i] as number;
+    if (sh.reflected[s]) continue;
+    const qx = (sh.x[s] as number) + (sh.vx[s] as number) * t;
+    const qy = (sh.y[s] as number) + (sh.vy[s] as number) * t;
+    const r = (sh.radius[s] as number) + sim.player.radius + 4;
+    const dx = x - qx;
+    const dy = y - qy;
+    if (dx * dx + dy * dy < r * r) risk += 2;
+  }
+  return risk;
 }

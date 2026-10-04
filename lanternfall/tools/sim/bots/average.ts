@@ -21,6 +21,7 @@ export class AverageBot implements Bot {
   private readonly rng: Rng;
   private mx = 0;
   private my = 0;
+  private dash = false;
 
   constructor(seed: number) {
     this.rng = new Rng(seed ^ 0xa4e);
@@ -30,7 +31,7 @@ export class AverageBot implements Bot {
     if (sim.tick % THINK_EVERY === 0) this.think(sim);
     out.moveX = this.mx;
     out.moveY = this.my;
-    out.action = false;
+    out.action = this.dash;
     return out;
   }
 
@@ -55,6 +56,33 @@ export class AverageBot implements Bot {
       fx += (dx / len) * w;
       fy += (dy / len) * w;
     }
+    // Shots and pending slams are threats too.
+    const sh = sim.enemyShots;
+    for (let i = 0; i < sh.count; i++) {
+      const k = sh.slots[i] as number;
+      if (sh.reflected[k]) continue;
+      const dx = p.x - (sh.x[k] as number);
+      const dy = p.y - (sh.y[k] as number);
+      const d = len2(dx, dy) || 1;
+      if (d > FEAR_RADIUS) continue;
+      const w = (1 - d / FEAR_RADIUS) ** 2;
+      fx += (dx / d) * w;
+      fy += (dy / d) * w;
+      closest = Math.min(closest, d);
+    }
+    const hz = sim.hazards;
+    for (let i = 0; i < hz.count; i++) {
+      const k = hz.slots[i] as number;
+      if ((hz.delay[k] as number) <= 0) continue;
+      const dx = p.x - (hz.x[k] as number);
+      const dy = p.y - (hz.y[k] as number);
+      const d = len2(dx, dy) || 1;
+      if (d > (hz.radius[k] as number) + 30) continue;
+      fx += (dx / d) * 1.5;
+      fy += (dy / d) * 1.5;
+      closest = 0;
+    }
+    this.dash = closest < 22 && sim.dashCooldown <= 0;
     if (closest > SAFE_RADIUS) {
       // Pickups (reliquaries, food) first, then embers.
       const pk = nearestPickup(sim, 500);
