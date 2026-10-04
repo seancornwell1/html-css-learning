@@ -16,6 +16,10 @@ export interface Settings {
   effects: EffectsQuality;
   /** Photosensitivity notice acknowledged. */
   noticeSeen: boolean;
+  /** 0..1 volumes. */
+  volMaster: number;
+  volMusic: number;
+  volSfx: number;
 }
 
 export interface Profile {
@@ -43,7 +47,15 @@ export interface SaveData {
 export function defaultSave(): SaveData {
   return {
     version: SAVE_VERSION,
-    settings: { reduceFlashing: false, shake: 1, effects: 'high', noticeSeen: false },
+    settings: {
+      reduceFlashing: false,
+      shake: 1,
+      effects: 'high',
+      noticeSeen: false,
+      volMaster: 0.8,
+      volMusic: 0.6,
+      volSfx: 0.8,
+    },
     profile: defaultProfile(),
   };
 }
@@ -90,9 +102,13 @@ export function migrate(raw: unknown): SaveData {
     version: SAVE_VERSION,
     settings: {
       reduceFlashing: s.reduceFlashing === true,
-      shake: typeof s.shake === 'number' ? Math.min(1, Math.max(0, s.shake)) : 1,
+      shake: unit(s.shake, 1),
       effects,
       noticeSeen: s.noticeSeen === true,
+      // Volumes arrived within v3; absent fields take their defaults.
+      volMaster: unit(s.volMaster, 0.8),
+      volMusic: unit(s.volMusic, 0.6),
+      volSfx: unit(s.volSfx, 0.8),
     },
     profile: sanitizeProfile(pr),
   };
@@ -115,6 +131,8 @@ export function writeSave(data: SaveData): void {
   }
 }
 
+const unit = (v: unknown, fallback: number): number =>
+  typeof v === 'number' && Number.isFinite(v) ? Math.min(1, Math.max(0, v)) : fallback;
 const strings = (v: unknown): string[] =>
   Array.isArray(v) ? v.filter((x): x is string => typeof x === 'string') : [];
 const num = (v: unknown, fallback = 0): number =>

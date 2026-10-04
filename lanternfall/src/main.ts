@@ -2,6 +2,7 @@ import { FixedStepLoop } from './core/loop';
 import { Controller } from './input/controller';
 import { KeyboardInput } from './input/keyboard';
 import { TouchStick } from './input/touch';
+import { AudioDirector } from './audio/director';
 import { loadSave, writeSave, type Settings } from './meta/save';
 import { Display } from './render/display';
 import { Renderer } from './render/renderer';
@@ -51,7 +52,14 @@ const inventory = new Inventory(el('inventory'));
 const banner = new Banner(el('banner'), el('banner-title'), el('banner-detail'));
 renderer.onBanner = (title, detail) => banner.show(title, detail);
 
+const audio = new AudioDirector();
+// Browsers only allow audio after a gesture; any press/tap/key unlocks it.
+for (const ev of ['pointerdown', 'keydown'] as const) {
+  window.addEventListener(ev, () => audio.unlock(), { capture: true });
+}
+
 function applySettings(s: Settings): void {
+  audio.setVolumes(s.volMaster, s.volMusic, s.volSfx);
   renderer.reduceFlashing = s.reduceFlashing;
   renderer.shake.scale = s.shake;
   if (s.effects !== display.quality) {
@@ -120,7 +128,10 @@ const loop = new FixedStepLoop({
     if (dashHeld) intent.action = true;
     sim.step(intent);
     const now = performance.now();
-    sim.events.drain((e) => renderer.onEvent(e, now));
+    sim.events.drain((e) => {
+      renderer.onEvent(e, now);
+      audio.onEvent(e);
+    });
     if (sim.choices && !levelUp.open) {
       stick.release();
       levelUp.show(sim.choices, sim.level);
@@ -136,6 +147,8 @@ const loop = new FixedStepLoop({
     // Multiple level-ups in a row: show the next set as soon as one is picked.
     if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level);
     stick.enabled = !levelUp.open && !paused && !blocked && !select.isOpen;
+    audio.menu = select.isOpen || blocked;
+    audio.update(sim);
     updateBossBar();
     dashBtn.hidden = sim.characterDef.innate !== 'flutter' || select.isOpen;
     dashBtn.classList.toggle('cooling', sim.dashCooldown > 0);
@@ -231,6 +244,7 @@ for (const ev of ['pointerup', 'pointercancel', 'pointerleave'] as const) {
   dashBtn.addEventListener(ev, () => (dashHeld = false));
 }
 document.addEventListener('visibilitychange', () => {
+  audio.engine.suspend(document.hidden);
   if (document.hidden) {
     setPaused(true);
     loop.stop();

@@ -5,6 +5,19 @@ export function bindSettings(settings: Settings, onChange: (s: Settings) => void
   const flash = document.getElementById('set-reduce-flash') as HTMLInputElement;
   const shake = document.getElementById('set-shake') as HTMLInputElement;
   const effects = document.getElementById('set-effects') as HTMLSelectElement;
+  const vols = [
+    ['set-vol-master', 'volMaster'],
+    ['set-vol-music', 'volMusic'],
+    ['set-vol-sfx', 'volSfx'],
+  ] as const;
+  for (const [id, key] of vols) {
+    const input = document.getElementById(id) as HTMLInputElement;
+    input.value = String(Math.round(settings[key] * 100));
+    input.addEventListener('input', () => {
+      settings[key] = Number(input.value) / 100;
+      onChange(settings);
+    });
+  }
   const sync = (): void => {
     flash.checked = settings.reduceFlashing;
     shake.value = String(Math.round(settings.shake * 100));
