@@ -26,6 +26,8 @@ export interface RunResult extends RunJob {
   evolutions: string[];
   /** Seconds to the first evolution, or -1. */
   firstEvolution: number;
+  /** What dealt the killing blow (deaths only). */
+  killer: string;
   hash: number;
   wallMs: number;
   error?: string;
@@ -37,7 +39,7 @@ const FIVE_MINUTES = 300 * TICK_RATE;
 
 export function runOne(job: RunJob): RunResult {
   const start = process.hrtime.bigint();
-  const sim = new Sim({ seed: job.seed, events: false });
+  const sim = new Sim({ seed: job.seed, character: job.character, events: false });
   const bot = createBot(job.bot, job.seed);
   const intent: Intent = { moveX: 0, moveY: 0, action: false };
   let levelAt5 = 0;
@@ -84,6 +86,7 @@ function finish(
     minHp,
     evolutions: sim.evolutions.map((e) => e.weapon),
     firstEvolution: sim.evolutions[0]?.time ?? -1,
+    killer: sim.status === 'dead' ? sim.lastHurtBy || '?' : '',
     hash: sim.hash(),
     wallMs: Number(process.hrtime.bigint() - start) / 1e6,
   };

@@ -5,7 +5,7 @@ import { createBot, isBotName } from './bots/index';
 const botName = process.argv[2] ?? 'average';
 const seed = Number(process.argv[3] ?? 1);
 if (!isBotName(botName)) throw new Error(`unknown bot ${botName}`);
-const sim = new Sim({ seed, events: false });
+const sim = new Sim({ seed, events: false, character: process.argv[4] ?? 'akari' });
 const bot = createBot(botName, seed);
 const intent = { moveX: 0, moveY: 0, action: false };
 let dist = 0;

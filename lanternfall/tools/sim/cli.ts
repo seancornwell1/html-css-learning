@@ -6,6 +6,7 @@ import { parseArgs } from 'node:util';
 import { Worker } from 'node:worker_threads';
 import { build } from 'esbuild';
 import { BOT_NAMES, isBotName, type BotName } from './bots/index';
+import { CHARACTERS as CHARACTER_DEFS } from '../../src/data/characters';
 import { WEAPONS } from '../../src/data/weapons';
 import { BANDS, MAX_WEAPON_SHARE } from './bands';
 import {
@@ -20,8 +21,9 @@ import {
 } from './report';
 import { runOne, type RunJob, type RunResult } from './run';
 
-/** Playable characters arrive in M5; until then everything runs as Akari. */
-const CHARACTERS = ['akari'] as const;
+/** Characters simulated by default: everyone not hidden behind a secret. */
+const CHARACTERS = CHARACTER_DEFS.filter((c) => !c.secret).map((c) => c.id);
+const ALL_CHARACTERS = CHARACTER_DEFS.map((c) => c.id);
 const MIN_SPEED = 30;
 const DETERMINISM_SAMPLES = 10;
 
@@ -40,6 +42,7 @@ const { values } = parseArgs({
     note: { type: 'string', multiple: true },
     gate: { type: 'string', multiple: true },
     rescore: { type: 'string' },
+    fast: { type: 'boolean', default: false },
   },
 });
 
@@ -50,8 +53,8 @@ const bots = (values.bot ? values.bot.split(',') : [...BOT_NAMES]).map((b) => {
 });
 const characters = values.char ? values.char.split(',') : [...CHARACTERS];
 for (const c of characters) {
-  if (!(CHARACTERS as readonly string[]).includes(c)) {
-    throw new Error(`unknown character "${c}" (have: ${CHARACTERS.join(', ')})`);
+  if (!ALL_CHARACTERS.includes(c)) {
+    throw new Error(`unknown character "${c}" (have: ${ALL_CHARACTERS.join(', ')})`);
   }
 }
 const workerCount = Math.max(1, Number(values.workers ?? availableParallelism()));
@@ -197,7 +200,8 @@ async function main(): Promise<void> {
 
   // Re-run a sample in this thread, from source via tsx rather than the
   // bundle, and compare hashes: catches nondeterminism and transform bugs.
-  const sample = runs.filter((r) => r.seed <= DETERMINISM_SAMPLES);
+  // --fast (searches) skips the re-check.
+  const sample = values.fast ? [] : runs.filter((r) => r.seed <= DETERMINISM_SAMPLES);
   const mismatched = sample.filter((r) => runOne(r).hash !== r.hash);
   checks.push({
     name: 'Determinism (same seed ⇒ same hash)',

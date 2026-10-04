@@ -337,8 +337,11 @@ function fireOrbit(sim: Sim, def: WeaponDef, w: OwnedWeapon, s: WeaponStats): bo
     const slot = pr.slots[i] as number;
     if (pr.weapon[slot] === w.weapon && pr.mode[slot] === MODE.orbit) pr.remove(slot);
   }
+  // Parasols scale with their own levels; Amount from passives counts half.
   const count =
-    def.behaviour === 'parasol' ? 1 + Math.floor(sim.stats.amount / 2) : amountOf(sim, s);
+    def.behaviour === 'parasol'
+      ? Math.round(s.amount) + Math.floor(sim.stats.amount / 2)
+      : amountOf(sim, s);
   for (let i = 0; i < count; i++) {
     const slot = spawnShot(sim, w, s, MODE.orbit, 0, 0);
     if (slot < 0) break;

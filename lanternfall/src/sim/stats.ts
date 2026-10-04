@@ -49,5 +49,7 @@ export function baseStats(maxHp: number): PlayerStats {
   };
 }
 
-/** Minimum contact damage after armor. */
+/** Minimum damage after armor. */
 export const MIN_DAMAGE = 1;
+/** Armor can never remove more than this share of a hit (GAME_DESIGN §3.2). */
+export const ARMOR_CAP = 0.6;

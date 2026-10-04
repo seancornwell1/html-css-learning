@@ -259,3 +259,230 @@ export function parasol(ctx: Ctx): void {
   ctx.arc(0, 0, 2, 0, Math.PI * 2);
   ctx.fill();
 }
+
+// ---- M5 roster ---------------------------------------------------------------
+
+/** Drowned: bloated, hunched, dripping. Frames sway. */
+export function drowned(ctx: Ctx, frame: number, fill: string): void {
+  const sway = frame === 0 ? 0 : 1.5;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(3 + sway, -12, 6.5, 6, 0.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(-10, -6);
+  ctx.quadraticCurveTo(4 + sway, -14, 14 + sway, -4);
+  ctx.quadraticCurveTo(18, 10, 10, 16);
+  ctx.lineTo(-12, 16);
+  ctx.quadraticCurveTo(-18, 4, -10, -6);
+  ctx.closePath();
+  ctx.fill();
+  // Drips.
+  for (const [x, len] of [
+    [-8, 5],
+    [0, 7],
+    [8, 4],
+  ] as const) {
+    ctx.fillRect(x - 0.8, 16, 1.6, len + sway);
+  }
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.arc(6 + sway, -13, 1.4, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Carrion crow, flying toward +x. Frames flap. */
+export function crow(ctx: Ctx, frame: number, fill: string): void {
+  const up = frame === 0 ? -1 : 0.4;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 8, 3.4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(8, -1);
+  ctx.lineTo(13, 0);
+  ctx.lineTo(8, 1.5);
+  ctx.closePath();
+  ctx.fill();
+  for (const side of [-1, 1]) {
+    ctx.beginPath();
+    ctx.moveTo(2, 0);
+    ctx.quadraticCurveTo(-2, side * 10 * (up < 0 ? 1.1 : 0.6), -8, side * 12 * (up < 0 ? 1 : 0.5));
+    ctx.lineTo(-4, side * 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+  ctx.beginPath();
+  ctx.moveTo(-7, -2);
+  ctx.lineTo(-13, 0);
+  ctx.lineTo(-7, 2);
+  ctx.closePath();
+  ctx.fill();
+}
+
+/** Long-Neck: a robed woman whose neck coils (windup) and strikes (lunge). */
+export function longNeck(ctx: Ctx, pose: number, fill: string): void {
+  ctx.fillStyle = fill;
+  // Robe.
+  ctx.beginPath();
+  ctx.moveTo(-5, -6);
+  ctx.quadraticCurveTo(0, -9, 5, -6);
+  ctx.lineTo(9, 16);
+  ctx.lineTo(-9, 16);
+  ctx.closePath();
+  ctx.fill();
+  // Neck path and head position per pose: walk, windup (coiled back), lunge (thrown forward).
+  const head = pose === 2 ? { x: 30, y: -14 } : pose === 1 ? { x: -10, y: -26 } : { x: 3, y: -22 };
+  ctx.strokeStyle = fill;
+  ctx.lineWidth = 2.6;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(0, -7);
+  if (pose === 1) ctx.bezierCurveTo(10, -14, -16, -18, head.x, head.y);
+  else ctx.quadraticCurveTo(head.x * 0.4, head.y * 0.9, head.x, head.y);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.ellipse(head.x, head.y, 5, 6, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Hair.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.ellipse(head.x - 1, head.y - 1, 4.2, 5, 0, Math.PI * 0.9, Math.PI * 2.1);
+  ctx.fill();
+}
+
+/** Lantern Mouth: a paper lantern with a jagged mouth (open while spitting). */
+export function lanternMouth(ctx: Ctx, frame: number, fill: string): void {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 11, 14, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-6, -17, 12, 3);
+  ctx.fillRect(-6, 14, 12, 3);
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  for (const y of [-8, 8]) {
+    ctx.moveTo(-10, y);
+    ctx.lineTo(10, y);
+  }
+  ctx.stroke();
+  // Mouth.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  const open = frame === 1 ? 5 : 1.5;
+  ctx.moveTo(-7, 2);
+  for (let i = 0; i <= 6; i++) ctx.lineTo(-7 + (i * 14) / 6, 2 + (i % 2 === 0 ? 0 : 2));
+  ctx.lineTo(7, 2 + open);
+  for (let i = 6; i >= 0; i--) ctx.lineTo(-7 + (i * 14) / 6, 2 + open - (i % 2 === 0 ? 0 : 2));
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-4, -4, 1.6, 0, Math.PI * 2);
+  ctx.arc(4, -4, 1.6, 0, Math.PI * 2);
+  ctx.fill();
+}
+
+/** Bone Colossus: a towering skeleton; frame 1 raises its arms to slam. */
+export function colossus(ctx: Ctx, frame: number, fill: string): void {
+  ctx.fillStyle = fill;
+  // Skull.
+  ctx.beginPath();
+  ctx.ellipse(0, -34, 13, 12, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.ellipse(-5, -35, 3.5, 4, 0, 0, Math.PI * 2);
+  ctx.ellipse(5, -35, 3.5, 4, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fill;
+  // Ribcage.
+  ctx.fillRect(-2, -24, 4, 34);
+  for (let i = 0; i < 5; i++) {
+    const y = -20 + i * 6;
+    ctx.beginPath();
+    ctx.ellipse(0, y, 16 - i, 2, 0, Math.PI, 0);
+    ctx.lineWidth = 2.4;
+    ctx.strokeStyle = fill;
+    ctx.stroke();
+  }
+  // Pelvis and legs.
+  ctx.fillRect(-12, 10, 24, 5);
+  ctx.fillRect(-11, 15, 4, 24);
+  ctx.fillRect(7, 15, 4, 24);
+  // Arms: down (walk) or up (slam windup).
+  ctx.lineWidth = 4;
+  ctx.lineCap = 'round';
+  ctx.beginPath();
+  if (frame === 1) {
+    ctx.moveTo(-16, -22);
+    ctx.lineTo(-26, -50);
+    ctx.moveTo(16, -22);
+    ctx.lineTo(26, -50);
+  } else {
+    ctx.moveTo(-16, -22);
+    ctx.lineTo(-24, 6);
+    ctx.moveTo(16, -22);
+    ctx.lineTo(24, 6);
+  }
+  ctx.stroke();
+}
+
+/** Mother of Lanterns: a towering veiled woman crowned with dark lanterns. */
+export function mother(ctx: Ctx, frame: number, fill: string): void {
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(0, -40);
+  ctx.quadraticCurveTo(20, -36, 22, -10);
+  ctx.quadraticCurveTo(30, 20, 34, 40);
+  ctx.lineTo(-34, 40);
+  ctx.quadraticCurveTo(-30, 20, -22, -10);
+  ctx.quadraticCurveTo(-20, -36, 0, -40);
+  ctx.closePath();
+  ctx.fill();
+  // Face: a hollow oval.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.ellipse(0, -22, 7, 10, 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Unlit lanterns (ink) hanging around her.
+  const lift = frame === 1 ? -4 : 0;
+  for (const [x, y] of [
+    [-30, -30],
+    [30, -30],
+    [-38, -4],
+    [38, -4],
+  ] as const) {
+    ctx.fillStyle = fill;
+    ctx.fillRect(x - 0.6, y - 12 + lift, 1.2, 8);
+    ctx.beginPath();
+    ctx.ellipse(x, y + lift, 5, 6.5, 0, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = PALETTE.ink;
+    ctx.fillRect(x - 4, y - 1 + lift, 8, 1);
+  }
+}
+
+/** The Lantern-Eater: a shadow-maw. Bone outline around ink. */
+export function lanternEater(ctx: Ctx, frame: number, fill: string): void {
+  const gape = frame === 0 ? 6 : 12;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 24, 22, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 20, 18, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.moveTo(-14, 2);
+  for (let i = 0; i <= 8; i++) ctx.lineTo(-14 + (i * 28) / 8, 2 + (i % 2 === 0 ? 0 : gape));
+  ctx.lineTo(14, 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.beginPath();
+  ctx.arc(-7, -7, 2.4, 0, Math.PI * 2);
+  ctx.arc(7, -7, 2.4, 0, Math.PI * 2);
+  ctx.fill();
+}

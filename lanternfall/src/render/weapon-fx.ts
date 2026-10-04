@@ -121,6 +121,7 @@ export class WeaponFx {
         });
         break;
       case 'nova':
+      case 'slam':
         this.items.push({ kind: 'ring', x: e.x, y: e.y, radius: e.radius, age: 0, life: 0.35 });
         break;
       case 'beam':

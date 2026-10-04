@@ -417,3 +417,136 @@ body {
     }
   }
 }
+
+/* Character select */
+#select-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  width: min(100%, 860px);
+}
+
+.char-card {
+  min-height: 64px;
+  display: grid;
+  gap: 4px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--bone);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.char-card.focused {
+  border-color: var(--bone);
+}
+
+.char-card.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.char-name {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+}
+
+.char-title,
+.char-start {
+  color: var(--ash);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.char-innate {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.char-innate strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+@media (orientation: portrait) {
+  #select-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn.secondary {
+  border-color: var(--ash);
+  color: var(--bone);
+}
+
+/* Boss bar */
+#boss-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 8px);
+  transform: translateX(-50%);
+  width: min(80vw, 520px);
+  text-align: center;
+  pointer-events: none;
+}
+
+#boss-bar[hidden] {
+  display: none;
+}
+
+#boss-name {
+  margin: 0 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+#boss-track {
+  height: 6px;
+  border: 1px solid var(--bone);
+}
+
+#boss-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--bone);
+}
+
+/* Touch dash button (Hotaru) */
+#dash-btn {
+  position: fixed;
+  right: calc(var(--safe-right) + 8px);
+  bottom: calc(var(--safe-bottom) + 40px);
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: rgb(7 7 10 / 0.5);
+  color: var(--gold);
+  font:
+    600 13px system-ui,
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+#dash-btn[hidden] {
+  display: none;
+}
+
+#dash-btn.cooling {
+  border-color: var(--ash);
+  color: var(--ash);
+}

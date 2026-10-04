@@ -2,3 +2,6 @@ node_modules
 dist
 *.local
 screenshots
+# Scratch sim reports; milestone reports (M*) are committed.
+sim-reports/*
+!sim-reports/M*

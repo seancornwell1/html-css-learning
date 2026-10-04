@@ -255,6 +255,40 @@ cached to offscreen canvases, or kept as hand-authored SVG in the repo. There
 are no downloaded sprites, rips or traced references. Fonts are OFL-licensed and
 bundled with their licence file.
 
+#### 7.3.1 Art style target: modern anime × ukiyo-e
+By release, every piece of art should read as a **cross between modern anime
+and ukiyo-e woodblock prints**. The user supplied two mood references (a
+monochrome anime samurai and a colour woodblock-style swordswoman). They set
+the *style*: nothing is traced or copied from them.
+
+- **From anime:** clean faces with large dark eyes and sharp highlights, hair as
+  bold solid shapes with a few strand cuts, dynamic poses, speed lines, impact
+  frames.
+- **From ukiyo-e:** confident **variable-width ink outlines** (brush taper:
+  thick on the shadow side, thin on the light side), **flat fills** with no
+  soft shading, **pattern fills** on cloth (asanoha, seigaiha, kikkō,
+  sakura, scattered maple), **bokashi** gradient bands in the sky, stylised
+  clouds, waves and ripples, cartouches with vertical text, and a
+  hanko-style seal on title and results screens.
+- **Print feel in post-FX:** washi paper grain and fibres, slight plate
+  misregistration (a 1–2 px offset on the gold plate), ink pooling at line
+  ends. These replace generic film grain at `high` quality.
+- **Gameplay sprites stay readable first.** At play size, enemies and the
+  player keep the bone-on-ink silhouette rule, and get an ink outline plus
+  one pattern fill on the largest cloth area. Detailed linework goes where
+  the screen gives it room: character portraits (select, results), bosses,
+  Reliquary and evolution cut-ins, and the title screen.
+- **Palette.** Gameplay keeps `ink`/`bone`/`gold` and the gold rule. Two
+  *print tones* are added for illustration and UI ornament only, never for
+  gameplay entities: `ai` (deep indigo, for bokashi skies, pattern grounds
+  and portrait backdrops) and `shu` (vermilion, for seals, cartouche borders
+  and blood spatter in illustrations). `shu` never marks player damage
+  (inversion still does).
+- **Production.** All art stays code-drawn (Canvas paths baked by
+  `SpriteCache`) or hand-authored SVG in the repo. Portraits are large SVG
+  illustrations built from path data, written by hand. The art pass happens
+  in M9.
+
 ### 7.4 Screen effects ("heavy, but switchable")
 - **WebGL2 post-FX pass** (`src/render/postfx.ts`): bloom on gold only (a
   warm, bright, saturated mask at quarter resolution), manga **screentone**
@@ -447,7 +481,7 @@ kept in one table so localisation can be added later).
 | **M6** | Power-ups | Stone lanterns, Lantern Burst, Spirit Call, Frenzy, Onigiri, coins | Bands still hold; power-up pickup rate reported |
 | **M7** | Audio | SFX synth + data table, 6 procedural tracks, intensity layers, mixer settings | Bands unchanged (audio is presentation only) |
 | **M8** | Meta & secrets | Versioned save, Shrine shop, unlock flow, Kagerou + Ido, Lantern Register, union discovery | Bands for 6 characters; skilled + max meta at 80–90% |
-| **M9** | UI & mobile polish | Title, pause, settings, results, safe areas, orientation handling, dynamic resolution, perf pass on a real phone | Bands unchanged; perf budget measured |
+| **M9** | Art pass, UI & mobile polish | Anime × ukiyo-e art pass (§7.3.1): outlined, pattern-filled sprites, character portraits, boss illustrations, washi/misregistration post-FX, title with seal. Title, pause, settings, results, safe areas, orientation handling, dynamic resolution, perf pass on a real phone | Bands unchanged; perf budget measured |
 | **M10** | Balance & release | Full sim (200 seeds × bots × characters), tuning, human playtest calibration, production build, Pages deploy | All bands green; no flagged weapons |
 
 Each milestone ends with: tests green → `npm run sim` → report committed to

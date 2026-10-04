@@ -7,7 +7,7 @@
 import { existsSync, mkdirSync } from 'node:fs';
 import { chromium } from 'playwright';
 
-const url = process.argv[2] ?? 'http://localhost:4173/?seed=1&notice=skip';
+const url = process.argv[2] ?? 'http://localhost:4173/?seed=1&notice=skip&char=akari';
 const outDir = process.argv[3] ?? 'screenshots';
 const preinstalled = '/opt/pw-browsers/chromium';
 
@@ -76,9 +76,12 @@ const extra = await browser.newPage({
 });
 extra.on('pageerror', (e) => errors.push(`extra: ${e.message}`));
 extra.on('console', (m) => m.type() === 'error' && errors.push(`extra: ${m.text()}`));
-await extra.goto(url.replace(/[?&]notice=skip/, ''));
+await extra.goto(url.replace(/[?&]notice=skip/, '').replace(/[?&]char=\w+/, ''));
 await extra.waitForSelector('#notice:not([hidden])', { timeout: 5000 });
 await extra.screenshot({ path: `${outDir}/notice.png` });
+await extra.click('#notice-ok');
+await extra.waitForSelector('#select:not([hidden])', { timeout: 5000 });
+await extra.screenshot({ path: `${outDir}/select.png` });
 await extra.goto(`${url}&fx=off`);
 await extra.keyboard.down('KeyD');
 await extra.waitForTimeout(3000);

@@ -1,5 +1,14 @@
 import {
+  EXORCISM,
+  FLUTTER,
+  GRAVE_HUNGER,
+  LANTERNLIGHT,
+  characterDef,
+  type CharacterDef,
+} from '../data/characters';
+import {
   ENEMIES,
+  ENEMY_KIND,
   HOP,
   MAX_ENEMY_RADIUS,
   enemyDamageScale,
@@ -9,9 +18,8 @@ import {
 import { PASSIVES } from '../data/passives';
 import { PLAYER_BASE } from '../data/player';
 import { xpToNext } from '../data/progression';
-import { WEAPONS, WEAPON_ID, weaponIndex } from '../data/weapons';
+import { WEAPONS, weaponIndex } from '../data/weapons';
 import {
-  DESPAWN_RADIUS,
   DT,
   MAX_EMBERS,
   MAX_ENEMIES,
@@ -20,6 +28,9 @@ import {
   SPAWN_RADIUS,
   TICK_RATE,
 } from './constants';
+import { moveEnemies, updateEnemyShots, updateHazards } from './enemy-ai';
+import { EnemyShotPool } from './enemy-shot-pool';
+import { HazardPool } from './hazard-pool';
 import { runDirector, type DirectorState } from './director';
 import { EmberPool } from './ember-pool';
 import { EnemyPool } from './enemy-pool';
@@ -30,7 +41,7 @@ import { PICKUP, PickupPool, type PickupKind } from './pickup-pool';
 import { ProjectilePool } from './projectile-pool';
 import { Rng } from './rng';
 import { SpatialHash } from './spatial-hash';
-import { MIN_DAMAGE, baseStats, type PlayerStats } from './stats';
+import { ARMOR_CAP, MIN_DAMAGE, baseStats, type PlayerStats } from './stats';
 import {
   evolutionReady,
   legalOptions,
@@ -80,12 +91,8 @@ export interface Turret {
   pierce: number;
 }
 
-/** Knockback velocity kept per tick (exponential decay). */
-const KNOCKBACK_DECAY = 0.86;
-/** Separation looks at most this many grid candidates per enemy (dense blobs). */
-const SEPARATION_CANDIDATES = 24;
-/** How hard overlapping enemies push apart (fraction of overlap per tick). */
-const SEPARATION = 0.35;
+/** The Lantern-Eater arrives this long into the Long Night. */
+const LONG_NIGHT_REAPER = 30;
 const PICKUP_RADIUS = 16;
 const RELIQUARY_HEAL = 30;
 const ONIGIRI_HEAL = 30;
@@ -112,6 +119,22 @@ export class Sim {
   readonly zones = new ZonePool(256);
   readonly pickups = new PickupPool(64);
   readonly turrets: Turret[] = [];
+  readonly enemyShots = new EnemyShotPool(512);
+  readonly hazards = new HazardPool(128);
+  /** Fraction of move speed lost to puddles this tick (set by hazards). */
+  playerSlow = 0;
+  readonly characterDef: CharacterDef;
+  /** Hotaru's dash: cooldown left, time left, direction. */
+  dashCooldown = 0;
+  dashTime = 0;
+  private dashX = 0;
+  private dashY = 0;
+  private killsSinceHeal = 0;
+  /** After Dawn, the player chose to keep going (GAME_DESIGN §3.1). */
+  longNight = false;
+  private reaperSpawned = false;
+  /** The Mother of Lanterns was slain before Dawn. */
+  motherSlain = false;
   /** Enemy positions, rebuilt every tick. Bots may query it (read-only). */
   readonly enemyGrid = new SpatialHash(MAX_ENEMIES);
   readonly events: EventQueue;
@@ -133,7 +156,6 @@ export class Sim {
 
   /** Shared scratch buffer for grid queries (never held across calls). */
   readonly scratch = new Int32Array(MAX_ENEMIES);
-  private readonly separationScratch = new Int32Array(SEPARATION_CANDIDATES);
 
   readonly spawnRng: Rng;
   private readonly upgradeRng: Rng;
@@ -144,6 +166,7 @@ export class Sim {
   constructor(config: SimConfig) {
     this.seed = config.seed;
     this.character = config.character ?? 'akari';
+    this.characterDef = characterDef(this.character);
     this.events = new EventQueue(config.events ?? true);
     const root = new Rng(config.seed);
     this.spawnRng = root.fork();
@@ -161,7 +184,7 @@ export class Sim {
       vx: 0,
       vy: 0,
     };
-    this.addWeapon(WEAPON_ID.lantern_flail);
+    this.addWeapon(weaponIndex(this.characterDef.startWeapon));
     this.recomputeStats();
     this.player.hp = this.stats.maxHp;
   }
@@ -191,24 +214,40 @@ export class Sim {
   step(intent: Intent): void {
     if (this.status !== 'running' || this.choices) return;
     this.tick++;
+    // Regen first: healing after damage would let a lethal hit be undone by
+    // a few hundredths of HP before the death check.
+    if (this.stats.regen > 0 && this.player.hp > 0) this.heal(this.stats.regen * DT);
     this.movePlayer(intent);
     runDirector(this, this.director);
-    this.moveEnemies();
+    moveEnemies(this);
     this.enemyGrid.build(this.enemies.slots, this.enemies.count, this.enemies.x, this.enemies.y);
     updateWeapons(this);
     updateProjectiles(this);
     updateZones(this);
+    updateEnemyShots(this);
+    updateHazards(this);
     this.resolveContacts();
     this.updateEmbers();
     this.updatePickups();
-    if (this.stats.regen > 0) this.heal(this.stats.regen * DT);
 
     if (this.player.hp <= 0 && !this.tryRevive()) {
       this.status = 'dead';
       this.events.push({ type: 'player_died', time: this.time });
-    } else if (this.time >= RUN_SECONDS) {
+    } else if (!this.longNight && (this.time >= RUN_SECONDS || this.motherSlain)) {
       this.status = 'won';
       this.events.push({ type: 'victory', time: this.time });
+    }
+    if (this.longNight && !this.reaperSpawned && this.time >= RUN_SECONDS + LONG_NIGHT_REAPER) {
+      this.reaperSpawned = true;
+      const a = this.spawnRng.range(0, Math.PI * 2);
+      const p = this.player;
+      this.spawnEnemy(
+        ENEMY_KIND.lantern_eater,
+        p.x + Math.cos(a) * SPAWN_RADIUS,
+        p.y + Math.sin(a) * SPAWN_RADIUS,
+        true,
+      );
+      this.events.push({ type: 'boss', kind: ENEMY_KIND.lantern_eater });
     }
     if (this.status === 'running' && this.pendingLevels > 0 && !this.choices) {
       this.choices = rollChoices(this.loadout, this.upgradeRng, this.stats.luck);
@@ -225,6 +264,46 @@ export class Sim {
     this.pendingLevels--;
     this.choices =
       this.pendingLevels > 0 ? rollChoices(this.loadout, this.upgradeRng, this.stats.luck) : null;
+  }
+
+  /** After Dawn: keep playing into the Long Night (the Lantern-Eater comes). */
+  continueLongNight(): void {
+    if (this.status !== 'won') return;
+    this.status = 'running';
+    this.longNight = true;
+    this.events.push({ type: 'long_night' });
+  }
+
+  /** Bosses alive (the director eases off while one lives). */
+  get bossesAlive(): number {
+    const e = this.enemies;
+    let n = 0;
+    for (let i = 0; i < e.count; i++) {
+      const def = ENEMIES[e.kind[e.slots[i] as number] as number];
+      if (def?.boss && !def.invulnerable) n++;
+    }
+    return n;
+  }
+
+  spawnEnemyShot(
+    x: number,
+    y: number,
+    angle: number,
+    speed: number,
+    radius: number,
+    damage: number,
+    life: number,
+  ): void {
+    const dmg = damage * enemyDamageScale(this.minutes);
+    this.enemyShots.spawn(
+      x,
+      y,
+      Math.cos(angle) * speed,
+      Math.sin(angle) * speed,
+      radius,
+      dmg,
+      life,
+    );
   }
 
   heal(amount: number): void {
@@ -257,7 +336,8 @@ export class Sim {
   ): boolean {
     const e = this.enemies;
     const def = ENEMIES[e.kind[slot] as number];
-    if (!def) return false;
+    if (!def || def.invulnerable) return false;
+    damage *= this.innateDamage(slot, def.elite === true || def.boss === true);
     const dealt = Math.min(damage, e.hp[slot] as number);
     this.damageByWeapon[weapon] = (this.damageByWeapon[weapon] ?? 0) + dealt;
     e.hp[slot] = (e.hp[slot] as number) - damage;
@@ -275,6 +355,15 @@ export class Sim {
     if ((e.hp[slot] as number) > 0) return false;
 
     this.kills++;
+    if (
+      this.characterDef.innate === 'grave_hunger' &&
+      ++this.killsSinceHeal >= GRAVE_HUNGER.killsPerHp
+    ) {
+      this.killsSinceHeal = 0;
+      this.heal(1);
+    }
+    if (def.id === 'mother_of_lanterns' && !this.longNight) this.motherSlain = true;
+    if (def.boss) this.events.push({ type: 'boss_slain', kind: e.kind[slot] as number });
     this.embers.drop(
       x,
       y,
@@ -293,6 +382,25 @@ export class Sim {
     return true;
   }
 
+  /** Character damage multipliers (Lanternlight, Exorcism). */
+  private innateDamage(slot: number, eliteOrBoss: boolean): number {
+    const innate = this.characterDef.innate;
+    if (innate === 'lanternlight') {
+      const r =
+        LANTERNLIGHT.radius * (1 + LANTERNLIGHT.growthPer10Levels * Math.floor(this.level / 10));
+      const dx = (this.enemies.x[slot] as number) - this.player.x;
+      const dy = (this.enemies.y[slot] as number) - this.player.y;
+      return dx * dx + dy * dy <= r * r ? LANTERNLIGHT.damage : 1;
+    }
+    if (innate === 'exorcism' && eliteOrBoss) return EXORCISM.damage;
+    return 1;
+  }
+
+  /** Light radius of Lanternlight (renderer reads it too). */
+  get lightRadius(): number {
+    return LANTERNLIGHT.radius * (1 + LANTERNLIGHT.growthPer10Levels * Math.floor(this.level / 10));
+  }
+
   /** Spawn one enemy; `force` makes room by recycling the furthest normal enemy. */
   spawnEnemy(kind: number, x: number, y: number, force = false): number {
     const def = ENEMIES[kind];
@@ -304,7 +412,7 @@ export class Sim {
       kind,
       x,
       y,
-      def.hp * enemyHpScale(m) * curse,
+      def.hp * (def.boss ? 1 : enemyHpScale(m)) * curse,
       def.contactDamage * enemyDamageScale(m),
     );
     if (slot >= 0) {
@@ -361,6 +469,19 @@ export class Sim {
       h.num(em.x[s] as number)
         .num(em.y[s] as number)
         .num(em.value[s] as number);
+    }
+    h.num(this.dashCooldown).num(this.dashTime).num(this.playerSlow);
+    const sh = this.enemyShots;
+    h.u32v(sh.count);
+    for (let i = 0; i < sh.count; i++) {
+      const k = sh.slots[i] as number;
+      h.num(sh.x[k] as number).num(sh.y[k] as number);
+    }
+    const hz = this.hazards;
+    h.u32v(hz.count);
+    for (let i = 0; i < hz.count; i++) {
+      const k = hz.slots[i] as number;
+      h.num(hz.x[k] as number).num(hz.delay[k] as number);
     }
     const pk = this.pickups;
     h.u32v(pk.count);
@@ -429,6 +550,9 @@ export class Sim {
   recomputeStats(): void {
     const before = this.stats.maxHp;
     const s = baseStats(PLAYER_BASE.maxHp);
+    for (const [k, v] of Object.entries(this.characterDef.mods) as [keyof PlayerStats, number][]) {
+      s[k] += v;
+    }
     for (const owned of this.passives) {
       const def = PASSIVES[owned.passive];
       if (!def) continue;
@@ -542,8 +666,30 @@ export class Sim {
       mx /= len;
       my /= len;
     }
-    p.vx = mx * this.moveSpeed;
-    p.vy = my * this.moveSpeed;
+    const speed = this.moveSpeed * (1 - this.playerSlow);
+    p.vx = mx * speed;
+    p.vy = my * speed;
+    if (this.dashCooldown > 0) this.dashCooldown -= DT;
+    if (
+      intent.action &&
+      this.characterDef.innate === 'flutter' &&
+      this.dashCooldown <= 0 &&
+      this.dashTime <= 0
+    ) {
+      // Dash where you're steering, else where you face.
+      this.dashX = len > 0.001 ? mx / Math.max(len2(mx, my), 1e-9) : p.faceX;
+      this.dashY = len > 0.001 ? my / Math.max(len2(mx, my), 1e-9) : p.faceY;
+      this.dashTime = FLUTTER.time;
+      this.dashCooldown = FLUTTER.cooldown;
+      p.iframes = Math.max(p.iframes, FLUTTER.iframes);
+      this.events.push({ type: 'dash', x: p.x, y: p.y });
+    }
+    if (this.dashTime > 0) {
+      this.dashTime -= DT;
+      const dashSpeed = FLUTTER.distance / FLUTTER.time;
+      p.vx = this.dashX * dashSpeed;
+      p.vy = this.dashY * dashSpeed;
+    }
     p.x += p.vx * DT;
     p.y += p.vy * DT;
     if (p.iframes > 0) p.iframes = Math.max(0, p.iframes - DT);
@@ -566,97 +712,6 @@ export class Sim {
     if (worst >= 0) e.remove(worst);
   }
 
-  private moveEnemies(): void {
-    const e = this.enemies;
-    const p = this.player;
-    const hopCycle = HOP.crouch + HOP.air + HOP.rest;
-    // Separation uses last tick's grid (positions one tick stale; fine).
-    this.enemyGrid.build(e.slots, e.count, e.x, e.y);
-    for (let i = 0; i < e.count; i++) {
-      const s = e.slots[i] as number;
-      const def = ENEMIES[e.kind[s] as number];
-      if (!def) continue;
-      let x = e.x[s] as number;
-      let y = e.y[s] as number;
-      let dx = p.x - x;
-      let dy = p.y - y;
-      const d = len2(dx, dy);
-      if (d > DESPAWN_RADIUS) {
-        // Recycle stragglers onto the spawn ring ahead of the player.
-        const a = Math.atan2(p.faceY, p.faceX) + this.spawnRng.range(-1, 1);
-        e.x[s] = p.x + Math.cos(a) * SPAWN_RADIUS;
-        e.y[s] = p.y + Math.sin(a) * SPAWN_RADIUS;
-        continue;
-      }
-      // Status effects.
-      let speedMul = e.speedMul[s] as number;
-      const freeze = e.freezeT[s] as number;
-      if (freeze > 0) {
-        e.freezeT[s] = freeze - DT;
-        speedMul = 0;
-      }
-      const slowT = e.slowT[s] as number;
-      if (slowT > 0) {
-        e.slowT[s] = slowT - DT;
-        speedMul *= 1 - (e.slowAmt[s] as number);
-      }
-      // Aim where the player is going: lead grows with distance, so close
-      // enemies still home in directly.
-      const lead = def.lead * Math.min(1, d / 400);
-      dx += p.vx * lead;
-      dy += p.vy * lead;
-      const dl = len2(dx, dy);
-      const ux = dl > 0.001 ? dx / dl : 0;
-      const uy = dl > 0.001 ? dy / dl : 0;
-      const speed = def.speed * speedMul;
-      if (def.behaviour === 'hop') {
-        const before = e.timer[s] as number;
-        const t = (before + DT * (speedMul > 0 ? 1 : 0)) % hopCycle;
-        e.timer[s] = t;
-        if (before < HOP.rest && t >= HOP.rest) {
-          // Crouch starts: lock heading (the telegraph).
-          e.dirX[s] = ux;
-          e.dirY[s] = uy;
-        }
-        if (t >= HOP.rest + HOP.crouch) {
-          x += (e.dirX[s] as number) * speed * DT;
-          y += (e.dirY[s] as number) * speed * DT;
-        }
-      } else {
-        x += ux * speed * DT;
-        y += uy * speed * DT;
-      }
-      x += (e.kbx[s] as number) * DT;
-      y += (e.kby[s] as number) * DT;
-      e.kbx[s] = (e.kbx[s] as number) * KNOCKBACK_DECAY;
-      e.kby[s] = (e.kby[s] as number) * KNOCKBACK_DECAY;
-
-      // Push apart from overlapping neighbours.
-      const near = this.separationScratch;
-      const n = this.enemyGrid.query(x, y, def.radius + MAX_ENEMY_RADIUS, near);
-      let checked = 0;
-      for (let k = 0; k < n && checked < 8; k++) {
-        const o = near[k] as number;
-        if (o === s) continue;
-        const od = ENEMIES[e.kind[o] as number];
-        if (!od) continue;
-        const ox = x - (e.x[o] as number);
-        const oy = y - (e.y[o] as number);
-        const min = def.radius + od.radius;
-        const d2 = ox * ox + oy * oy;
-        if (d2 >= min * min || d2 < 1e-9) continue;
-        checked++;
-        const dd = Math.sqrt(d2);
-        // Heavier enemies (low knockback) shove lighter ones aside.
-        const push = ((min - dd) / dd) * SEPARATION * Math.min(1, def.knockback * 2);
-        x += ox * push;
-        y += oy * push;
-      }
-      e.x[s] = x;
-      e.y[s] = y;
-    }
-  }
-
   private resolveContacts(): void {
     const p = this.player;
     if (p.iframes > 0) return;
@@ -671,16 +726,20 @@ export class Sim {
       const dx = p.x - (e.x[s] as number);
       const dy = p.y - (e.y[s] as number);
       if (dx * dx + dy * dy <= r * r) {
-        this.hurtPlayer(e.damage[s] as number);
+        this.hurtPlayer(e.damage[s] as number, def.id);
         return;
       }
     }
   }
 
-  hurtPlayer(raw: number): void {
+  /** What last hurt the player: enemy id, 'shot' or 'slam' (reports only). */
+  lastHurtBy = '';
+
+  hurtPlayer(raw: number, source = ''): void {
     const p = this.player;
     if (p.iframes > 0) return;
-    const dmg = Math.max(MIN_DAMAGE, raw - this.stats.armor);
+    this.lastHurtBy = source;
+    const dmg = Math.max(MIN_DAMAGE, raw * (1 - ARMOR_CAP), raw - this.stats.armor);
     p.hp = Math.max(0, p.hp - dmg);
     p.iframes = PLAYER_BASE.iframes;
     this.events.push({ type: 'player_hit', damage: dmg, hp: p.hp });

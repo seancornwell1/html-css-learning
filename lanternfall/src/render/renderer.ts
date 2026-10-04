@@ -1,5 +1,7 @@
 import { ENEMIES, HOP } from '../data/enemies';
 import { WEAPONS } from '../data/weapons';
+import { STATE } from '../sim/enemy-ai';
+import { HAZARD } from '../sim/hazard-pool';
 import { MODE } from '../sim/projectile-pool';
 import { MAX_ENEMIES, MAX_PROJECTILES } from '../sim/constants';
 import type { SimEvent } from '../sim/events';
@@ -167,6 +169,32 @@ export class Renderer {
         this.shake.add(0.25);
         this.fx.aberration(0.5);
         break;
+      case 'boss': {
+        this.fx.impactFrame(1);
+        this.shake.add(0.7);
+        this.hitStop.trigger(160, now);
+        this.onBanner('It comes', ENEMIES[e.kind]?.name ?? '');
+        break;
+      }
+      case 'boss_slain':
+        this.fx.impactFrame(1);
+        this.shake.add(0.8);
+        this.hitStop.trigger(250, now);
+        this.onBanner('Laid to rest', ENEMIES[e.kind]?.name ?? '');
+        break;
+      case 'slam':
+        this.shake.add(0.45);
+        break;
+      case 'dash':
+        this.fx.aberration(0.35);
+        break;
+      case 'procession':
+        this.onBanner('The Procession', 'Something is crossing');
+        break;
+      case 'long_night':
+        this.fx.impactFrame(0.6);
+        this.onBanner('The Long Night', 'Dawn will not come again');
+        break;
       case 'level_up':
         this.pulse = 0;
         this.fx.aberration(0.3);
@@ -212,11 +240,13 @@ export class Renderer {
     this.drawLight(sim, px, py, dt);
     this.drawEmbers(sim);
     this.worldTransform();
+    this.drawHazards(sim);
     this.weaponFx.drawGround(display.ctx, sim, this.sprites, this.blitScaled, dt);
     display.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawEnemies(sim, alpha, px, py, dt);
     this.drawProjectiles(sim, alpha);
     this.worldTransform();
+    this.drawEnemyShots(sim);
     this.weaponFx.drawEffects(display.ctx, dt);
     display.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawPlayer(sim, px, py);
@@ -373,11 +403,22 @@ export class Renderer {
         // Airborne kasa lift off the ground a little.
         lift = frame === KASA_POSE.air ? 4 : 0;
       }
+      // Telegraph poses come from the behaviour state.
+      const st = e.state[s] as number;
+      if (def.behaviour === 'lunge') frame = st === STATE.windup ? 1 : st === STATE.act ? 2 : 0;
+      else if (def.behaviour === 'ranged' || def.behaviour === 'colossus') {
+        frame = st === STATE.windup ? 1 : 0;
+      } else if (def.behaviour === 'mother') frame = st !== STATE.move ? 1 : 0;
       // Frozen enemies stop animating.
       if ((e.freezeT[s] as number) > 0) frame = 0;
       let index: number;
       if (art.layout === 'rotate') {
-        const rot = rotationIndex(Math.atan2(y - py, x - px), ENEMY_ROTATIONS);
+        // Flyers face where they fly; wisps trail away from the player.
+        const angle =
+          def.behaviour === 'flank'
+            ? Math.atan2(e.dirY[s] as number, e.dirX[s] as number)
+            : Math.atan2(y - py, x - px);
+        const rot = rotationIndex(angle, ENEMY_ROTATIONS);
         index = rot * art.frames + frame;
       } else {
         index = (px < x ? 1 : 0) * art.frames + frame;
@@ -419,6 +460,74 @@ export class Renderer {
           : y - oy;
       const rot = rotationIndex(Math.atan2(vy, vx), LOOK_ROTATIONS);
       this.blit(this.sprites.looks.get(look)?.[rot], x, y);
+    }
+  }
+
+  /** Puddles and telegraphed slams (world transform set). */
+  private drawHazards(sim: Sim): void {
+    const ctx = this.display.ctx;
+    const h = sim.hazards;
+    for (let i = 0; i < h.count; i++) {
+      const s = h.slots[i] as number;
+      const x = h.x[s] as number;
+      const y = h.y[s] as number;
+      const r = h.radius[s] as number;
+      if (h.kind[s] === HAZARD.puddle) {
+        const fade = Math.min(1, (h.life[s] as number) / 1);
+        ctx.fillStyle = withAlpha(PALETTE.ink2, 0.9 * fade);
+        ctx.beginPath();
+        ctx.ellipse(x, y, r, r * 0.6, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = withAlpha(PALETTE.ash, 0.5 * fade);
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.ellipse(
+          x,
+          y,
+          r * (0.6 + 0.4 * ((this.time * 0.8 + s) % 1)),
+          r * 0.36,
+          0,
+          0,
+          Math.PI * 2,
+        );
+        ctx.stroke();
+        continue;
+      }
+      // Slam telegraph: a dashed ring with a fill that closes in as it charges.
+      const delay = h.delay[s] as number;
+      if (delay <= 0) continue;
+      const progress = 1 - delay / Math.max(h.total[s] as number, 0.01);
+      ctx.strokeStyle = withAlpha(PALETTE.bone, 0.7);
+      ctx.lineWidth = 2;
+      ctx.setLineDash([8, 6]);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = withAlpha(PALETTE.ash, 0.25 + 0.25 * progress);
+      ctx.beginPath();
+      ctx.arc(x, y, r * progress, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  /** Enemy orbs: bone cores with an ash halo; reflected ones turn gold (yours now). */
+  private drawEnemyShots(sim: Sim): void {
+    const ctx = this.display.ctx;
+    const sh = sim.enemyShots;
+    for (let i = 0; i < sh.count; i++) {
+      const s = sh.slots[i] as number;
+      const x = sh.x[s] as number;
+      const y = sh.y[s] as number;
+      const r = sh.radius[s] as number;
+      ctx.fillStyle = withAlpha(PALETTE.ash, 0.45);
+      ctx.beginPath();
+      ctx.arc(x, y, r * 1.7, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = sh.reflected[s] ? PALETTE.gold : PALETTE.bone;
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 

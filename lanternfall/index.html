@@ -77,8 +77,23 @@
     <div id="gameover" class="modal" hidden>
       <p class="modal-title" id="gameover-title"></p>
       <p id="gameover-stats"></p>
-      <p class="hint">Press R or tap to try again</p>
+      <div class="actions">
+        <button id="again-btn" class="btn" type="button">Try again</button>
+        <button id="longnight-btn" class="btn" type="button" hidden>Keep the lantern lit</button>
+        <button id="change-btn" class="btn secondary" type="button">Change character</button>
+      </div>
+      <p class="hint">R to try again</p>
     </div>
+    <div id="select" class="modal" hidden>
+      <p class="modal-title">Who carries the lantern?</p>
+      <div id="select-cards"></div>
+      <p class="hint">Tap a card twice, or keys 1–4 and Enter</p>
+    </div>
+    <div id="boss-bar" hidden>
+      <p id="boss-name"></p>
+      <div id="boss-track"><div id="boss-fill"></div></div>
+    </div>
+    <button id="dash-btn" type="button" aria-label="Dash" hidden>Dash</button>
     <script type="module" src="./src/main.ts"></script>
   </body>
 </html>

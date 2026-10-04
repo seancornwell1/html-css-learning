@@ -235,6 +235,13 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
   faceless_walker: { halfW: 16, halfH: 24, frames: WALKER_FRAMES, layout: 'mirror', draw: walker },
   hopping_kasa: { halfW: 16, halfH: 24, frames: 3, layout: 'mirror', draw: kasa },
   bride_of_the_reservoir: { halfW: 38, halfH: 34, frames: 2, layout: 'mirror', draw: shapes.bride },
+  drowned: { halfW: 20, halfH: 26, frames: 2, layout: 'mirror', draw: shapes.drowned },
+  carrion_crow: { halfW: 15, halfH: 15, frames: 2, layout: 'rotate', draw: shapes.crow },
+  long_neck: { halfW: 38, halfH: 34, frames: 3, layout: 'mirror', draw: shapes.longNeck },
+  lantern_mouth: { halfW: 14, halfH: 19, frames: 2, layout: 'mirror', draw: shapes.lanternMouth },
+  bone_colossus: { halfW: 32, halfH: 54, frames: 2, layout: 'mirror', draw: shapes.colossus },
+  mother_of_lanterns: { halfW: 46, halfH: 46, frames: 2, layout: 'mirror', draw: shapes.mother },
+  lantern_eater: { halfW: 26, halfH: 24, frames: 2, layout: 'mirror', draw: shapes.lanternEater },
 };
 
 /** Rotated projectile looks (16 rotations each, facing +x at index 0). */

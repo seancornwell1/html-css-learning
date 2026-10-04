@@ -8,18 +8,22 @@ import { chromium } from 'playwright';
 
 const outDir = process.argv[2] ?? 'screenshots';
 const sets = process.argv.slice(3).map((arg) => {
-  const [name, grant] = arg.split('=');
-  return { name: name ?? 'set', grant: grant ?? '' };
+  // name=grant or name=grant@spawn
+  const [name, rest] = arg.split('=');
+  const [grant, spawn] = (rest ?? '').split('@');
+  return { name: name ?? 'set', grant: grant ?? '', spawn: spawn ?? '' };
 });
 mkdirSync(outDir, { recursive: true });
 const preinstalled = '/opt/pw-browsers/chromium';
 const browser = await chromium.launch(
   existsSync(preinstalled) ? { executablePath: preinstalled } : {},
 );
-for (const { name, grant } of sets) {
+for (const { name, grant, spawn } of sets) {
   const page = await browser.newPage({ viewport: { width: 1280, height: 720 } });
   page.on('pageerror', (e) => console.error(`${name}: ${e.message}`));
-  await page.goto(`http://localhost:4173/?seed=3&notice=skip&fx=high&grant=${grant}`);
+  await page.goto(
+    `http://localhost:4173/?seed=3&notice=skip&char=akari&fx=high&grant=${grant}&spawn=${spawn}`,
+  );
   await page.keyboard.down('KeyD');
   for (let i = 0; i < 14; i++) {
     await page.waitForTimeout(1000);

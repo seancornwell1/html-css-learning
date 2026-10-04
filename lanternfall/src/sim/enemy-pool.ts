@@ -26,6 +26,15 @@ export class EnemyPool {
   readonly freezeT: Float64Array;
   /** Movement-speed multiplier fixed at spawn (curse). */
   readonly speedMul: Float64Array;
+  /** Velocity actually moved last tick (bots predict with it). */
+  readonly vx: Float64Array;
+  readonly vy: Float64Array;
+  /** Behaviour state machine: state id, time in state, spare timer. */
+  readonly state: Uint8Array;
+  readonly stateT: Float64Array;
+  readonly aux: Float64Array;
+  /** 1 = marching in a fixed direction (procession), ignoring the player. */
+  readonly march: Uint8Array;
   private nextId = 1;
 
   constructor(capacity: number) {
@@ -46,6 +55,12 @@ export class EnemyPool {
     this.slowAmt = new Float64Array(capacity);
     this.freezeT = new Float64Array(capacity);
     this.speedMul = new Float64Array(capacity);
+    this.vx = new Float64Array(capacity);
+    this.vy = new Float64Array(capacity);
+    this.state = new Uint8Array(capacity);
+    this.stateT = new Float64Array(capacity);
+    this.aux = new Float64Array(capacity);
+    this.march = new Uint8Array(capacity);
   }
 
   get count(): number {
@@ -80,6 +95,12 @@ export class EnemyPool {
     this.slowAmt[slot] = 0;
     this.freezeT[slot] = 0;
     this.speedMul[slot] = 1;
+    this.vx[slot] = 0;
+    this.vy[slot] = 0;
+    this.state[slot] = 0;
+    this.stateT[slot] = 0;
+    this.aux[slot] = 0;
+    this.march[slot] = 0;
     return slot;
   }
 

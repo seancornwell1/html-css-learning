@@ -54,10 +54,14 @@ decision changes, update the doc in the same commit.
   offscreen canvases) or hand-author SVG in this repo. Never download, trace
   or imitate existing game, anime or artist assets. Fonts must be OFL and
   bundled with their licence.
+- **Style target:** modern anime × ukiyo-e (GAME_DESIGN §7.3.1). Reference
+  images guide style only; never trace or reproduce them.
 - **Palette tokens only** (`src/render/palette.ts`): `ink`, `ink-2`, `ash`,
   `bone`, `gold`. **Gold is reserved** for the player's light, XP embers,
   evolutions, Frenzy and focused UI. Enemies are never gold. Show player
-  damage with inversion, not red.
+  damage with inversion, not red. Print tones `ai` (indigo) and `shu`
+  (vermilion) are for illustration and UI ornament only, never gameplay
+  entities (added in M9).
 - Every flashing effect must respect the *Reduce flashing* setting (≤ 3 Hz,
   no full-screen inversion). Shake must respect the shake slider.
 - All audio is synthesized with WebAudio; there are no sample files. Start the
@@ -138,7 +142,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M6 | Power-ups | not started |
 | M7 | Audio | not started |
 | M8 | Meta & secrets | not started |
-| M9 | UI & mobile polish | not started |
+| M9 | Art pass, UI & mobile polish | not started |
 | M10 | Balance & release | not started |
 
 ## Conventions

@@ -48,7 +48,13 @@ export type SimEvent =
   | { type: 'player_died'; time: number }
   | { type: 'victory'; time: number }
   | { type: 'encircle'; kind: number }
-  | { type: 'elite'; kind: number };
+  | { type: 'elite'; kind: number }
+  | { type: 'boss'; kind: number }
+  | { type: 'boss_slain'; kind: number }
+  | { type: 'slam'; x: number; y: number; radius: number }
+  | { type: 'dash'; x: number; y: number }
+  | { type: 'procession' }
+  | { type: 'long_night' };
 
 export class EventQueue {
   private items: SimEvent[] = [];

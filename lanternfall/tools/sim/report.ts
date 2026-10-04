@@ -19,6 +19,10 @@ export interface GroupStats {
   evolvedRuns: number;
   /** Median seconds to first evolution among runs that evolved (-1 if none). */
   medianFirstEvolution: number;
+  /** Killing blows by source, most common first. */
+  killers: [string, number][];
+  /** Deaths per minute bucket (index = minute). */
+  deathsByMinute: number[];
   errors: number;
 }
 
@@ -117,6 +121,22 @@ export function groupStats(runs: RunResult[]): GroupStats[] {
           .sort((a, b) => a - b);
         return t.length ? quantile(t, 0.5) : -1;
       })(),
+      killers: Object.entries(
+        list.reduce<Record<string, number>>((acc, r) => {
+          if (r.status === 'dead') acc[r.killer || '?'] = (acc[r.killer || '?'] ?? 0) + 1;
+          return acc;
+        }, {}),
+      ).sort((a, b) => b[1] - a[1]),
+      deathsByMinute: list.reduce<number[]>(
+        (acc, r) => {
+          if (r.status === 'dead') {
+            const m = Math.min(9, Math.floor(r.time / 60));
+            acc[m] = (acc[m] ?? 0) + 1;
+          }
+          return acc;
+        },
+        [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      ),
       errors: list.filter((r) => r.status === 'error').length,
     };
   });
@@ -152,6 +172,14 @@ export function toMarkdown(report: Report): string {
       .sort((a, b) => b[1] - a[1])
       .map(([id, f]) => `${id} ${(f * 100).toFixed(0)}%`);
     lines.push(`| ${g.character} | ${g.bot} | ${parts.join(', ')} |`);
+  }
+  lines.push('', '## Deaths', '');
+  lines.push('| Character | Bot | Deaths by minute (0–9) | Killing blows |', '|---|---|---|---|');
+  for (const g of report.groups) {
+    lines.push(
+      `| ${g.character} | ${g.bot} | ${g.deathsByMinute.join(' ')} | ` +
+        `${g.killers.map(([k, n]) => `${k} ${n}`).join(', ')} |`,
+    );
   }
   lines.push('', '## Evolutions', '');
   lines.push(
