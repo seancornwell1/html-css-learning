@@ -1,4 +1,6 @@
-import { ENEMIES, ENEMY_KIND, HOP } from '../data/enemies';
+import { ENEMIES, HOP } from '../data/enemies';
+import { WEAPONS } from '../data/weapons';
+import { MODE } from '../sim/projectile-pool';
 import { MAX_ENEMIES, MAX_PROJECTILES } from '../sim/constants';
 import type { SimEvent } from '../sim/events';
 import type { Sim } from '../sim/sim';
@@ -9,34 +11,24 @@ import { GROUND_TILE, bakeGround } from './ground';
 import { PALETTE, withAlpha } from './palette';
 import {
   DECAL_VARIANTS,
+  ENEMY_ART,
+  ENEMY_ROTATIONS,
   KASA_POSE,
-  OFUDA_ROTATIONS,
+  LOOK_ROTATIONS,
   PLAYER_FRAMES,
   SpriteCache,
-  WALKER_FRAMES,
-  WISP_FRAMES,
-  WISP_ROTATIONS,
   rotationIndex,
   type Sprite,
 } from './sprites';
+import { PROJECTILE_LOOK, WeaponFx } from './weapon-fx';
 
 const LIGHT_RADIUS = 150;
 const HIT_FLASH = 0.08;
-const SWEEP_LIFE = 0.18;
 const PULSE_LIFE = 0.5;
 /** Kills in a single tick that earn a hit-stop. */
 const MULTIKILL = 6;
 /** A projectile/ember that moved further than this in one tick is new: don't interpolate. */
 const TELEPORT = 40;
-
-interface Sweep {
-  x: number;
-  y: number;
-  angle: number;
-  radius: number;
-  arc: number;
-  age: number;
-}
 
 /**
  * World renderer (GAME_DESIGN §7). Reads sim state and events only; never
@@ -62,7 +54,9 @@ export class Renderer {
   private prevY = 0;
   private killsThisStep = 0;
 
-  private readonly sweeps: Sweep[] = [];
+  private readonly weaponFx = new WeaponFx();
+  /** Called with a headline and detail line for evolutions and reliquaries. */
+  onBanner: (title: string, detail: string) => void = () => undefined;
   private pulse = PULSE_LIFE;
   private walkPhase = 0;
   private lanternSwing = 0;
@@ -91,7 +85,7 @@ export class Renderer {
 
   reset(): void {
     this.enemyFlash.fill(0);
-    this.sweeps.length = 0;
+    this.weaponFx.reset();
     this.decals.reset();
     this.shake.reset();
     this.fx.reset();
@@ -120,6 +114,7 @@ export class Renderer {
   }
 
   onEvent(e: SimEvent, now: number): void {
+    this.weaponFx.onEvent(e);
     switch (e.type) {
       case 'player_hit':
         this.fx.flash(0.07);
@@ -142,17 +137,35 @@ export class Renderer {
         }
         break;
       case 'sweep':
+      case 'whip':
         this.shake.add(0.03);
-        if (this.sweeps.length < 16) {
-          this.sweeps.push({
-            x: e.x,
-            y: e.y,
-            angle: e.angle,
-            radius: e.radius,
-            arc: e.arc,
-            age: 0,
-          });
-        }
+        break;
+      case 'nova':
+        this.shake.add(0.12);
+        break;
+      case 'strike':
+        this.shake.add(0.04);
+        break;
+      case 'evolution': {
+        this.fx.impactFrame(1);
+        this.shake.add(0.6);
+        this.hitStop.trigger(180, now);
+        const name = WEAPONS[e.weapon]?.name ?? '';
+        this.onBanner(e.union ? 'Union' : 'Evolution', name);
+        break;
+      }
+      case 'reliquary':
+        this.fx.aberration(0.4);
+        this.onBanner('Reliquary', e.rewards.join(' · '));
+        break;
+      case 'revived':
+        this.fx.impactFrame(0.8);
+        this.shake.add(0.6);
+        this.onBanner('Revived', 'The paper doll burns in your place');
+        break;
+      case 'elite':
+        this.shake.add(0.25);
+        this.fx.aberration(0.5);
         break;
       case 'level_up':
         this.pulse = 0;
@@ -198,9 +211,14 @@ export class Renderer {
     this.drawDecals();
     this.drawLight(sim, px, py, dt);
     this.drawEmbers(sim);
+    this.worldTransform();
+    this.weaponFx.drawGround(display.ctx, sim, this.sprites, this.blitScaled, dt);
+    display.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawEnemies(sim, alpha, px, py, dt);
-    this.drawSweeps(dt);
     this.drawProjectiles(sim, alpha);
+    this.worldTransform();
+    this.weaponFx.drawEffects(display.ctx, dt);
+    display.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawPlayer(sim, px, py);
     this.drawPulse(px, py, dt);
 
@@ -324,10 +342,14 @@ export class Renderer {
 
   private drawEnemies(sim: Sim, alpha: number, px: number, py: number, dt: number): void {
     const e = sim.enemies;
-    const sp = this.sprites;
     for (let i = 0; i < e.count; i++) {
       const s = e.slots[i] as number;
       const kind = e.kind[s] as number;
+      const def = ENEMIES[kind];
+      if (!def) continue;
+      const art = ENEMY_ART[def.id];
+      const sprites = this.sprites.enemy.get(def.id);
+      if (!art || !sprites) continue;
       const id = e.id[s] as number;
       let x = e.x[s] as number;
       let y = e.y[s] as number;
@@ -337,64 +359,35 @@ export class Renderer {
       }
       const flashLeft = this.enemyFlash[s] as number;
       if (flashLeft > 0) this.enemyFlash[s] = Math.max(0, flashLeft - dt);
-      const tint = flashLeft > 0 ? 1 : 0;
-      if (kind === ENEMY_KIND.wisp) {
-        const rot = rotationIndex(Math.atan2(y - py, x - px), WISP_ROTATIONS);
-        const frame = Math.floor(this.time * 6 + id) % WISP_FRAMES;
-        this.blit(sp.wisp[tint]?.[rot * WISP_FRAMES + frame], x, y);
-      } else if (kind === ENEMY_KIND.hopping_kasa) {
+      const tinted = sprites[flashLeft > 0 ? 1 : 0];
+      let frame = Math.floor(this.time * 5 + id * 0.37) % art.frames;
+      let lift = 0;
+      if (def.behaviour === 'hop') {
         const t = e.timer[s] as number;
-        const pose =
+        frame =
           t < HOP.rest
             ? KASA_POSE.rest
             : t < HOP.rest + HOP.crouch
               ? KASA_POSE.crouch
               : KASA_POSE.air;
-        const mirror = px < x ? 1 : 0;
         // Airborne kasa lift off the ground a little.
-        const lift = pose === KASA_POSE.air ? 4 : 0;
-        this.blit(sp.kasa[tint]?.[mirror * 3 + pose], x, y - lift);
+        lift = frame === KASA_POSE.air ? 4 : 0;
+      }
+      // Frozen enemies stop animating.
+      if ((e.freezeT[s] as number) > 0) frame = 0;
+      let index: number;
+      if (art.layout === 'rotate') {
+        const rot = rotationIndex(Math.atan2(y - py, x - px), ENEMY_ROTATIONS);
+        index = rot * art.frames + frame;
       } else {
-        const mirror = px < x ? 1 : 0;
-        const frame = Math.floor(this.time * 5 + id * 0.37) % WALKER_FRAMES;
-        this.blit(sp.walker[tint]?.[mirror * WALKER_FRAMES + frame], x, y);
+        index = (px < x ? 1 : 0) * art.frames + frame;
       }
+      this.blit(tinted?.[index], x, y - lift);
     }
-  }
-
-  private drawSweeps(dt: number): void {
-    const ctx = this.display.ctx;
-    this.worldTransform();
-    for (let i = this.sweeps.length - 1; i >= 0; i--) {
-      const sw = this.sweeps[i] as Sweep;
-      sw.age += dt;
-      if (sw.age >= SWEEP_LIFE) {
-        this.sweeps.splice(i, 1);
-        continue;
-      }
-      const t = sw.age / SWEEP_LIFE;
-      // The lantern's arc of light: a crescent that sweeps across, then fades.
-      const start = sw.angle - sw.arc / 2;
-      const head = start + sw.arc * Math.min(1, t * 1.8);
-      const tail = start + sw.arc * Math.max(0, t * 1.8 - 0.8);
-      ctx.fillStyle = withAlpha(PALETTE.gold, 0.9 * (1 - t));
-      ctx.beginPath();
-      ctx.arc(sw.x, sw.y, sw.radius, tail, head);
-      ctx.arc(sw.x, sw.y, sw.radius * 0.62, head, tail, true);
-      ctx.closePath();
-      ctx.fill();
-      ctx.strokeStyle = withAlpha(PALETTE.bone, 1 - t);
-      ctx.lineWidth = 2;
-      ctx.beginPath();
-      ctx.arc(sw.x, sw.y, sw.radius, tail, head);
-      ctx.stroke();
-    }
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
   }
 
   private drawProjectiles(sim: Sim, alpha: number): void {
     const pr = sim.projectiles;
-    const sprites = this.sprites.ofuda;
     for (let i = 0; i < pr.count; i++) {
       const s = pr.slots[i] as number;
       let x = pr.x[s] as number;
@@ -405,13 +398,46 @@ export class Renderer {
         x = ox + (x - ox) * alpha;
         y = oy + (y - oy) * alpha;
       }
-      const rot = rotationIndex(
-        Math.atan2(pr.vy[s] as number, pr.vx[s] as number),
-        OFUDA_ROTATIONS,
-      );
-      this.blit(sprites[rot], x, y);
+      const weaponId = WEAPONS[pr.weapon[s] as number]?.id ?? '';
+      let look = PROJECTILE_LOOK[weaponId] ?? 'ofuda';
+      if (look === 'koi' && (pr.radius[s] as number) > 30) look = 'dragon';
+      if ((pr.mode[s] as number) === MODE.turret) look = 'shot';
+      if (look.startsWith('prop:')) {
+        const frames = this.sprites.props.get(look.slice(5));
+        const f = frames && frames.length > 1 ? Math.floor(this.time * 12 + s) % frames.length : 0;
+        this.blit(frames?.[f], x, y);
+        continue;
+      }
+      // Orbit/boomerang velocities aren't stored as headings; aim along motion.
+      const vx =
+        (pr.mode[s] as number) === MODE.straight || (pr.mode[s] as number) >= MODE.ricochet
+          ? (pr.vx[s] as number)
+          : x - ox;
+      const vy =
+        (pr.mode[s] as number) === MODE.straight || (pr.mode[s] as number) >= MODE.ricochet
+          ? (pr.vy[s] as number)
+          : y - oy;
+      const rot = rotationIndex(Math.atan2(vy, vx), LOOK_ROTATIONS);
+      this.blit(this.sprites.looks.get(look)?.[rot], x, y);
     }
   }
+
+  /** Draw a sprite at a world position with an optional scale (resets transform). */
+  private blitScaled = (sprite: Sprite | undefined, x: number, y: number, scale: number): void => {
+    if (!sprite) return;
+    const ctx = this.display.ctx;
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    const w = sprite.canvas.width * scale;
+    const h = sprite.canvas.height * scale;
+    ctx.drawImage(
+      sprite.canvas,
+      this.sx(x) - sprite.ox * scale,
+      this.sy(y) - sprite.oy * scale,
+      w,
+      h,
+    );
+    this.worldTransform();
+  };
 
   private drawPlayer(sim: Sim, px: number, py: number): void {
     const p = sim.player;

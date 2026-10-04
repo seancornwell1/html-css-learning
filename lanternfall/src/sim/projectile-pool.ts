@@ -3,6 +3,18 @@ import { DenseIndex } from './dense-index';
 /** Max distinct enemies one projectile remembers hitting. */
 export const HIT_MEMORY = 8;
 
+/** Projectile movement modes. */
+export const MODE = {
+  straight: 0,
+  homing: 1,
+  orbit: 2,
+  boomerang: 3,
+  ricochet: 4,
+  wander: 5,
+  /** Turret shots: homing, but owned by a turret (no player stats on spawn). */
+  turret: 6,
+} as const;
+
 /** Player projectiles (structure of arrays). */
 export class ProjectilePool {
   readonly index: DenseIndex;
@@ -24,6 +36,16 @@ export class ProjectilePool {
   /** Enemy ids already hit (ring of HIT_MEMORY per slot). */
   readonly hits: Uint32Array;
   readonly hitCount: Uint8Array;
+  readonly mode: Uint8Array;
+  readonly age: Float64Array;
+  /** Mode parameters (orbit: angle/index; boomerang: phase; wander: seed). */
+  readonly a: Float64Array;
+  readonly b: Float64Array;
+  /** Re-hit interval (orbit) and its timer. */
+  readonly rehit: Float64Array;
+  readonly rehitT: Float64Array;
+  /** Freeze/slow applied on hit. */
+  readonly freeze: Float64Array;
 
   constructor(capacity: number) {
     this.index = new DenseIndex(capacity);
@@ -41,6 +63,13 @@ export class ProjectilePool {
     this.targetId = new Uint32Array(capacity);
     this.hits = new Uint32Array(capacity * HIT_MEMORY);
     this.hitCount = new Uint8Array(capacity);
+    this.mode = new Uint8Array(capacity);
+    this.age = new Float64Array(capacity);
+    this.a = new Float64Array(capacity);
+    this.b = new Float64Array(capacity);
+    this.rehit = new Float64Array(capacity);
+    this.rehitT = new Float64Array(capacity);
+    this.freeze = new Float64Array(capacity);
   }
 
   get count(): number {
@@ -63,6 +92,13 @@ export class ProjectilePool {
     this.targetSlot[slot] = -1;
     this.targetId[slot] = 0;
     this.hitCount[slot] = 0;
+    this.mode[slot] = MODE.straight;
+    this.age[slot] = 0;
+    this.a[slot] = 0;
+    this.b[slot] = 0;
+    this.rehit[slot] = 0;
+    this.rehitT[slot] = 0;
+    this.freeze[slot] = 0;
     return slot;
   }
 
@@ -77,6 +113,10 @@ export class ProjectilePool {
     const n = this.hitCount[slot] as number;
     this.hits[slot * HIT_MEMORY + (n % HIT_MEMORY)] = enemyId;
     this.hitCount[slot] = Math.min(n + 1, 255);
+  }
+
+  clearHits(slot: number): void {
+    this.hitCount[slot] = 0;
   }
 
   remove(slot: number): void {

@@ -8,6 +8,7 @@ import { Renderer } from './render/renderer';
 import type { Intent } from './sim/intent';
 import { Sim } from './sim/sim';
 import { formatTime } from './ui/format';
+import { Banner, Inventory } from './ui/hud';
 import { LevelUpUi } from './ui/levelup';
 import { bindSettings, showNotice } from './ui/settings-ui';
 
@@ -40,6 +41,9 @@ settings.effects = display.setQuality(
   fxParam === 'off' || fxParam === 'low' || fxParam === 'high' ? fxParam : settings.effects,
 );
 const renderer = new Renderer(display);
+const inventory = new Inventory(el('inventory'));
+const banner = new Banner(el('banner'), el('banner-title'), el('banner-detail'));
+renderer.onBanner = (title, detail) => banner.show(title, detail);
 
 function applySettings(s: Settings): void {
   renderer.reduceFlashing = s.reduceFlashing;
@@ -56,7 +60,20 @@ bindSettings(settings, applySettings);
 const stick = new TouchStick(stage, el('stick-base'), el('stick-knob'));
 const controller = new Controller(new KeyboardInput(window), stick);
 const intent: Intent = { moveX: 0, moveY: 0, action: false };
-let sim = new Sim({ seed: newSeed() });
+/** `?grant=fox_fire:8,iron_wick:5` gives a debug loadout to every new run. */
+const grant = (params.get('grant') ?? '')
+  .split(',')
+  .filter(Boolean)
+  .map((part) => {
+    const [id, level] = part.split(':');
+    return { id: id ?? '', level: Math.max(1, Number(level ?? 1) || 1) };
+  });
+function newSim(): Sim {
+  const s = new Sim({ seed: newSeed() });
+  if (grant.length > 0) s.grant(grant);
+  return s;
+}
+let sim = newSim();
 let paused = false;
 let blocked = false; // e.g. the first-launch notice
 let lastFrame = performance.now();
@@ -100,6 +117,7 @@ const loop = new FixedStepLoop({
     stick.enabled = !levelUp.open && !paused && !blocked;
     hudTime.textContent = formatTime(sim.time);
     hudLevel.textContent = `Lv ${sim.level}`;
+    inventory.update(sim);
     xpFill.style.width = `${Math.min(100, (sim.xp / sim.xpNext) * 100)}%`;
     const hpPct = Math.max(0, (sim.player.hp / sim.stats.maxHp) * 100);
     hpFill.style.width = `${hpPct}%`;
@@ -120,7 +138,7 @@ function showGameOver(): void {
 
 function restart(): void {
   if (sim.status === 'running') return;
-  sim = new Sim({ seed: newSeed() });
+  sim = newSim();
   renderer.reset();
   levelUp.hide();
   gameover.hidden = true;

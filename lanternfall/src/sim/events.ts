@@ -15,14 +15,40 @@ export type SimEvent =
       radius: number;
       arc: number;
     }
+  | {
+      type: 'whip';
+      weapon: number;
+      x: number;
+      y: number;
+      side: number;
+      length: number;
+      width: number;
+    }
+  | { type: 'nova'; weapon: number; x: number; y: number; radius: number }
+  | {
+      type: 'beam';
+      weapon: number;
+      x: number;
+      y: number;
+      angle: number;
+      length: number;
+      width: number;
+    }
+  | { type: 'strike'; weapon: number; x: number; y: number }
+  | { type: 'chain'; x1: number; y1: number; x2: number; y2: number }
   | { type: 'projectile_fired'; weapon: number; x: number; y: number }
   | { type: 'ember_collected'; value: number }
+  | { type: 'pickup'; kind: number; x: number; y: number }
+  | { type: 'reliquary'; rewards: string[] }
+  | { type: 'evolution'; weapon: number; union: boolean }
   | { type: 'level_up'; level: number }
   | { type: 'upgrade_chosen'; label: string }
   | { type: 'player_hit'; damage: number; hp: number }
+  | { type: 'revived'; x: number; y: number }
   | { type: 'player_died'; time: number }
   | { type: 'victory'; time: number }
-  | { type: 'encircle'; kind: number };
+  | { type: 'encircle'; kind: number }
+  | { type: 'elite'; kind: number };
 
 export class EventQueue {
   private items: SimEvent[] = [];

@@ -1,5 +1,6 @@
 import { Rng } from '../sim/rng';
 import { PALETTE } from './palette';
+import * as shapes from './shapes';
 
 /**
  * Procedural silhouette sprites (GAME_DESIGN §7.3). Every shape is drawn in
@@ -14,8 +15,6 @@ export interface Sprite {
   oy: number;
 }
 
-export const WISP_ROTATIONS = 16;
-export const OFUDA_ROTATIONS = 16;
 export const WISP_FRAMES = 2;
 export const WALKER_FRAMES = 4;
 export const PLAYER_FRAMES = 4;
@@ -218,13 +217,62 @@ function splat(ctx: CanvasRenderingContext2D, seed: number, fill: string): void 
 
 // ---- Cache ------------------------------------------------------------------
 
+/** How an enemy's sprite variants are laid out. */
+export interface EnemyArt {
+  halfW: number;
+  halfH: number;
+  frames: number;
+  /** 'rotate': 16 rotations × frames (faces away from the player); 'mirror': 2 × frames. */
+  layout: 'rotate' | 'mirror';
+  draw: (ctx: CanvasRenderingContext2D, frame: number, fill: string) => void;
+}
+
+export const ENEMY_ROTATIONS = 16;
+export const LOOK_ROTATIONS = 16;
+
+export const ENEMY_ART: Record<string, EnemyArt> = {
+  wisp: { halfW: 26, halfH: 26, frames: WISP_FRAMES, layout: 'rotate', draw: wisp },
+  faceless_walker: { halfW: 16, halfH: 24, frames: WALKER_FRAMES, layout: 'mirror', draw: walker },
+  hopping_kasa: { halfW: 16, halfH: 24, frames: 3, layout: 'mirror', draw: kasa },
+  bride_of_the_reservoir: { halfW: 38, halfH: 34, frames: 2, layout: 'mirror', draw: shapes.bride },
+};
+
+/** Rotated projectile looks (16 rotations each, facing +x at index 0). */
+const LOOKS: Record<string, { half: number; draw: (ctx: CanvasRenderingContext2D) => void }> = {
+  ofuda: { half: 10, draw: ofuda },
+  kunai: { half: 11, draw: shapes.kunai },
+  crane: { half: 11, draw: shapes.crane },
+  chime: { half: 10, draw: shapes.chime },
+  koi: { half: 11, draw: (c) => shapes.koi(c) },
+  crescent: { half: 34, draw: shapes.crescent },
+  dragon: { half: 52, draw: shapes.dragon },
+  shot: { half: 6, draw: shapes.shot },
+};
+
+/** Unrotated props, possibly with frames. */
+const PROPS: Record<
+  string,
+  { half: number; frames: number; draw: (ctx: CanvasRenderingContext2D, f: number) => void }
+> = {
+  moth: { half: 10, frames: 2, draw: shapes.moth },
+  flame: { half: 15, frames: 3, draw: shapes.flame },
+  smoke: { half: 17, frames: 1, draw: shapes.smoke },
+  reliquary: { half: 12, frames: 1, draw: shapes.reliquary },
+  onigiri: { half: 10, frames: 1, draw: shapes.onigiri },
+  coin: { half: 6, frames: 1, draw: shapes.coin },
+  stone_lantern: { half: 17, frames: 1, draw: shapes.stoneLantern },
+  parasol: { half: 15, frames: 1, draw: shapes.parasol },
+};
+
 export class SpriteCache {
   scale = 0;
-  wisp: Sprite[][] = []; // [tint][rotation * WISP_FRAMES + frame]
-  walker: Sprite[][] = []; // [tint][mirror * WALKER_FRAMES + frame]
-  kasa: Sprite[][] = []; // [tint][mirror * 3 + pose]
+  /** enemy id → [tint][variant]. */
+  enemy = new Map<string, Sprite[][]>();
   player: Sprite[] = []; // [mirror * PLAYER_FRAMES + frame]
-  ofuda: Sprite[] = []; // [rotation]
+  /** look → [rotation]. */
+  looks = new Map<string, Sprite[]>();
+  /** prop → [frame]. */
+  props = new Map<string, Sprite[]>();
   ember: Sprite[] = []; // [size]
   decal: Sprite[][] = []; // [tint][variant]
 
@@ -236,35 +284,55 @@ export class SpriteCache {
       ['bone', PALETTE.bone],
       ['ash', PALETTE.ash],
     ];
-    this.wisp = tints.map(([, fill]) => {
-      const out: Sprite[] = [];
-      for (let r = 0; r < WISP_ROTATIONS; r++) {
-        for (let f = 0; f < WISP_FRAMES; f++) {
-          out.push(
-            bake(scale, 26, 26, (ctx) => {
-              ctx.rotate((r / WISP_ROTATIONS) * Math.PI * 2);
-              wisp(ctx, f, fill);
-            }),
-          );
-        }
-      }
-      return out;
-    });
-    this.walker = tints.map(([, fill]) =>
-      mirrored(scale, 16, 24, WALKER_FRAMES, (c, f) => walker(c, f, fill)),
-    );
-    this.kasa = tints.map(([, fill]) => mirrored(scale, 16, 24, 3, (c, p) => kasa(c, p, fill)));
-    this.player = mirrored(scale, 15, 25, PLAYER_FRAMES, (c, f) => player(c, f));
-    this.ofuda = [];
-    for (let r = 0; r < OFUDA_ROTATIONS; r++) {
-      this.ofuda.push(
-        bake(scale, 10, 10, (ctx) => {
-          ctx.rotate((r / OFUDA_ROTATIONS) * Math.PI * 2);
-          ofuda(ctx);
+    this.enemy.clear();
+    for (const [id, art] of Object.entries(ENEMY_ART)) {
+      this.enemy.set(
+        id,
+        tints.map(([, fill]) => {
+          if (art.layout === 'mirror') {
+            return mirrored(scale, art.halfW, art.halfH, art.frames, (c, f) =>
+              art.draw(c, f, fill),
+            );
+          }
+          const out: Sprite[] = [];
+          const half = Math.max(art.halfW, art.halfH);
+          for (let r = 0; r < ENEMY_ROTATIONS; r++) {
+            for (let f = 0; f < art.frames; f++) {
+              out.push(
+                bake(scale, half, half, (ctx) => {
+                  ctx.rotate((r / ENEMY_ROTATIONS) * Math.PI * 2);
+                  art.draw(ctx, f, fill);
+                }),
+              );
+            }
+          }
+          return out;
         }),
       );
     }
-    this.ember = [3.2, 4.5, 6].map((r) => bake(scale, r + 1, r + 1, (ctx) => ember(ctx, r)));
+    this.player = mirrored(scale, 15, 25, PLAYER_FRAMES, (c, f) => player(c, f));
+    this.looks.clear();
+    for (const [id, look] of Object.entries(LOOKS)) {
+      const out: Sprite[] = [];
+      for (let r = 0; r < LOOK_ROTATIONS; r++) {
+        out.push(
+          bake(scale, look.half, look.half, (ctx) => {
+            ctx.rotate((r / LOOK_ROTATIONS) * Math.PI * 2);
+            look.draw(ctx);
+          }),
+        );
+      }
+      this.looks.set(id, out);
+    }
+    this.props.clear();
+    for (const [id, prop] of Object.entries(PROPS)) {
+      const out: Sprite[] = [];
+      for (let f = 0; f < prop.frames; f++) {
+        out.push(bake(scale, prop.half, prop.half, (ctx) => prop.draw(ctx, f)));
+      }
+      this.props.set(id, out);
+    }
+    this.ember = [3.2, 4.5, 6, 8].map((r) => bake(scale, r + 1, r + 1, (ctx) => ember(ctx, r)));
     this.decal = tints.map(([, fill]) => {
       const out: Sprite[] = [];
       for (let v = 0; v < DECAL_VARIANTS; v++) {

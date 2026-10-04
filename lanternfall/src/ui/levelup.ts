@@ -1,6 +1,28 @@
 import type { UpgradeOption } from '../sim/upgrades';
 import { optionDescription, optionLabel } from '../sim/upgrades';
+import { PASSIVES } from '../data/passives';
 import { WEAPONS } from '../data/weapons';
+
+const MELEE = new Set(['sweep', 'whip', 'nova', 'aura', 'parasol']);
+
+function cardKind(o: UpgradeOption): string {
+  switch (o.type) {
+    case 'heal':
+      return 'Mend';
+    case 'passive_new':
+    case 'passive_level':
+      return 'Passive';
+    default: {
+      const def = WEAPONS[o.weapon];
+      const evo = def?.evolvePassive ? ` · evolves with ${passiveName(def.evolvePassive)}` : '';
+      return `Weapon · ${MELEE.has(def?.behaviour ?? '') ? 'close' : 'ranged'}${evo}`;
+    }
+  }
+}
+
+function passiveName(id: string): string {
+  return PASSIVES.find((p) => p.id === id)?.name ?? id;
+}
 
 /** Ignore taps this soon after the cards appear (thumb still on the stick). */
 const TAP_GUARD_MS = 350;
@@ -40,13 +62,12 @@ export class LevelUpUi {
       card.type = 'button';
       card.className = 'card';
       const badge =
-        o.type === 'weapon_new' ? 'New' : o.type === 'weapon_level' ? `Lv ${o.toLevel}` : '';
-      const kind =
-        o.type === 'heal'
-          ? 'Mend'
-          : WEAPONS[o.weapon]?.behaviour === 'sweep'
-            ? 'Weapon · melee'
-            : 'Weapon · ranged';
+        o.type === 'weapon_new' || o.type === 'passive_new'
+          ? 'New'
+          : o.type === 'weapon_level' || o.type === 'passive_level'
+            ? `Lv ${o.toLevel}`
+            : '';
+      const kind = cardKind(o);
       card.innerHTML = `<span class="card-key">${i + 1}</span><span class="card-badge"></span><strong class="card-name"></strong><span class="card-kind"></span><span class="card-desc"></span>`;
       (card.querySelector('.card-badge') as HTMLElement).textContent = badge;
       (card.querySelector('.card-name') as HTMLElement).textContent = optionLabel(o).replace(

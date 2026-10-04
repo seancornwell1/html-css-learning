@@ -17,7 +17,7 @@ export interface TimelineSegment {
 
 export interface TimelineEvent {
   at: number;
-  type: 'encircle';
+  type: 'encircle' | 'elite';
   kind: number;
   count: number;
 }
@@ -25,6 +25,7 @@ export interface TimelineEvent {
 const W = ENEMY_KIND.wisp;
 const F = ENEMY_KIND.faceless_walker;
 const K = ENEMY_KIND.hopping_kasa;
+const B = ENEMY_KIND.bride_of_the_reservoir;
 
 export const TIMELINE: readonly TimelineSegment[] = [
   {
@@ -133,6 +134,13 @@ export const TIMELINE_EVENTS: readonly TimelineEvent[] = [
   { at: 90, type: 'encircle', kind: W, count: 140 },
   { at: 270, type: 'encircle', kind: F, count: 100 },
   { at: 480, type: 'encircle', kind: K, count: 120 },
+  // Elites carry the Reliquaries that evolve weapons.
+  { at: 150, type: 'elite', kind: B, count: 1 },
+  { at: 270, type: 'elite', kind: B, count: 2 },
+  { at: 360, type: 'elite', kind: B, count: 1 },
+  { at: 420, type: 'elite', kind: B, count: 1 },
+  { at: 480, type: 'elite', kind: B, count: 1 },
+  { at: 540, type: 'elite', kind: B, count: 2 },
 ];
 
 export function segmentAt(seconds: number): TimelineSegment {

@@ -22,6 +22,10 @@ export interface RunResult extends RunJob {
   damage: Record<string, number>;
   /** Lowest HP reached. */
   minHp: number;
+  /** Evolved/union weapon ids obtained, in order. */
+  evolutions: string[];
+  /** Seconds to the first evolution, or -1. */
+  firstEvolution: number;
   hash: number;
   wallMs: number;
   error?: string;
@@ -78,6 +82,8 @@ function finish(
     levelAt5,
     damage,
     minHp,
+    evolutions: sim.evolutions.map((e) => e.weapon),
+    firstEvolution: sim.evolutions[0]?.time ?? -1,
     hash: sim.hash(),
     wallMs: Number(process.hrtime.bigint() - start) / 1e6,
   };

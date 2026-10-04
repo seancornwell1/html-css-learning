@@ -63,7 +63,7 @@ Run ends: death (meta currency kept) or Dawn at 10:00 (victory + bonus).
 | Passive max level | 5 (Paper Doll: 2) |
 | Choices per level-up | 3 (4 with Luck ≥ 30% roll) |
 | XP to next level | `5 + 10·(L−1)` up to L20, then +13 per level, and every requirement ×1.5 from L40 |
-| Base player | 100 HP, 0 armor, 150 px/s move, 85 px pickup radius, 0 regen |
+| Base player | 100 HP, 0 armor, 150 px/s move, 110 px pickup radius, 0 regen |
 | Invulnerability after hit | 0.5 s |
 | Victory | Alive at 10:00 ("Dawn") |
 | Final boss | Arrives at 9:00. Killing it early ends the night at once, with a bonus and a secret check |
@@ -96,6 +96,13 @@ gating the roster for long.
 ## 5. Arsenal
 
 16 weapons, 16 passives, 16 evolutions and 3 hidden unions.
+
+### 5.0 Reliquaries
+Opening one gives, in order of priority: an evolution that is ready (the
+first owned weapon at Lv 8 whose paired passive is maxed), else a union
+(§5.4), else 1 random level-up of something owned. With Luck it can be 3
+(15% × Luck) or 5 (3% × Luck). If nothing can level, it heals 30 HP. Level-up
+cards show 3 options, and a 4th with probability (Luck − 1).
 
 ### 5.1 Evolution rule
 A weapon **evolves** when the weapon is **Lv 8** *and* its paired passive is at
@@ -169,8 +176,12 @@ and free up a slot.
 | **Mother of Lanterns** *(boss, 9:00)* | Boss | 25,000 | 50 | 35 | 3 attack patterns; extinguishes nearby pickups |
 | **The Lantern-Eater** *(Long Night)* | Reaper | ∞ | 200+ | 9999 | Appears only after Dawn, or at 10:30 if Long Night is on |
 
-Enemy stats scale per minute (`m`): HP × `(1 + 0.10m + 0.012m²)`, and contact
-damage × `(1 + 0.05m)`.
+Enemy stats scale per minute (`m`): HP × `(1 + 0.10m + 0.012m²)`, contact
+damage × `(1 + 0.05m)`, and XP × `(1 + 0.18m)`. Curse multiplies HP, spawn
+budget and XP, and adds half its bonus to move speed.
+
+**Brides (elites, M3 schedule):** 2:30, 4:30 ×2, 6:00, 7:00, 8:00 and 9:00 ×2.
+Each drops a Reliquary.
 
 ### 6.2 Timeline (initial)
 | Time | Spawns | Event |
@@ -208,7 +219,7 @@ All director numbers live in `src/data/director.ts` and `src/data/timeline.ts`.
 ### 7.1 Pickups
 | Pickup | Source | Effect |
 |---|---|---|
-| **Spirit Ember** (XP) | Every kill | Small, medium and large tiers. Embers merge past 300 on screen. |
+| **Spirit Ember** (XP) | Every kill | Value = enemy XP × (1 + 0.18 × minute) × Curse. At most 400 embers exist; when full, the ember furthest from the player is recycled into the new drop, carrying its value, so XP left behind is never stranded. |
 | **Onigiri** | Stone lanterns, rare drops | Heals 30 HP |
 | **Coin pouch** | Stone lanterns, elites | Meta currency ("Embers of the Shrine"; called *coins* in the UI) |
 | **Reliquary** | Elites, bosses | 1 upgrade, or an evolution or union when eligible. Luck can give 3 or 5 upgrades. |

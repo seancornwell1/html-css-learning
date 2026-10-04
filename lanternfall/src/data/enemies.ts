@@ -23,6 +23,10 @@ export interface EnemyDef {
    */
   lead: number;
   behaviour: EnemyBehaviour;
+  /** Elites drop a Reliquary and resist knockback (GAME_DESIGN §6.1). */
+  elite?: boolean;
+  /** Bosses are immune to execute effects and screen clears. */
+  boss?: boolean;
 }
 
 export const ENEMIES: readonly EnemyDef[] = [
@@ -65,9 +69,28 @@ export const ENEMIES: readonly EnemyDef[] = [
     lead: 0.6,
     behaviour: 'hop',
   },
+  {
+    id: 'bride_of_the_reservoir',
+    hp: 900,
+    speed: 60,
+    contactDamage: 22,
+    radius: 22,
+    xp: 30,
+    cost: 0,
+    group: [1, 1],
+    knockback: 0.15,
+    lead: 0.8,
+    behaviour: 'chase',
+    elite: true,
+  },
 ];
 
-export const ENEMY_KIND = { wisp: 0, faceless_walker: 1, hopping_kasa: 2 } as const;
+export const ENEMY_KIND = {
+  wisp: 0,
+  faceless_walker: 1,
+  hopping_kasa: 2,
+  bride_of_the_reservoir: 3,
+} as const;
 
 export const MAX_ENEMY_RADIUS = Math.max(...ENEMIES.map((e) => e.radius));
 
@@ -77,6 +100,11 @@ export const HOP = { crouch: 0.35, air: 0.3, rest: 0.25 } as const;
 /** Per-minute scaling (GAME_DESIGN §6.1). */
 export function enemyHpScale(minutes: number): number {
   return 1 + 0.1 * minutes + 0.012 * minutes * minutes;
+}
+
+/** Later spirits carry more light (bigger embers), like their HP. */
+export function enemyXpScale(minutes: number): number {
+  return 1 + 0.18 * minutes;
 }
 
 export function enemyDamageScale(minutes: number): number {

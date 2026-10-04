@@ -28,16 +28,28 @@ export class EmberPool {
   }
 
   /**
-   * Drop an ember. When the pool is full the value merges into an existing
-   * ember instead (GAME_DESIGN §7.1), so XP is never lost.
+   * Drop an ember. When the pool is full, the ember furthest from the
+   * player (px, py) is recycled into this one, carrying its XP along, so
+   * light left far behind is not lost and the cap never strands new drops.
    */
-  drop(x: number, y: number, value: number): void {
-    const slot = this.index.alloc();
+  drop(x: number, y: number, value: number, px = x, py = y): void {
+    let slot = this.index.alloc();
     if (slot < 0) {
-      // Merge into the oldest-placed dense entry; deterministic.
-      const target = this.index.slots[0] as number;
-      this.value[target] = (this.value[target] as number) + value;
-      return;
+      let far = -1;
+      let farD2 = -1;
+      for (let i = 0; i < this.index.count; i++) {
+        const s = this.index.slots[i] as number;
+        const dx = (this.x[s] as number) - px;
+        const dy = (this.y[s] as number) - py;
+        const d2 = dx * dx + dy * dy;
+        if (d2 > farD2) {
+          farD2 = d2;
+          far = s;
+        }
+      }
+      if (far < 0) return;
+      slot = far;
+      value += this.value[far] as number;
     }
     this.x[slot] = x;
     this.y[slot] = y;

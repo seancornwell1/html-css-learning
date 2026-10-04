@@ -19,6 +19,13 @@ export class EnemyPool {
   /** Behaviour direction (e.g. hop heading), unit vector. */
   readonly dirX: Float64Array;
   readonly dirY: Float64Array;
+  /** Seconds of slow left, and how much speed it removes (0..1). */
+  readonly slowT: Float64Array;
+  readonly slowAmt: Float64Array;
+  /** Seconds of freeze left (no movement). */
+  readonly freezeT: Float64Array;
+  /** Movement-speed multiplier fixed at spawn (curse). */
+  readonly speedMul: Float64Array;
   private nextId = 1;
 
   constructor(capacity: number) {
@@ -35,6 +42,10 @@ export class EnemyPool {
     this.timer = new Float64Array(capacity);
     this.dirX = new Float64Array(capacity);
     this.dirY = new Float64Array(capacity);
+    this.slowT = new Float64Array(capacity);
+    this.slowAmt = new Float64Array(capacity);
+    this.freezeT = new Float64Array(capacity);
+    this.speedMul = new Float64Array(capacity);
   }
 
   get count(): number {
@@ -65,6 +76,10 @@ export class EnemyPool {
     this.timer[slot] = 0;
     this.dirX[slot] = 0;
     this.dirY[slot] = 0;
+    this.slowT[slot] = 0;
+    this.slowAmt[slot] = 0;
+    this.freezeT[slot] = 0;
+    this.speedMul[slot] = 1;
     return slot;
   }
 

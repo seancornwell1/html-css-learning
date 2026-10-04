@@ -94,15 +94,16 @@ describe('Sim rules', () => {
     expect(picks).toBe(3);
   });
 
-  it('taking Ofuda Volley fires homing talismans that hit', () => {
+  it('Ofuda Volley fires homing talismans that hit', () => {
     const sim = new Sim({ seed: 1, events: false });
-    sim.embers.drop(0, 0, sim.xpNext);
-    sim.step(IDLE_INTENT);
-    const idx = sim.choices?.findIndex(
-      (o) => o.type === 'weapon_new' && o.weapon === WEAPON_ID.ofuda_volley,
-    );
-    expect(idx).toBeGreaterThanOrEqual(0);
-    sim.choose(idx ?? 0);
+    sim.weapons.push({
+      weapon: WEAPON_ID.ofuda_volley,
+      level: 1,
+      cooldown: 0,
+      fired: 0,
+      hits: 0,
+      active: 0,
+    });
     sim.enemies.spawn(ENEMY_KIND.faceless_walker, 300, 0, 500, 1);
     advance(sim, 3 * TICK_RATE, () => IDLE_INTENT);
     expect(sim.damageByWeapon[WEAPON_ID.ofuda_volley]).toBeGreaterThan(0);

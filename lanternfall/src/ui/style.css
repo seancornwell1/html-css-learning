@@ -324,3 +324,96 @@ body {
   line-height: 1.5;
   color: var(--bone);
 }
+
+/* Inventory chips under the HUD */
+#inventory {
+  position: fixed;
+  top: calc(var(--safe-top) + 34px);
+  left: var(--safe-left);
+  right: calc(var(--safe-right) + 56px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.chip {
+  padding: 2px 6px;
+  border: 1px solid var(--ash);
+  border-radius: 3px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  background: rgb(7 7 10 / 0.6);
+}
+
+.chip.passive {
+  color: var(--ash);
+}
+
+.chip.evolved {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Evolution / reliquary banner */
+#banner {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: min(90vw, 520px);
+  text-align: center;
+  pointer-events: none;
+  animation: banner 2.6s ease-out forwards;
+}
+
+#banner[hidden] {
+  display: none;
+}
+
+#banner-title {
+  margin: 0;
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+#banner-detail {
+  margin: 6px 0 0;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+@keyframes banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  10%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #banner {
+    animation-duration: 3s;
+    animation-name: banner-fade;
+  }
+
+  @keyframes banner-fade {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}

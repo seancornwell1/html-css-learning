@@ -6,7 +6,17 @@ import { parseArgs } from 'node:util';
 import { Worker } from 'node:worker_threads';
 import { build } from 'esbuild';
 import { BOT_NAMES, isBotName, type BotName } from './bots/index';
-import { groupStats, sortRuns, suiteHash, toMarkdown, type Check, type Report } from './report';
+import { WEAPONS } from '../../src/data/weapons';
+import { BANDS, MAX_WEAPON_SHARE } from './bands';
+import {
+  evolutionCounts,
+  groupStats,
+  sortRuns,
+  suiteHash,
+  toMarkdown,
+  type Check,
+  type Report,
+} from './report';
 import { runOne, type RunJob, type RunResult } from './run';
 
 /** Playable characters arrive in M5; until then everything runs as Akari. */
@@ -27,6 +37,7 @@ const { values } = parseArgs({
     workers: { type: 'string' },
     compare: { type: 'string' },
     note: { type: 'string', multiple: true },
+    gate: { type: 'string', multiple: true },
   },
 });
 
@@ -148,13 +159,53 @@ async function main(): Promise<void> {
     });
   }
 
+  const groups = groupStats(runs);
+  const gates = new Set(values.gate ?? []);
+  if (gates.has('share')) {
+    const over = groups.flatMap((g) =>
+      Object.entries(g.damageShare)
+        .filter(([, f]) => f > MAX_WEAPON_SHARE)
+        .map(([id, f]) => `${g.character}/${g.bot} ${id} ${(f * 100).toFixed(0)}%`),
+    );
+    checks.push({
+      name: `No weapon over ${MAX_WEAPON_SHARE * 100}% damage share`,
+      pass: over.length === 0,
+      detail: over.length === 0 ? 'all groups under the cap' : over.join('; '),
+    });
+  }
+  if (gates.has('evolutions')) {
+    const reached = evolutionCounts(runs, 'skilled');
+    const all = WEAPONS.filter((w) => w.evolvedFrom || w.unionOf).map((w) => w.id);
+    const missing = all.filter((id) => !reached[id]);
+    checks.push({
+      name: 'Every evolution and union reached by the skilled bot',
+      pass: missing.length === 0,
+      detail:
+        missing.length === 0
+          ? `${all.length}/${all.length} reached`
+          : `missing: ${missing.join(', ')}`,
+    });
+  }
+  if (gates.has('bands')) {
+    for (const g of groups) {
+      const band = BANDS[g.bot as keyof typeof BANDS];
+      if (!band) continue;
+      const pass = g.survival >= band[0] && g.survival <= band[1];
+      checks.push({
+        name: `Band ${g.character}/${g.bot} ${band[0] * 100}–${band[1] * 100}%`,
+        pass,
+        detail: `${(g.survival * 100).toFixed(1)}% survived`,
+      });
+    }
+  }
+
   const report: Report = {
     label: values.label,
     createdAt: new Date().toISOString(),
     seedsPerGroup,
     suiteHash: suiteHash(runs),
     speed,
-    groups: groupStats(runs),
+    groups,
     checks,
     notes: values.note ?? [],
     runs,

@@ -14,6 +14,11 @@ export interface GroupStats {
   meanLevelAt5: number;
   /** Fraction of total damage per weapon id. */
   damageShare: Record<string, number>;
+  /** Mean evolutions per run and share of runs with at least one. */
+  meanEvolutions: number;
+  evolvedRuns: number;
+  /** Median seconds to first evolution among runs that evolved (-1 if none). */
+  medianFirstEvolution: number;
   errors: number;
 }
 
@@ -70,6 +75,16 @@ function shares(list: RunResult[]): Record<string, number> {
   return totals;
 }
 
+/** Runs in which each evolved/union weapon was obtained, optionally for one bot. */
+export function evolutionCounts(runs: RunResult[], bot?: string): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const r of runs) {
+    if (bot && r.bot !== bot) continue;
+    for (const id of new Set(r.evolutions)) out[id] = (out[id] ?? 0) + 1;
+  }
+  return out;
+}
+
 export function groupStats(runs: RunResult[]): GroupStats[] {
   const groups = new Map<string, RunResult[]>();
   for (const r of sortRuns(runs)) {
@@ -93,6 +108,15 @@ export function groupStats(runs: RunResult[]): GroupStats[] {
       meanLevel: list.reduce((s, r) => s + r.level, 0) / list.length,
       meanLevelAt5: list.reduce((s, r) => s + r.levelAt5, 0) / list.length,
       damageShare: shares(list),
+      meanEvolutions: list.reduce((s, r) => s + r.evolutions.length, 0) / list.length,
+      evolvedRuns: list.filter((r) => r.evolutions.length > 0).length / list.length,
+      medianFirstEvolution: (() => {
+        const t = list
+          .map((r) => r.firstEvolution)
+          .filter((x) => x >= 0)
+          .sort((a, b) => a - b);
+        return t.length ? quantile(t, 0.5) : -1;
+      })(),
       errors: list.filter((r) => r.status === 'error').length,
     };
   });
@@ -128,6 +152,28 @@ export function toMarkdown(report: Report): string {
       .sort((a, b) => b[1] - a[1])
       .map(([id, f]) => `${id} ${(f * 100).toFixed(0)}%`);
     lines.push(`| ${g.character} | ${g.bot} | ${parts.join(', ')} |`);
+  }
+  lines.push('', '## Evolutions', '');
+  lines.push(
+    '| Character | Bot | Runs with ≥1 | Mean per run | Median first |',
+    '|---|---|---|---|---|',
+  );
+  for (const g of report.groups) {
+    lines.push(
+      `| ${g.character} | ${g.bot} | ${(g.evolvedRuns * 100).toFixed(0)}% | ` +
+        `${g.meanEvolutions.toFixed(2)} | ${g.medianFirstEvolution >= 0 ? mmss(g.medianFirstEvolution) : '—'} |`,
+    );
+  }
+  const reached = evolutionCounts(report.runs);
+  if (Object.keys(reached).length > 0) {
+    lines.push(
+      '',
+      'Reached (runs, all bots): ' +
+        Object.entries(reached)
+          .sort((a, b) => b[1] - a[1])
+          .map(([id, n]) => `${id} ${n}`)
+          .join(', '),
+    );
   }
   if (report.notes.length > 0) {
     lines.push('', '## Notes', '');

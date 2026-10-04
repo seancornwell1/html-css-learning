@@ -38,6 +38,14 @@ decision changes, update the doc in the same commit.
 6. **Rendering never changes outcomes.** The determinism hash for a seed and
    intent log must be identical with and without rendering.
 
+## Weapons
+- Weapon behaviours are generic (`WeaponBehaviour` in `src/data/weapons.ts`,
+  implemented in `src/sim/weapons.ts`). New weapons should be data first;
+  add a behaviour only when no existing one fits.
+- Evolved and union weapons are separate `WeaponDef`s (`evolvedFrom`,
+  `unionOf`), never offered on level-up. `tests/arsenal.test.ts` checks every
+  weapon actually damages something.
+
 ## Art & audio rules
 - **Original art only.** Draw sprites in code (vector paths cached to
   offscreen canvases) or hand-author SVG in this repo. Never download, trace
@@ -60,7 +68,12 @@ decision changes, update the doc in the same commit.
 - Feel effects (shake, flashes, hit-stop, decals) react to sim events in
   `Renderer.onEvent`. Hit-stop only delays stepping in `main.ts`.
 - Debug URL params: `?seed=N`, `?fx=off|low|high` (does not touch the save),
-  `?notice=skip`. `window.__frameMs` holds the smoothed frame time.
+  `?notice=skip`, `?grant=fox_fire:8,iron_wick:5` (debug loadout via
+  `Sim.grant`). `npx tsx tools/gallery.ts <out> name=grant ...` screenshots
+  loadouts (needs `vite preview --port 4173`).
+- Weapon presentation: projectile looks (`PROJECTILE_LOOK`) and zone looks
+  live in `src/render/weapon-fx.ts`. Enemy art is registered in `ENEMY_ART`
+  (`src/render/sprites.ts`); shapes live in `src/render/shapes.ts`. `window.__frameMs` holds the smoothed frame time.
 - Headless Chromium uses software GL, so its frame times (~100–250 ms) are
   not a performance signal. Measure on a real phone (M9).
 
@@ -114,7 +127,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M0 | Scaffold | ✅ done (`sim-reports/M0.md`) |
 | M1 | Core loop | ✅ done (`sim-reports/M1.md`) |
 | M2 | Look & feel | ✅ done (`sim-reports/M2.md`, bit-identical to M1) |
-| M3 | Arsenal I | not started |
+| M3 | Arsenal I | ✅ done (`sim-reports/M3.md`) |
 | M4 | Arsenal II | not started |
 | M5 | Night & roster | not started |
 | M6 | Power-ups | not started |
