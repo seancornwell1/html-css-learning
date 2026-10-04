@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#07070A" />
+    <title>Lanternfall</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307070A'/%3E%3Crect x='10' y='8' width='12' height='16' rx='5' fill='%23F5B83D'/%3E%3Crect x='13' y='4' width='6' height='3' fill='%23F2F0EA'/%3E%3Crect x='13' y='25' width='6' height='3' fill='%23F2F0EA'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/ui/style.css" />
+  </head>
+  <body>
+    <canvas id="game"></canvas>
+    <div id="hud" aria-live="polite">
+      <span id="hud-time">0:00</span>
+      <span id="hud-hp">100</span>
+    </div>
+    <div id="overlay" hidden>
+      <p id="overlay-title"></p>
+      <p id="overlay-hint">Press R or tap to try again</p>
+    </div>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

@@ -1,0 +1,539 @@
+{
+ "label": "M0",
+ "createdAt": "2026-10-04T17:19:47.166Z",
+ "seedsPerGroup": 50,
+ "suiteHash": "ee2bfcbf",
+ "speed": 2224.254097426596,
+ "groups": [
+  {
+   "character": "akari",
+   "bot": "stub",
+   "runs": 50,
+   "survival": 0,
+   "medianTime": 100.35,
+   "p25Time": 83.7,
+   "p75Time": 110.28333333333333,
+   "meanKills": 0,
+   "errors": 0
+  }
+ ],
+ "checks": [
+  {
+   "name": "No crashes / non-finite state",
+   "pass": true,
+   "detail": "all runs clean"
+  },
+  {
+   "name": "Determinism (same seed ⇒ same hash)",
+   "pass": true,
+   "detail": "10/10 re-runs matched"
+  },
+  {
+   "name": "Speed ≥ 30× real time",
+   "pass": true,
+   "detail": "2224×"
+  }
+ ],
+ "runs": [
+  {
+   "seed": 1,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 79.21666666666667,
+   "kills": 0,
+   "hash": 3554541203,
+   "wallMs": 64.726287
+  },
+  {
+   "seed": 2,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 89.8,
+   "kills": 0,
+   "hash": 191643570,
+   "wallMs": 95.70231
+  },
+  {
+   "seed": 3,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 111.66666666666667,
+   "kills": 0,
+   "hash": 3046404806,
+   "wallMs": 94.031162
+  },
+  {
+   "seed": 4,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 110.28333333333333,
+   "kills": 0,
+   "hash": 2848276078,
+   "wallMs": 87.202234
+  },
+  {
+   "seed": 5,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 82.05,
+   "kills": 0,
+   "hash": 1018807519,
+   "wallMs": 31.767838
+  },
+  {
+   "seed": 6,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 95.36666666666666,
+   "kills": 0,
+   "hash": 1198892162,
+   "wallMs": 55.679192
+  },
+  {
+   "seed": 7,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 112.5,
+   "kills": 0,
+   "hash": 1998750101,
+   "wallMs": 77.088408
+  },
+  {
+   "seed": 8,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 103.93333333333334,
+   "kills": 0,
+   "hash": 3212822618,
+   "wallMs": 64.854112
+  },
+  {
+   "seed": 9,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 83.7,
+   "kills": 0,
+   "hash": 1090086559,
+   "wallMs": 31.406558
+  },
+  {
+   "seed": 10,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 114,
+   "kills": 0,
+   "hash": 2245873891,
+   "wallMs": 69.033568
+  },
+  {
+   "seed": 11,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 101.31666666666666,
+   "kills": 0,
+   "hash": 1243505572,
+   "wallMs": 33.405787
+  },
+  {
+   "seed": 12,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 88.05,
+   "kills": 0,
+   "hash": 2763768217,
+   "wallMs": 45.533929
+  },
+  {
+   "seed": 13,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 116.85,
+   "kills": 0,
+   "hash": 1891123563,
+   "wallMs": 53.973538
+  },
+  {
+   "seed": 14,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 72.81666666666666,
+   "kills": 0,
+   "hash": 3133635972,
+   "wallMs": 30.622829
+  },
+  {
+   "seed": 15,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 71.63333333333334,
+   "kills": 0,
+   "hash": 3391936496,
+   "wallMs": 15.465918
+  },
+  {
+   "seed": 16,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 95.6,
+   "kills": 0,
+   "hash": 1072228548,
+   "wallMs": 53.062166
+  },
+  {
+   "seed": 17,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 116.66666666666667,
+   "kills": 0,
+   "hash": 2262507699,
+   "wallMs": 55.29007
+  },
+  {
+   "seed": 18,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 123.48333333333333,
+   "kills": 0,
+   "hash": 2680098143,
+   "wallMs": 77.077697
+  },
+  {
+   "seed": 19,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 91.96666666666667,
+   "kills": 0,
+   "hash": 3026140410,
+   "wallMs": 27.236158
+  },
+  {
+   "seed": 20,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 100.86666666666666,
+   "kills": 0,
+   "hash": 3131669512,
+   "wallMs": 43.204773
+  },
+  {
+   "seed": 21,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 116.86666666666666,
+   "kills": 0,
+   "hash": 1018579961,
+   "wallMs": 52.476046
+  },
+  {
+   "seed": 22,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 113.36666666666666,
+   "kills": 0,
+   "hash": 3774899243,
+   "wallMs": 63.605335
+  },
+  {
+   "seed": 23,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 105.93333333333334,
+   "kills": 0,
+   "hash": 197640963,
+   "wallMs": 40.372123
+  },
+  {
+   "seed": 24,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 81.66666666666667,
+   "kills": 0,
+   "hash": 2626560857,
+   "wallMs": 25.769191
+  },
+  {
+   "seed": 25,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 77.7,
+   "kills": 0,
+   "hash": 2784438936,
+   "wallMs": 30.310244
+  },
+  {
+   "seed": 26,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 105.41666666666667,
+   "kills": 0,
+   "hash": 1071927586,
+   "wallMs": 40.587281
+  },
+  {
+   "seed": 27,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 109.21666666666667,
+   "kills": 0,
+   "hash": 1836767991,
+   "wallMs": 46.840736
+  },
+  {
+   "seed": 28,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 74.46666666666667,
+   "kills": 0,
+   "hash": 806034411,
+   "wallMs": 25.738834
+  },
+  {
+   "seed": 29,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 72.63333333333334,
+   "kills": 0,
+   "hash": 2100840686,
+   "wallMs": 23.245003
+  },
+  {
+   "seed": 30,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 100.86666666666666,
+   "kills": 0,
+   "hash": 917324013,
+   "wallMs": 36.323395
+  },
+  {
+   "seed": 31,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 121.33333333333333,
+   "kills": 0,
+   "hash": 2917888907,
+   "wallMs": 59.267285
+  },
+  {
+   "seed": 32,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 100.35,
+   "kills": 0,
+   "hash": 2887632687,
+   "wallMs": 38.627714
+  },
+  {
+   "seed": 33,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 87.58333333333333,
+   "kills": 0,
+   "hash": 829921672,
+   "wallMs": 28.865851
+  },
+  {
+   "seed": 34,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 81.41666666666667,
+   "kills": 0,
+   "hash": 1051532916,
+   "wallMs": 21.116559
+  },
+  {
+   "seed": 35,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 97.23333333333333,
+   "kills": 0,
+   "hash": 3372343962,
+   "wallMs": 31.691526
+  },
+  {
+   "seed": 36,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 92.51666666666667,
+   "kills": 0,
+   "hash": 3703390110,
+   "wallMs": 30.379614
+  },
+  {
+   "seed": 37,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 101.8,
+   "kills": 0,
+   "hash": 1531237515,
+   "wallMs": 37.041181
+  },
+  {
+   "seed": 38,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 80.56666666666666,
+   "kills": 0,
+   "hash": 3425317030,
+   "wallMs": 20.868863
+  },
+  {
+   "seed": 39,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 106.13333333333334,
+   "kills": 0,
+   "hash": 4293138928,
+   "wallMs": 38.276236
+  },
+  {
+   "seed": 40,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 92.43333333333334,
+   "kills": 0,
+   "hash": 2631201223,
+   "wallMs": 27.964762
+  },
+  {
+   "seed": 41,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 77.73333333333333,
+   "kills": 0,
+   "hash": 3449594532,
+   "wallMs": 18.963602
+  },
+  {
+   "seed": 42,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 100.8,
+   "kills": 0,
+   "hash": 470443947,
+   "wallMs": 36.764473
+  },
+  {
+   "seed": 43,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 106.21666666666667,
+   "kills": 0,
+   "hash": 443884262,
+   "wallMs": 42.444283
+  },
+  {
+   "seed": 44,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 88.81666666666666,
+   "kills": 0,
+   "hash": 8696757,
+   "wallMs": 25.438414
+  },
+  {
+   "seed": 45,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 114.45,
+   "kills": 0,
+   "hash": 3349450926,
+   "wallMs": 53.088083
+  },
+  {
+   "seed": 46,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 118.45,
+   "kills": 0,
+   "hash": 1899877322,
+   "wallMs": 56.99409
+  },
+  {
+   "seed": 47,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 95.55,
+   "kills": 0,
+   "hash": 762880558,
+   "wallMs": 30.24614
+  },
+  {
+   "seed": 48,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 74.66666666666667,
+   "kills": 0,
+   "hash": 1573734880,
+   "wallMs": 16.697043
+  },
+  {
+   "seed": 49,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 115.3,
+   "kills": 0,
+   "hash": 1273829072,
+   "wallMs": 48.473525
+  },
+  {
+   "seed": 50,
+   "bot": "stub",
+   "character": "akari",
+   "status": "dead",
+   "time": 97.31666666666666,
+   "kills": 0,
+   "hash": 3966793328,
+   "wallMs": 34.910847
+  }
+ ]
+}

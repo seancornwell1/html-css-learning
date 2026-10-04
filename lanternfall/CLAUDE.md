@@ -14,6 +14,8 @@ decision changes, update the doc in the same commit.
 | `npm run sim` | Headless balance sim, quick mode (50 seeds × bot × character) |
 | `npm run sim -- --full` | Full sim (200 seeds); required at M5, M8 and M10 |
 | `npm run sim -- --char akari --bot skilled --seeds 20` | Targeted runs while tuning |
+| `npm run sim -- --label M2 --compare M1` | Also assert every shared run is bit-identical to an earlier report |
+| `npm run shot -- <url> <outDir>` | Playwright screenshots (portrait, landscape, desktop); fails on console errors. Serve first with `npm run build && npx vite preview --port 4173` |
 
 ## Architecture rules (do not break these)
 1. **`src/sim/` is pure and deterministic.** No DOM, `window`, `document`,
@@ -57,8 +59,13 @@ decision changes, update the doc in the same commit.
 
 ## Balance simulation
 - Lives in `tools/sim/`. Bots: `naive`, `average`, `skilled` (see
-  GAME_DESIGN §10). It runs with worker_threads and writes
-  `sim-reports/<label>.json` and `sim-reports/<label>.md`.
+  GAME_DESIGN §10; M0 has only a `stub` bot). It runs with worker_threads
+  (loaded through `worker-boot.mjs`, which registers tsx) and writes
+  `sim-reports/<label>.json` and `sim-reports/<label>.md`. Commit both: the
+  JSON holds the per-run hashes that `--compare` checks against.
+- Built-in checks: no crashes or non-finite state, determinism (a sample of
+  seeds re-run on another thread), speed ≥ 30× real time, and `--compare`
+  when given. The exit code is non-zero if any check fails.
 - **Target bands** (no meta, per character, survival to 10:00): naive < 5%,
   average 10–25%, skilled 50–70%; skilled + max meta 80–90%.
   These bands are enforced **from M5 onward**. Before M5 the sim checks only
@@ -83,7 +90,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 ### Milestone status
 | M | Name | Status |
 |---|---|---|
-| M0 | Scaffold | not started |
+| M0 | Scaffold | ✅ done (`sim-reports/M0.md`) |
 | M1 | Core loop | not started |
 | M2 | Look & feel | not started |
 | M3 | Arsenal I | not started |
@@ -100,5 +107,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
   `kebab-case.ts`, types `PascalCase`, data IDs `snake_case` strings.
 - The repo root holds an unrelated HTML/CSS exercise. Keep all game files
   inside `lanternfall/`.
+- Stopping a background server: `pkill -f`/`pgrep -f` match your own shell's
+  command line too. Use a bracketed pattern, e.g. `pgrep -f "[v]ite.js preview" | xargs -r kill`.
 - Save data goes through `src/meta/save.ts`, which is versioned and
   migrations-only. Never read `localStorage` elsewhere.

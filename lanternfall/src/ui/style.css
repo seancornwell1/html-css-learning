@@ -1,0 +1,69 @@
+:root {
+  --ink: #07070a;
+  --ash: #6e6e78;
+  --bone: #f2f0ea;
+  --gold: #f5b83d;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: system-ui, sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+}
+
+#game {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+#hud {
+  position: fixed;
+  top: max(12px, env(safe-area-inset-top));
+  left: max(16px, env(safe-area-inset-left));
+  right: max(16px, env(safe-area-inset-right));
+  display: flex;
+  justify-content: space-between;
+  font-variant-numeric: tabular-nums;
+  font-size: 20px;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+
+#hud-time {
+  color: var(--gold);
+}
+
+#overlay {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  text-align: center;
+  background: rgb(7 7 10 / 0.8);
+}
+
+#overlay[hidden] {
+  display: none;
+}
+
+#overlay-title {
+  font-size: 32px;
+  letter-spacing: 0.2em;
+  margin: 0 0 12px;
+}
+
+#overlay-hint {
+  color: var(--ash);
+  margin: 0;
+}
