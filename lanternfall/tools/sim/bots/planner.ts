@@ -1,4 +1,5 @@
 import { ENEMIES } from '../../../src/data/enemies';
+import { STATE } from '../../../src/sim/enemy-ai';
 import type { Intent } from '../../../src/sim/intent';
 import type { Sim } from '../../../src/sim/sim';
 import type { Bot } from './bot';
@@ -150,6 +151,28 @@ export class PlannerBot implements Bot {
         else if (h === 1 && d < reach) engage += 1;
       }
       danger += hazardRisk(sim, px, py, t) * P.contact * 0.3 * urgency;
+    }
+    // Telegraphed lunges and charges are fast too: sweep them finely.
+    for (let k = 0; k < n; k++) {
+      const s = this.near[k] as number;
+      if (!e.isAlive(s)) continue;
+      const b = ENEMIES[e.kind[s] as number];
+      if (!b || (b.behaviour !== 'lunge' && b.behaviour !== 'mother')) continue;
+      const st = e.state[s] as number;
+      if (st !== STATE.windup && st !== STATE.act) continue;
+      const r = b.radius + pl.radius + 6;
+      for (let step = 1; step <= 20; step++) {
+        const t = step * 0.05;
+        const px = pl.x + dx * speed * t;
+        const py = pl.y + dy * speed * t;
+        const q = predictEnemy(sim, s, t, px, py);
+        const ox = px - q.x;
+        const oy = py - q.y;
+        if (ox * ox + oy * oy < r * r) {
+          danger += P.contact * P.shot * 1.5 * (1.1 - t);
+          break;
+        }
+      }
     }
     // Shots are fast: sweep the path finely and count any crossing as a hit.
     const sh = sim.enemyShots;
