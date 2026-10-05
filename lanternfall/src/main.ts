@@ -12,7 +12,8 @@ import { ENEMIES } from './data/enemies';
 import { Sim } from './sim/sim';
 import { formatTime } from './ui/format';
 import { Banner, Inventory } from './ui/hud';
-import { LevelUpUi } from './ui/levelup';
+import { LevelUpUi, type LevelUpTools } from './ui/levelup';
+import { FRAGMENTS, SECRETS } from './data/secrets';
 import { CharacterSelect } from './ui/select';
 import { Shrine } from './ui/shrine';
 import { Register } from './ui/register';
@@ -92,7 +93,7 @@ let character =
 /** `?spawn=bone_colossus,long_neck` places debug enemies near the start. */
 const spawnIds = (params.get('spawn') ?? '').split(',').filter(Boolean);
 function newSim(): Sim {
-  const s = new Sim({ seed: newSeed(), character });
+  const s = new Sim({ seed: newSeed(), character, meta: save.profile.ranks });
   if (grant.length > 0) s.grant(grant);
   spawnIds.forEach((id, i) => {
     const kind = ENEMIES.findIndex((d) => d.id === id);
@@ -117,6 +118,22 @@ let blocked = false; // e.g. the first-launch notice
 let lastFrame = performance.now();
 /** Smoothed frame time, exposed for tooling (tools/shot.ts). */
 let frameMs = 16;
+
+/** Shrine run tools for the level-up screen; reads the live sim. */
+const runTools: LevelUpTools = {
+  get rerolls() {
+    return sim.rerolls;
+  },
+  get skips() {
+    return sim.skips;
+  },
+  get banishes() {
+    return sim.banishes;
+  },
+  reroll: () => void sim.reroll(),
+  skip: () => void sim.skip(),
+  banish: (i) => void sim.banish(i),
+};
 
 const levelUp = new LevelUpUi(el('levelup'), el('levelup-cards'), (i) => sim.choose(i));
 
@@ -154,7 +171,7 @@ const loop = new FixedStepLoop({
     });
     if (sim.choices && !levelUp.open) {
       stick.release();
-      levelUp.show(sim.choices, sim.level);
+      levelUp.show(sim.choices, sim.level, runTools);
     }
   },
   render(alpha) {
@@ -165,7 +182,7 @@ const loop = new FixedStepLoop({
     (window as { __frameMs?: number }).__frameMs = frameMs;
     lastFrame = now;
     // Multiple level-ups in a row: show the next set as soon as one is picked.
-    if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level);
+    if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level, runTools);
     stick.enabled =
       !levelUp.open &&
       !paused &&
@@ -220,6 +237,7 @@ function showGameOver(): void {
   el('gameover-stats').textContent =
     `${formatTime(sim.time)} · Level ${sim.level} · ${sim.kills} spirits laid to rest · ` +
     `+${earned} coins`;
+  el('gameover-fragment').textContent = pickFragment();
   el('longnight-btn').hidden = !won;
   gameover.hidden = false;
   el('again-btn').focus();
@@ -248,8 +266,24 @@ function settleRun(won: boolean): number {
   if (sim.time >= 300) unlock('tetsu');
   if (sim.evolutions.length > 0) unlock('hotaru');
   for (const e of sim.evolutions) if (!pr.register.includes(e.weapon)) pr.register.push(e.weapon);
+  for (const id of sim.secrets) {
+    if (!pr.secrets.includes(id)) pr.secrets.push(id);
+    const unlocks = SECRETS.find((x) => x.id === id)?.unlocks;
+    if (unlocks) unlock(unlocks);
+  }
   writeSave(save);
   return earned;
+}
+
+/**
+ * A death-screen fragment (GAME_DESIGN §9.2): usually a hint toward a
+ * secret not yet found, otherwise night lore. Presentation-only randomness.
+ */
+function pickFragment(): string {
+  const found = save.profile.secrets;
+  const hints = FRAGMENTS.filter((f) => f.hint && !found.includes(f.hint));
+  const pool = hints.length > 0 && Math.random() < 0.6 ? hints : FRAGMENTS.filter((f) => !f.hint);
+  return pool[Math.floor(Math.random() * pool.length)]?.text ?? '';
 }
 
 function restart(): void {
@@ -295,6 +329,7 @@ el('shrine-btn').addEventListener('click', () => {
   shrine.show(() => chooseCharacter());
 });
 el('shrine-close').addEventListener('click', () => shrine.close());
+el('shrine-refund').addEventListener('click', () => shrine.refund());
 el('register-btn').addEventListener('click', () => {
   select.hide();
   register.show(() => chooseCharacter());

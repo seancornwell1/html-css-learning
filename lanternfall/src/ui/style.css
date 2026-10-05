@@ -803,3 +803,15 @@ body {
     transform: translateY(-50%) rotate(-4deg);
   }
 }
+
+.fragment {
+  max-width: 36em;
+  margin: 0;
+  color: var(--ash);
+  font-style: italic;
+  text-align: center;
+}
+
+.fragment:empty {
+  display: none;
+}

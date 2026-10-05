@@ -323,6 +323,14 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     draw: (ctx) => shapes.stoneLantern(ctx),
     ink: { thin: 0.4, thick: 1 },
   },
+  sealed_well: {
+    halfW: 20,
+    halfH: 16,
+    frames: 1,
+    layout: 'mirror',
+    draw: (ctx) => shapes.sealedWell(ctx),
+    ink: { thin: 0.4, thick: 1 },
+  },
   lantern_eater: {
     halfW: 26,
     halfH: 24,

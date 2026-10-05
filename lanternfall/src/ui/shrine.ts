@@ -54,6 +54,20 @@ export class Shrine {
     this.render(def.id);
   }
 
+  /** Full-refund respec (GAME_DESIGN §9.1): every coin spent comes back. */
+  refund(): void {
+    let back = 0;
+    for (const def of SHRINE) {
+      const rank = Math.min(this.profile.ranks[def.id] ?? 0, def.maxRank);
+      for (let r = 0; r < rank; r++) back += rankCost(def, r);
+    }
+    if (back === 0) return;
+    this.profile.coins += back;
+    this.profile.ranks = {};
+    this.onChange();
+    this.render();
+  }
+
   private render(focusId?: string): void {
     this.coinsLabel.textContent = `${this.profile.coins} coins`;
     const rows = SHRINE.map((def) => {

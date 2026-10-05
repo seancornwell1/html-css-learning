@@ -1,4 +1,5 @@
 import { ENEMIES, HOP } from '../data/enemies';
+import { SECRETS } from '../data/secrets';
 import { WEAPONS } from '../data/weapons';
 import { STATE } from '../sim/enemy-ai';
 import { HAZARD } from '../sim/hazard-pool';
@@ -217,6 +218,17 @@ export class Renderer {
           this.onBanner('Festival Night', 'Faster, fiercer, for a while');
         }
         break;
+      case 'flood':
+        this.fx.impactFrame(0.7);
+        this.shake.add(0.5);
+        this.onBanner('The Flood', 'Black water rises');
+        break;
+      case 'secret': {
+        const def = SECRETS.find((x) => x.id === e.id);
+        this.fx.impactFrame(0.5);
+        this.onBanner('A secret', def?.reveal ?? '');
+        break;
+      }
       case 'level_up':
         this.pulse = 0;
         this.fx.aberration(0.3);

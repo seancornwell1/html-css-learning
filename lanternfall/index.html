@@ -89,6 +89,7 @@
     <div id="gameover" class="modal" hidden>
       <p class="modal-title" id="gameover-title"></p>
       <p id="gameover-stats"></p>
+      <p id="gameover-fragment" class="fragment"></p>
       <div class="actions">
         <button id="again-btn" class="btn" type="button">Try again</button>
         <button id="longnight-btn" class="btn" type="button" hidden>Keep the lantern lit</button>
@@ -128,7 +129,10 @@
       <p class="modal-title">The Shrine</p>
       <p id="shrine-coins" class="shrine-coins"></p>
       <div id="shrine-list"></div>
-      <button id="shrine-close" class="btn" type="button">Back</button>
+      <div class="actions">
+        <button id="shrine-close" class="btn" type="button">Back</button>
+        <button id="shrine-refund" class="btn secondary" type="button">Refund all</button>
+      </div>
     </div>
     <div id="boss-bar" hidden>
       <p id="boss-name"></p>

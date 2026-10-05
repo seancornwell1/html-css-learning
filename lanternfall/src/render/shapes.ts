@@ -569,3 +569,36 @@ export function festivalFan(ctx: Ctx): void {
     ctx.fill();
   }
 }
+
+/** The Sealed Well: a square stone curb bound with a straw rope and paper streamers. */
+export function sealedWell(ctx: Ctx): void {
+  ctx.fillStyle = PALETTE.bone;
+  ctx.fillRect(-16, -6, 32, 18);
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillRect(-12, -6, 24, 6);
+  // Stone joints.
+  ctx.fillRect(-6, 2, 1.2, 10);
+  ctx.fillRect(6, 2, 1.2, 10);
+  ctx.fillRect(-16, 6, 32, 1.2);
+  // Shimenawa rope across the mouth.
+  ctx.strokeStyle = PALETTE.ash;
+  ctx.lineWidth = 3;
+  ctx.beginPath();
+  ctx.moveTo(-18, -7);
+  ctx.quadraticCurveTo(0, -1, 18, -7);
+  ctx.stroke();
+  // Zigzag shide streamers.
+  ctx.fillStyle = PALETTE.bone;
+  for (const x of [-9, 0, 9]) {
+    ctx.beginPath();
+    ctx.moveTo(x - 2, -4);
+    ctx.lineTo(x + 2, -4);
+    ctx.lineTo(x, 1);
+    ctx.lineTo(x + 3, 1);
+    ctx.lineTo(x - 1, 7);
+    ctx.lineTo(x - 2, 2);
+    ctx.lineTo(x - 4, 2);
+    ctx.closePath();
+    ctx.fill();
+  }
+}
