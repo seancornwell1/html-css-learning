@@ -29,9 +29,9 @@ describe('characters', () => {
       expect(WEAPONS[sim.weapons[0]?.weapon ?? -1]?.id).toBe(c.startWeapon);
     }
     const tetsu = new Sim({ seed: 1, character: 'tetsu', events: false });
-    expect(tetsu.stats.maxHp).toBe(140);
+    expect(tetsu.stats.maxHp).toBe(130);
     expect(tetsu.stats.armor).toBe(1);
-    expect(tetsu.player.hp).toBe(140);
+    expect(tetsu.player.hp).toBe(130);
   });
 
   it("Hotaru's dash moves fast, grants i-frames, then cools down", () => {

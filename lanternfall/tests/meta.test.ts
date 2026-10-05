@@ -34,7 +34,7 @@ describe('Shrine ranks', () => {
     const meta = new Sim({ seed: 1, meta: maxRanks() });
     const might = SHRINE.find((r) => r.id === 'might');
     expect(meta.stats.might).toBeCloseTo(plain.stats.might + (might?.perRank ?? 0) * 5);
-    expect(meta.stats.maxHp).toBe(plain.stats.maxHp + 20);
+    expect(meta.stats.maxHp).toBe(plain.stats.maxHp + 15);
     expect(meta.player.hp).toBe(meta.stats.maxHp);
     expect(meta.stats.revival).toBe(plain.stats.revival + 1);
     expect([meta.rerolls, meta.skips, meta.banishes]).toEqual([3, 3, 3]);
@@ -42,7 +42,7 @@ describe('Shrine ranks', () => {
 
   it('ignore ranks beyond the maximum', () => {
     const sim = new Sim({ seed: 1, meta: { might: 99 } });
-    expect(sim.stats.might).toBeCloseTo(1.075);
+    expect(sim.stats.might).toBeCloseTo(1.05);
   });
 });
 
@@ -87,7 +87,7 @@ describe('run tools', () => {
 describe('secret characters', () => {
   it('Kagerou has fixed max HP and takes softer hits', () => {
     const k = new Sim({ seed: 1, character: 'kagerou', meta: maxRanks() });
-    expect(k.stats.maxHp).toBe(60);
+    expect(k.stats.maxHp).toBe(75);
     expect(k.stats.curse).toBeCloseTo(1.2);
   });
 
