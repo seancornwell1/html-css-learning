@@ -425,6 +425,12 @@ time to first evolution, damage share per weapon, top killers, lowest HP, and
 the pick rate versus win rate of each weapon and passive. Any weapon whose win
 rate deviates by more than ±15 points from the median gets flagged.
 
+**Skilled bot (M10).**
+- **Before M10:** the skilled bot was a potential field plus a lookahead veto. It played barely better than the average bot (6–33% survival), so the skilled band stayed unmet through M5–M8. That shortfall was accepted at the time.
+- **From M10:** it is a planner. It scores 16 headings plus standing still by rolling the player forward 1.2 s against predicted enemies, with fine sweeps for shots and telegraphed lunges. The score weighs crowding (scaled to weapon reach), enemies inside reach, loot along the path and escape room.
+- **Reaction time** is unchanged at 50 ms.
+- **The old bot** stays available as `--bot kiter`.
+
 **Calibration caveat:** bots stand in for humans. After M5 and M10 a short
 human playtest checks that "Average bot ≈ first-time player". If it doesn't,
 the bands are shifted rather than the bots tuned to match.
