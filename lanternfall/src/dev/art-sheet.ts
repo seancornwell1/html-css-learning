@@ -26,6 +26,7 @@ function show(label: string, sprite: Sprite | undefined): void {
 }
 
 show('player', cache.player[0]);
+for (const [id, frames] of cache.players) show(`figure ${id}`, frames[0]);
 for (const [id, tints] of cache.enemy) show(id, tints[0]?.[0]);
 
 for (const id of ['akari', 'ren', 'tetsu', 'hotaru', 'kagerou', 'ido']) {

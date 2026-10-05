@@ -592,7 +592,8 @@ export class Renderer {
     // Reduce flashing: translucency instead of a 10 Hz blink.
     if (hurt && this.fx.reduceFlashing) ctx.globalAlpha = 0.55;
     if (!hurt || this.fx.reduceFlashing || Math.floor(p.iframes * 20) % 2 === 1) {
-      this.blit(this.sprites.player[mirror * PLAYER_FRAMES + frame], px, py);
+      const frames = this.sprites.players.get(sim.character) ?? this.sprites.player;
+      this.blit(frames[mirror * PLAYER_FRAMES + frame], px, py);
     }
     ctx.globalAlpha = 1;
 

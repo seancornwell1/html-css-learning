@@ -1,6 +1,8 @@
 import { Rng } from '../sim/rng';
 import { PALETTE } from './palette';
-import { inkFinish, type InkOptions } from './ink';
+import { CHARACTERS } from '../data/characters';
+import { inkFinish, type InkOptions, type Motif } from './ink';
+import { drawFigure } from './player-art';
 import * as shapes from './shapes';
 
 /**
@@ -231,6 +233,16 @@ export interface EnemyArt {
   ink?: InkOptions;
 }
 
+/** Kimono motif per character (matches the portraits). */
+const CHARACTER_MOTIF: Record<string, Motif> = {
+  akari: 'sakura',
+  ren: 'asanoha',
+  tetsu: 'kikko',
+  hotaru: 'seigaiha',
+  kagerou: 'asanoha',
+  ido: 'seigaiha',
+};
+
 export const ENEMY_ROTATIONS = 16;
 export const LOOK_ROTATIONS = 16;
 
@@ -376,6 +388,8 @@ export class SpriteCache {
   /** enemy id → [tint][variant]. */
   enemy = new Map<string, Sprite[][]>();
   player: Sprite[] = []; // [mirror * PLAYER_FRAMES + frame]
+  /** Per-character figures, same layout as `player`. */
+  players = new Map<string, Sprite[]>();
   /** look → [rotation]. */
   looks = new Map<string, Sprite[]>();
   /** prop → [frame]. */
@@ -432,6 +446,19 @@ export class SpriteCache {
       motif: 'sakura',
       motifAlpha: 0.3,
     });
+    this.players.clear();
+    for (const c of CHARACTERS) {
+      this.players.set(
+        c.id,
+        mirrored(scale, 15, 25, PLAYER_FRAMES, (ctx, f) => drawFigure(ctx, c.id, f), {
+          motif: CHARACTER_MOTIF[c.id] ?? 'sakura',
+          motifAlpha: 0.3,
+          // No keyline: it would eat the bone rim on the hair masses.
+          thin: 0,
+          thick: 0,
+        }),
+      );
+    }
     this.looks.clear();
     for (const [id, look] of Object.entries(LOOKS)) {
       const out: Sprite[] = [];
