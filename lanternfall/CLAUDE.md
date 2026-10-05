@@ -147,6 +147,12 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M9 | Art pass, UI & mobile polish | not started |
 | M10 | Balance & release | not started |
 
+## CI & deploy
+- `.github/workflows/lanternfall.yml` runs check, tests and build on every
+  push or PR touching `lanternfall/`. Pushes to `main` (or a manual run) deploy
+  to GitHub Pages: the repo root's files stay at the site root, and the game is
+  served at `/lanternfall/`. One-time setup: Settings → Pages → Source: GitHub Actions.
+
 ## Conventions
 - TypeScript strict mode, ES modules, no default exports. File names are
   `kebab-case.ts`, types `PascalCase`, data IDs `snake_case` strings.

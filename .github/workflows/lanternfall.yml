@@ -1,0 +1,75 @@
+# Lanternfall CI and GitHub Pages deploy.
+# - Every push/PR touching lanternfall/: typecheck, lint, format check, tests, build.
+# - Pushes to the default branch (or a manual run) also deploy to Pages:
+#   the repo root's existing files stay at the site root and the game is
+#   served from /lanternfall/.
+# One-time setup: Settings -> Pages -> Source: "GitHub Actions".
+name: Lanternfall
+
+on:
+  push:
+    paths: ['lanternfall/**', '.github/workflows/lanternfall.yml']
+  pull_request:
+    paths: ['lanternfall/**', '.github/workflows/lanternfall.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: lanternfall-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lanternfall
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: '1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: lanternfall/package-lock.json
+      - run: npm ci
+      - run: npm run check
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lanternfall-dist
+          path: lanternfall/dist
+
+  deploy:
+    needs: check
+    if: github.event_name == 'workflow_dispatch' || (github.event_name == 'push' && github.ref == format('refs/heads/{0}', github.event.repository.default_branch))
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: lanternfall-dist
+          path: dist-game
+      - name: Assemble site
+        run: |
+          mkdir -p site
+          # Keep the existing root site (everything except the game sources and tooling).
+          rsync -a --exclude '.git' --exclude '.github' --exclude 'lanternfall' ./ site/
+          mkdir -p site/lanternfall
+          cp -r dist-game/. site/lanternfall/
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
