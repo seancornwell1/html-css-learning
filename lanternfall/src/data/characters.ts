@@ -28,7 +28,7 @@ export const CHARACTERS: readonly CharacterDef[] = [
     startWeapon: 'lantern_flail',
     innate: 'lanternlight',
     innateName: 'Lanternlight',
-    innateText: 'Enemies inside your light take 12% more damage. The light grows every 10 levels.',
+    innateText: 'Enemies inside your light take 6% more damage. The light grows every 10 levels.',
     mods: {},
     unlock: 'Available from the start.',
   },
@@ -50,8 +50,8 @@ export const CHARACTERS: readonly CharacterDef[] = [
     startWeapon: 'chain_sickle',
     innate: 'grave_hunger',
     innateName: 'Grave Hunger',
-    innateText: 'Heal 1 HP for every 20 spirits laid to rest. Tough, but slow.',
-    mods: { maxHp: 40, armor: 1, moveSpeed: -0.1 },
+    innateText: 'Heal 1 HP for every 15 spirits laid to rest. Tough, but slow.',
+    mods: { maxHp: 40, armor: 1, moveSpeed: -0.05 },
     unlock: 'Survive to 5:00 with anyone.',
   },
   {
@@ -69,9 +69,9 @@ export const CHARACTERS: readonly CharacterDef[] = [
 ];
 
 /** Light radius and damage bonus for Lanternlight (GAME_DESIGN §4). */
-export const LANTERNLIGHT = { radius: 140, growthPer10Levels: 0.05, damage: 1.12 } as const;
+export const LANTERNLIGHT = { radius: 140, growthPer10Levels: 0.05, damage: 1.06 } as const;
 export const EXORCISM = { damage: 1.3 } as const;
-export const GRAVE_HUNGER = { killsPerHp: 20 } as const;
+export const GRAVE_HUNGER = { killsPerHp: 15 } as const;
 export const FLUTTER = { distance: 120, time: 0.15, iframes: 0.25, cooldown: 6 } as const;
 
 export function characterDef(id: string): CharacterDef {
