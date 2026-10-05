@@ -20,6 +20,8 @@ export interface GroupStats {
   /** Median seconds to first evolution among runs that evolved (-1 if none). */
   medianFirstEvolution: number;
   /** Killing blows by source, most common first. */
+  pickups: Record<string, { perRun: number; perMinute: number }>;
+  meanCoins: number;
   killers: [string, number][];
   /** Deaths per minute bucket (index = minute). */
   deathsByMinute: number[];
@@ -121,6 +123,21 @@ export function groupStats(runs: RunResult[]): GroupStats[] {
           .sort((a, b) => a - b);
         return t.length ? quantile(t, 0.5) : -1;
       })(),
+      /** Mean pickups per run and per minute survived, by pickup name. */
+      pickups: (() => {
+        const minutes = list.reduce((s, r) => s + r.time, 0) / 60 || 1;
+        const totals: Record<string, number> = {};
+        for (const r of list) {
+          for (const [k, n] of Object.entries(r.collected ?? {})) totals[k] = (totals[k] ?? 0) + n;
+        }
+        return Object.fromEntries(
+          Object.entries(totals).map(([k, n]) => [
+            k,
+            { perRun: n / list.length, perMinute: n / minutes },
+          ]),
+        );
+      })(),
+      meanCoins: list.reduce((s, r) => s + (r.coins ?? 0), 0) / list.length,
       killers: Object.entries(
         list.reduce<Record<string, number>>((acc, r) => {
           if (r.status === 'dead') acc[r.killer || '?'] = (acc[r.killer || '?'] ?? 0) + 1;
@@ -191,6 +208,15 @@ export function toMarkdown(report: Report): string {
       `| ${g.character} | ${g.bot} | ${(g.evolvedRuns * 100).toFixed(0)}% | ` +
         `${g.meanEvolutions.toFixed(2)} | ${g.medianFirstEvolution >= 0 ? mmss(g.medianFirstEvolution) : '—'} |`,
     );
+  }
+  lines.push('', '## Pickups (power-up rate)', '');
+  lines.push('| Character | Bot | Per run (per minute) | Coins |', '|---|---|---|---|');
+  for (const g of report.groups) {
+    const cells = Object.entries(g.pickups)
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([k, v]) => `${k} ${v.perRun.toFixed(1)} (${v.perMinute.toFixed(2)})`)
+      .join(', ');
+    lines.push(`| ${g.character} | ${g.bot} | ${cells || '—'} | ${g.meanCoins.toFixed(0)} |`);
   }
   const reached = evolutionCounts(report.runs);
   if (Object.keys(reached).length > 0) {

@@ -9,7 +9,7 @@ import {
   type FxParams,
 } from '../src/render/effects';
 
-const params = (): FxParams => ({ invert: 0, fade: 0, ca: 0, impact: 0, time: 0 });
+const params = (): FxParams => ({ invert: 0, fade: 0, ca: 0, impact: 0, time: 0, frenzy: 0 });
 
 describe('ScreenFx', () => {
   it('never flashes the full screen more than 3 times per second', () => {

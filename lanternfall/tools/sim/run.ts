@@ -1,5 +1,6 @@
 import { RUN_SECONDS, TICK_RATE } from '../../src/sim/constants';
 import type { Intent } from '../../src/sim/intent';
+import { PICKUP } from '../../src/sim/pickup-pool';
 import { Sim, type RunStatus } from '../../src/sim/sim';
 import { WEAPONS } from '../../src/data/weapons';
 import { createBot, type BotName } from './bots/index';
@@ -26,6 +27,10 @@ export interface RunResult extends RunJob {
   evolutions: string[];
   /** Seconds to the first evolution, or -1. */
   firstEvolution: number;
+  /** Pickups collected, by name (power-ups, onigiri, coins, reliquaries). */
+  collected: Record<string, number>;
+  /** Coins at the end of the run. */
+  coins: number;
   /** What dealt the killing blow (deaths only). */
   killer: string;
   hash: number;
@@ -86,6 +91,12 @@ function finish(
     minHp,
     evolutions: sim.evolutions.map((e) => e.weapon),
     firstEvolution: sim.evolutions[0]?.time ?? -1,
+    collected: Object.fromEntries(
+      Object.entries(PICKUP)
+        .map(([name, kind]) => [name, sim.collected[kind] ?? 0] as const)
+        .filter(([, n]) => n > 0),
+    ),
+    coins: sim.coins,
     killer: sim.status === 'dead' ? sim.lastHurtBy || '?' : '',
     hash: sim.hash(),
     wallMs: Number(process.hrtime.bigint() - start) / 1e6,

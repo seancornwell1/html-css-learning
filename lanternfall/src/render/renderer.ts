@@ -3,6 +3,7 @@ import { WEAPONS } from '../data/weapons';
 import { STATE } from '../sim/enemy-ai';
 import { HAZARD } from '../sim/hazard-pool';
 import { MODE } from '../sim/projectile-pool';
+import { PICKUP } from '../sim/pickup-pool';
 import { MAX_ENEMIES, MAX_PROJECTILES } from '../sim/constants';
 import type { SimEvent } from '../sim/events';
 import type { Sim } from '../sim/sim';
@@ -44,7 +45,14 @@ export class Renderer {
   readonly hitStop = new HitStop();
   private readonly decals = new Decals();
   private ground: HTMLCanvasElement | null = null;
-  private readonly fxParams: FxParams = { invert: 0, fade: 0, ca: 0, impact: 0, time: 0 };
+  private readonly fxParams: FxParams = {
+    invert: 0,
+    fade: 0,
+    ca: 0,
+    impact: 0,
+    time: 0,
+    frenzy: 0,
+  };
 
   private readonly enemyFlash = new Float32Array(MAX_ENEMIES);
   private readonly prevEX = new Float64Array(MAX_ENEMIES);
@@ -195,6 +203,20 @@ export class Renderer {
         this.fx.impactFrame(0.6);
         this.onBanner('The Long Night', 'Dawn will not come again');
         break;
+      case 'pickup':
+        if (e.kind === PICKUP.lantern_burst) {
+          this.fx.impactFrame(1);
+          this.shake.add(0.6);
+          this.hitStop.trigger(120, now);
+          this.onBanner('Lantern Burst', 'The dark is swept away');
+        } else if (e.kind === PICKUP.spirit_call) {
+          this.fx.aberration(0.5);
+          this.onBanner('Spirit Call', 'Every ember comes home');
+        } else if (e.kind === PICKUP.frenzy) {
+          this.fx.impactFrame(0.6);
+          this.onBanner('Festival Night', 'Faster, fiercer, for a while');
+        }
+        break;
       case 'level_up':
         this.pulse = 0;
         this.fx.aberration(0.3);
@@ -221,6 +243,7 @@ export class Renderer {
     const dt = Math.min(frameSeconds, 0.1);
     this.time += dt;
     this.shake.update(dt);
+    this.fx.setFrenzy(sim.frenzy > 0);
     this.fx.update(dt);
     this.decals.update(dt);
 

@@ -233,6 +233,16 @@ All director numbers live in `src/data/director.ts` and `src/data/timeline.ts`.
 | **Spirit Call** (magnet) | Pulls every XP ember on the map to you | Gold threads converge on the player |
 | **Frenzy: Festival Night** | 10 s: −50% cooldown, +30% MoveSpeed, contact damage halved | Palette inverts to gold-on-black, speed lines, and the music doubles in tempo |
 
+**Implementation (M6).** Data lives in `src/data/powerups.ts`.
+- **Stone lanterns:** a lantern is placed every 45 s from 0:20, 260–420 px from the player. At most 3 stand at once.
+  - They live in the enemy pool as a stationary `prop` (20 HP, scaled by minute), so every weapon can break them.
+  - They never hurt the player, never count as kills, and are cleared once far behind.
+- **Drop weights:** coin 32, onigiri 26, Spirit Call 18, Lantern Burst 12, Frenzy 12.
+- **Coins:** a pouch holds 3–8. Elites and bosses always drop an 8-coin pouch with their Reliquary.
+- **Lantern Burst:** reaches a circle of half the long view side (550 px). That is inside the spawn ring, so enemies still arriving survive in either orientation.
+- **Frenzy:** weapon cooldowns tick ×2. The bright tones go gold, faint speed lines run, and the music switches to *Festival*.
+- **Reports:** the sim report lists pickups per run and per minute for each character and bot.
+
 ### 7.3 Visual direction
 **Stark, high-contrast anime.** The world is a near-black ink wash. Every
 figure is a white silhouette with very little interior detail. There is exactly

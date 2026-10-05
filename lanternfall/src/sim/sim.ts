@@ -16,6 +16,15 @@ import {
   enemyXpScale,
 } from '../data/enemies';
 import { PASSIVES } from '../data/passives';
+import {
+  COIN_POUCH,
+  FRENZY,
+  LANTERN_BURST,
+  LANTERN_DROPS,
+  ONIGIRI_HEAL,
+  STONE_LANTERN,
+  type LanternDrop,
+} from '../data/powerups';
 import { PLAYER_BASE } from '../data/player';
 import { xpToNext } from '../data/progression';
 import { WEAPONS, weaponIndex } from '../data/weapons';
@@ -27,6 +36,7 @@ import {
   RUN_SECONDS,
   SPAWN_RADIUS,
   TICK_RATE,
+  VIEW_LONG,
 } from './constants';
 import { moveEnemies, updateEnemyShots, updateHazards } from './enemy-ai';
 import { EnemyShotPool } from './enemy-shot-pool';
@@ -95,8 +105,11 @@ export interface Turret {
 const LONG_NIGHT_REAPER = 30;
 const PICKUP_RADIUS = 16;
 const RELIQUARY_HEAL = 30;
-const ONIGIRI_HEAL = 30;
 const REVIVE_IFRAMES = 2;
+/** Damage source for non-weapon damage (Lantern Burst). */
+const NO_WEAPON = -1;
+/** Lantern Burst reach: half the long side of the fixed view. */
+const BURST_RADIUS = VIEW_LONG / 2;
 
 /**
  * The whole game rules. Pure and deterministic: the same seed and the same
@@ -153,6 +166,11 @@ export class Sim {
   readonly evolutions: { weapon: string; time: number }[] = [];
   revivalsUsed = 0;
   turretReviveUsed = false;
+  /** Frenzy: Festival Night, seconds left (GAME_DESIGN §7.2). */
+  frenzy = 0;
+  private nextLantern: number = STONE_LANTERN.first;
+  /** Power-ups and pickups collected, by pickup kind (balance reports). */
+  readonly collected: number[] = [0, 0, 0, 0, 0, 0];
 
   /** Shared scratch buffer for grid queries (never held across calls). */
   readonly scratch = new Int32Array(MAX_ENEMIES);
@@ -160,6 +178,8 @@ export class Sim {
   readonly spawnRng: Rng;
   private readonly upgradeRng: Rng;
   readonly combatRng: Rng;
+  /** Stone lantern placement and drops (its own stream, GAME_DESIGN §7.2). */
+  private readonly propRng: Rng;
   private readonly director: DirectorState = { budget: 0, nextKind: -1, nextGroup: 0 };
   private pendingLevels = 0;
 
@@ -172,6 +192,7 @@ export class Sim {
     this.spawnRng = root.fork();
     this.upgradeRng = root.fork();
     this.combatRng = root.fork();
+    this.propRng = root.fork();
     this.stats = baseStats(PLAYER_BASE.maxHp);
     this.player = {
       x: 0,
@@ -199,7 +220,7 @@ export class Sim {
   }
 
   get moveSpeed(): number {
-    return PLAYER_BASE.moveSpeed * this.stats.moveSpeed;
+    return PLAYER_BASE.moveSpeed * this.stats.moveSpeed * (this.frenzy > 0 ? FRENZY.moveSpeed : 1);
   }
 
   get magnetRadius(): number {
@@ -217,6 +238,7 @@ export class Sim {
     // Regen first: healing after damage would let a lethal hit be undone by
     // a few hundredths of HP before the death check.
     if (this.stats.regen > 0 && this.player.hp > 0) this.heal(this.stats.regen * DT);
+    if (this.frenzy > 0) this.frenzy = Math.max(0, this.frenzy - DT);
     this.movePlayer(intent);
     runDirector(this, this.director);
     moveEnemies(this);
@@ -229,6 +251,7 @@ export class Sim {
     this.resolveContacts();
     this.updateEmbers();
     this.updatePickups();
+    this.placeLanterns();
 
     if (this.player.hp <= 0 && !this.tryRevive()) {
       this.status = 'dead';
@@ -339,7 +362,7 @@ export class Sim {
     if (!def || def.invulnerable) return false;
     damage *= this.innateDamage(slot, def.elite === true || def.boss === true);
     const dealt = Math.min(damage, e.hp[slot] as number);
-    this.damageByWeapon[weapon] = (this.damageByWeapon[weapon] ?? 0) + dealt;
+    if (weapon >= 0) this.damageByWeapon[weapon] = (this.damageByWeapon[weapon] ?? 0) + dealt;
     e.hp[slot] = (e.hp[slot] as number) - damage;
     e.kbx[slot] = (e.kbx[slot] as number) + kbx * def.knockback;
     e.kby[slot] = (e.kby[slot] as number) + kby * def.knockback;
@@ -353,6 +376,14 @@ export class Sim {
     const y = e.y[slot] as number;
     if (this.events.enabled) this.events.push({ type: 'enemy_hit', slot, damage, x, y });
     if ((e.hp[slot] as number) > 0) return false;
+    if (def.behaviour === 'prop') {
+      this.breakLantern(x, y);
+      if (this.events.enabled) {
+        this.events.push({ type: 'enemy_killed', slot, kind: e.kind[slot] as number, x, y });
+      }
+      e.remove(slot);
+      return true;
+    }
 
     this.kills++;
     if (
@@ -371,7 +402,10 @@ export class Sim {
       this.player.x,
       this.player.y,
     );
-    if (def.elite || def.boss) this.pickups.drop(PICKUP.reliquary, x, y);
+    if (def.elite || def.boss) {
+      this.pickups.drop(PICKUP.reliquary, x, y);
+      this.pickups.drop(PICKUP.coin, x + 14, y, COIN_POUCH[1]);
+    }
     if (fx?.healPerKill) this.heal(fx.healPerKill);
     if (fx?.foodChance && this.combatRng.chance(fx.foodChance))
       this.pickups.drop(PICKUP.onigiri, x, y);
@@ -430,7 +464,8 @@ export class Sim {
     const d = this.director;
     h.u32v(this.tick).u32v(this.kills).u32v(this.level).num(this.xp).num(d.budget);
     h.u32v(this.pendingLevels).num(d.nextKind).num(d.nextGroup).num(this.coins);
-    for (const rng of [this.spawnRng, this.upgradeRng, this.combatRng]) {
+    h.num(this.frenzy).num(this.nextLantern);
+    for (const rng of [this.spawnRng, this.upgradeRng, this.combatRng, this.propRng]) {
       for (const word of rng.state()) h.u32v(word);
     }
     const p = this.player;
@@ -725,8 +760,12 @@ export class Sim {
       const r = def.radius + p.radius;
       const dx = p.x - (e.x[s] as number);
       const dy = p.y - (e.y[s] as number);
+      if (def.contactDamage <= 0) continue;
       if (dx * dx + dy * dy <= r * r) {
-        this.hurtPlayer(e.damage[s] as number, def.id);
+        this.hurtPlayer(
+          (e.damage[s] as number) * (this.frenzy > 0 ? FRENZY.contactDamage : 1),
+          def.id,
+        );
         return;
       }
     }
@@ -805,6 +844,7 @@ export class Sim {
   }
 
   private collect(kind: PickupKind, value: number): void {
+    this.collected[kind] = (this.collected[kind] ?? 0) + 1;
     switch (kind) {
       case PICKUP.reliquary:
         this.openReliquary();
@@ -815,8 +855,83 @@ export class Sim {
       case PICKUP.coin:
         this.coins += (value || 1) * this.stats.greed;
         break;
+      case PICKUP.lantern_burst:
+        this.lanternBurst();
+        break;
+      case PICKUP.spirit_call:
+        this.spiritCall();
+        break;
+      case PICKUP.frenzy:
+        this.frenzy = FRENZY.seconds;
+        break;
       default:
         break;
+    }
+  }
+
+  // ---- stone lanterns & power-ups (GAME_DESIGN §7.2) -------------------------
+
+  /** Place a stone lantern near the player every so often. */
+  private placeLanterns(): void {
+    if (this.time < this.nextLantern) return;
+    this.nextLantern += STONE_LANTERN.every;
+    const e = this.enemies;
+    let standing = 0;
+    for (let i = 0; i < e.count; i++) {
+      if (e.kind[e.slots[i] as number] === ENEMY_KIND.stone_lantern) standing++;
+    }
+    if (standing >= STONE_LANTERN.maxStanding) return;
+    const a = this.propRng.range(0, Math.PI * 2);
+    const d = this.propRng.range(STONE_LANTERN.minDist, STONE_LANTERN.maxDist);
+    const p = this.player;
+    this.spawnEnemy(ENEMY_KIND.stone_lantern, p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, true);
+  }
+
+  private breakLantern(x: number, y: number): void {
+    let total = 0;
+    for (const w of Object.values(LANTERN_DROPS)) total += w;
+    let roll = this.propRng.range(0, total);
+    let drop: LanternDrop = 'coin';
+    for (const [id, w] of Object.entries(LANTERN_DROPS) as [LanternDrop, number][]) {
+      roll -= w;
+      if (roll < 0) {
+        drop = id;
+        break;
+      }
+    }
+    const value = drop === 'coin' ? this.propRng.int(COIN_POUCH[0], COIN_POUCH[1]) : 0;
+    this.pickups.drop(PICKUP[drop], x, y, value);
+  }
+
+  /** Lantern Burst: clears every non-elite in view; elites and bosses are hurt. */
+  private lanternBurst(): void {
+    const e = this.enemies;
+    const p = this.player;
+    // "In view": a circle inside the spawn ring, so enemies still arriving
+    // from off screen survive whatever the screen orientation.
+    const r2 = BURST_RADIUS * BURST_RADIUS;
+    for (let i = e.count - 1; i >= 0; i--) {
+      const s = e.slots[i] as number;
+      const def = ENEMIES[e.kind[s] as number];
+      if (!def || def.invulnerable || def.behaviour === 'prop') continue;
+      const dx = (e.x[s] as number) - p.x;
+      const dy = (e.y[s] as number) - p.y;
+      if (dx * dx + dy * dy > r2) continue;
+      const dmg =
+        def.elite || def.boss
+          ? (e.maxHp[s] as number) * LANTERN_BURST.eliteMaxHpFrac
+          : (e.hp[s] as number) * 4 + 1;
+      this.damageEnemy(s, dmg, 0, 0, NO_WEAPON);
+    }
+  }
+
+  /** Spirit Call: every ember on the map flies to the player. */
+  private spiritCall(): void {
+    const em = this.embers;
+    for (let i = 0; i < em.count; i++) {
+      const s = em.slots[i] as number;
+      em.attracted[s] = 1;
+      em.speed[s] = Math.max(em.speed[s] as number, 300);
     }
   }
 }

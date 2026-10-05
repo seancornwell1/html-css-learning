@@ -91,6 +91,9 @@ const PICKUP_PROP: Record<number, string> = {
   [PICKUP.reliquary]: 'reliquary',
   [PICKUP.onigiri]: 'onigiri',
   [PICKUP.coin]: 'coin',
+  [PICKUP.lantern_burst]: 'burst_lantern',
+  [PICKUP.spirit_call]: 'magatama',
+  [PICKUP.frenzy]: 'festival_fan',
 };
 
 export class WeaponFx {

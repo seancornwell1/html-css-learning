@@ -15,7 +15,9 @@ export type EnemyBehaviour =
   /** Final boss: cycles volleys, summons and charges. */
   | 'mother'
   /** Long Night reaper: relentless and unkillable. */
-  | 'reaper';
+  | 'reaper'
+  /** Stone lantern: a breakable prop that drops a power-up (§7.2). */
+  | 'prop';
 
 export interface EnemyDef {
   id: string;
@@ -208,6 +210,20 @@ export const ENEMIES: readonly EnemyDef[] = [
     boss: true,
     invulnerable: true,
   },
+  {
+    id: 'stone_lantern',
+    name: 'Stone Lantern',
+    hp: 20,
+    speed: 0,
+    contactDamage: 0,
+    radius: 12,
+    xp: 0,
+    cost: 0,
+    group: [1, 1],
+    knockback: 0,
+    lead: 0,
+    behaviour: 'prop',
+  },
 ];
 
 const kindOf = (id: string): number => ENEMIES.findIndex((e) => e.id === id);
@@ -224,6 +240,7 @@ export const ENEMY_KIND = {
   bone_colossus: kindOf('bone_colossus'),
   mother_of_lanterns: kindOf('mother_of_lanterns'),
   lantern_eater: kindOf('lantern_eater'),
+  stone_lantern: kindOf('stone_lantern'),
 } as const;
 
 /** Largest enemy radius (grid queries pad by this). */

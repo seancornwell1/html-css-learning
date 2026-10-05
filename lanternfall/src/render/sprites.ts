@@ -315,6 +315,14 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     draw: shapes.mother,
     ink: { motif: 'seigaiha', motifAlpha: 0.4, thick: 3 },
   },
+  stone_lantern: {
+    halfW: 12,
+    halfH: 18,
+    frames: 1,
+    layout: 'mirror',
+    draw: (ctx) => shapes.stoneLantern(ctx),
+    ink: { thin: 0.4, thick: 1 },
+  },
   lantern_eater: {
     halfW: 26,
     halfH: 24,
@@ -350,6 +358,9 @@ const PROPS: Record<
   coin: { half: 6, frames: 1, draw: shapes.coin },
   stone_lantern: { half: 17, frames: 1, draw: shapes.stoneLantern },
   parasol: { half: 15, frames: 1, draw: shapes.parasol },
+  burst_lantern: { half: 16, frames: 1, draw: shapes.burstLantern },
+  magatama: { half: 14, frames: 1, draw: shapes.magatama },
+  festival_fan: { half: 14, frames: 1, draw: shapes.festivalFan },
 };
 
 export class SpriteCache {

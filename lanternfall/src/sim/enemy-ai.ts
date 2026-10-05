@@ -32,6 +32,11 @@ export function moveEnemies(sim: Sim): void {
     const s = e.slots[i] as number;
     const def = ENEMIES[e.kind[s] as number];
     if (!def) continue;
+    if (def.behaviour === 'prop') {
+      // Props stand still; ones left far behind are cleared away.
+      if (len2(p.x - (e.x[s] as number), p.y - (e.y[s] as number)) > DESPAWN_RADIUS) e.remove(s);
+      continue;
+    }
     const x0 = e.x[s] as number;
     const y0 = e.y[s] as number;
     let x = x0;

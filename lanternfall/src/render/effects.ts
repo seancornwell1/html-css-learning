@@ -16,6 +16,8 @@ export interface FxParams {
   impact: number;
   /** Seconds, for grain animation. */
   time: number;
+  /** 0..1 Frenzy: Festival Night (bright tones turn gold). */
+  frenzy: number;
 }
 
 /** Trauma-based camera shake: offset grows with trauma², decays linearly. */
@@ -57,6 +59,13 @@ export class ScreenFx {
   private time = 0;
   /** Seconds since the last full-screen flash (inversion or fade). */
   private sinceFlash = 1;
+  private frenzy = 0;
+  private frenzyTarget = 0;
+
+  /** Frenzy look on/off; eases in and out (sustained, not a flash). */
+  setFrenzy(on: boolean): void {
+    this.frenzyTarget = on ? 1 : 0;
+  }
 
   /** Brief full-screen inversion (or soft fade). Dropped if over 3 Hz. */
   flash(seconds: number): boolean {
@@ -89,14 +98,17 @@ export class ScreenFx {
     this.fadeLeft = Math.max(0, this.fadeLeft - dt);
     this.ca = Math.max(0, this.ca - dt * 6);
     this.impact = Math.max(0, this.impact - dt * 3.2);
+    this.frenzy += (this.frenzyTarget - this.frenzy) * Math.min(1, dt * 4);
   }
 
   params(out: FxParams): FxParams {
     out.invert = this.invertLeft > 0 ? 1 : 0;
     out.fade = this.fadeLeft / this.fadeTotal;
     out.ca = this.ca;
-    out.impact = this.impact;
+    // Festival speed lines stay faint while Frenzy lasts.
+    out.impact = Math.max(this.impact, this.frenzy * (this.reduceFlashing ? 0.1 : 0.22));
     out.time = this.time;
+    out.frenzy = this.frenzy;
     return out;
   }
 
@@ -105,6 +117,8 @@ export class ScreenFx {
     this.fadeLeft = 0;
     this.ca = 0;
     this.impact = 0;
+    this.frenzy = 0;
+    this.frenzyTarget = 0;
   }
 }
 

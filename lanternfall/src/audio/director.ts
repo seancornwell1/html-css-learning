@@ -47,6 +47,7 @@ export class AudioDirector {
     if (sim.status === 'won') return 'dawn';
     if (sim.status === 'dead') return 'ashes';
     if (MOTHER >= 0 && this.alive(sim, MOTHER)) return 'mother';
+    if (sim.frenzy > 0) return 'festival';
     return 'night_procession';
   }
 

@@ -10,13 +10,23 @@ describe('save migration', () => {
   it('keeps valid settings and clamps bad values', () => {
     const out = migrate({
       version: SAVE_VERSION,
-      settings: { reduceFlashing: true, shake: 7, effects: 'ultra', noticeSeen: true },
+      settings: {
+        reduceFlashing: true,
+        shake: 7,
+        effects: 'ultra',
+        noticeSeen: true,
+        volMusic: 0.3,
+        volSfx: -2,
+      },
     });
     expect(out.settings).toEqual({
       reduceFlashing: true,
       shake: 1,
       effects: 'high',
       noticeSeen: true,
+      volMaster: 0.8,
+      volMusic: 0.3,
+      volSfx: 0,
     });
   });
 });

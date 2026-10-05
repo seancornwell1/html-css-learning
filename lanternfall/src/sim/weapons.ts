@@ -1,5 +1,6 @@
 import { ENEMIES, MAX_ENEMY_RADIUS } from '../data/enemies';
 import { WEAPONS, weaponStatsAt, type WeaponDef, type WeaponStats } from '../data/weapons';
+import { FRENZY } from '../data/powerups';
 import { DT, MAX_ENEMIES } from './constants';
 import { MODE } from './projectile-pool';
 import type { Sim } from './sim';
@@ -24,7 +25,7 @@ const pickBuf = new Int32Array(MAX_ENEMIES);
 export function updateWeapons(sim: Sim): void {
   for (const w of sim.weapons) {
     if (w.active > 0) w.active -= DT;
-    w.cooldown -= DT;
+    w.cooldown -= DT * (sim.frenzy > 0 ? FRENZY.cooldownRate : 1);
     if (w.cooldown > 0) continue;
     const def = WEAPONS[w.weapon];
     if (!def) continue;

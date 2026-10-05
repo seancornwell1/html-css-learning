@@ -52,12 +52,12 @@ describe('reliquaries and evolution', () => {
     expect(sim.weapons[0]?.level).toBeGreaterThan(1);
   });
 
-  it('elites drop reliquaries', () => {
+  it('elites drop a reliquary and a coin pouch', () => {
     const sim = new Sim({ seed: 4, events: false });
     const slot = sim.spawnEnemy(ENEMY_KIND.bride_of_the_reservoir, 500, 0);
     sim.damageEnemy(slot, 1e9, 0, 0, 0);
-    expect(sim.pickups.count).toBe(1);
-    expect(sim.pickups.kind[sim.pickups.slots[0] as number]).toBe(PICKUP.reliquary);
+    const kinds = [0, 1].map((i) => sim.pickups.kind[sim.pickups.slots[i] as number]);
+    expect(kinds).toEqual([PICKUP.reliquary, PICKUP.coin]);
   });
 });
 

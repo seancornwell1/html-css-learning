@@ -486,3 +486,86 @@ export function lanternEater(ctx: Ctx, frame: number, fill: string): void {
   ctx.arc(7, -7, 2.4, 0, Math.PI * 2);
   ctx.fill();
 }
+
+/** Lantern Burst pickup: a paper chōchin lantern with light leaking out. */
+export function burstLantern(ctx: Ctx): void {
+  ctx.fillStyle = PALETTE.gold;
+  ctx.beginPath();
+  ctx.ellipse(0, 0, 7, 9, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 0.8;
+  for (const y of [-5, -1.7, 1.7, 5]) {
+    const w = Math.sqrt(Math.max(0, 1 - (y / 9) ** 2)) * 7;
+    ctx.beginPath();
+    ctx.moveTo(-w, y);
+    ctx.lineTo(w, y);
+    ctx.stroke();
+  }
+  ctx.fillStyle = PALETTE.bone;
+  ctx.fillRect(-4, -11, 8, 2.5);
+  ctx.fillRect(-4, 8.5, 8, 2.5);
+  // Rays.
+  ctx.strokeStyle = PALETTE.gold;
+  ctx.lineWidth = 1.2;
+  for (let k = 0; k < 8; k++) {
+    const a = (k / 8) * Math.PI * 2 + 0.2;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(a) * 11, Math.sin(a) * 12);
+    ctx.lineTo(Math.cos(a) * 14, Math.sin(a) * 15);
+    ctx.stroke();
+  }
+}
+
+/** Spirit Call pickup: a magatama jewel trailing a thread. */
+export function magatama(ctx: Ctx): void {
+  ctx.fillStyle = PALETTE.gold;
+  ctx.beginPath();
+  ctx.arc(-1, -2, 6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(5, -2);
+  ctx.quadraticCurveTo(5, 8, -4, 9);
+  ctx.quadraticCurveTo(2, 4, -1, 4);
+  ctx.closePath();
+  ctx.fill();
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.arc(-1.5, -3, 1.6, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.strokeStyle = PALETTE.bone;
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(-1.5, -3);
+  ctx.bezierCurveTo(-8, -10, -2, -12, -9, -13);
+  ctx.stroke();
+}
+
+/** Frenzy pickup: a round festival uchiwa fan with a tomoe swirl. */
+export function festivalFan(ctx: Ctx): void {
+  ctx.fillStyle = PALETTE.bone;
+  ctx.fillRect(-1, 5, 2, 8);
+  ctx.fillStyle = PALETTE.gold;
+  ctx.beginPath();
+  ctx.arc(0, -2, 8, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = PALETTE.ink;
+  for (let k = 0; k < 3; k++) {
+    const a = (k / 3) * Math.PI * 2;
+    const cx = Math.cos(a) * 2.6;
+    const cy = -2 + Math.sin(a) * 2.6;
+    ctx.beginPath();
+    ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + Math.cos(a + 1.6) * 2, cy + Math.sin(a + 1.6) * 2);
+    ctx.quadraticCurveTo(
+      Math.cos(a + 1) * 6,
+      -2 + Math.sin(a + 1) * 6,
+      Math.cos(a + 2.2) * 5.5,
+      -2 + Math.sin(a + 2.2) * 5.5,
+    );
+    ctx.lineTo(cx + Math.cos(a - 1.6) * 2, cy + Math.sin(a - 1.6) * 2);
+    ctx.fill();
+  }
+}

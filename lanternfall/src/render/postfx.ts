@@ -57,6 +57,7 @@ uniform float invert;
 uniform float fade;
 uniform float ca;
 uniform float impact;
+uniform float frenzy;
 out vec4 color;
 
 const vec3 INK = vec3(0.027, 0.027, 0.039);
@@ -92,7 +93,8 @@ float washi(vec2 px) {
 
 /** How "gold plate" a colour is (warm, bright). */
 float goldness(vec3 c) {
-  return clamp((c.r - c.b) * 2.2, 0.0, 1.0) * step(c.g, c.r + 0.02) *
+  // Bone is very slightly warm; only clearly gold pixels count.
+  return clamp((c.r - c.b - 0.15) * 4.0, 0.0, 1.0) * step(c.g, c.r + 0.02) *
     smoothstep(0.2, 0.5, dot(c, vec3(0.299, 0.587, 0.114)));
 }
 
@@ -136,6 +138,13 @@ void main() {
     float line = step(0.78, ray);
     float radial = smoothstep(0.18, 0.62, length(d * vec2(aspect, 1.0)));
     c = mix(c, BONE, line * radial * impact * 0.85);
+  }
+
+  // Frenzy: Festival Night turns bright tones to gold on black.
+  if (frenzy > 0.0) {
+    float fl = dot(c, vec3(0.299, 0.587, 0.114));
+    vec3 GOLD = vec3(0.961, 0.722, 0.239);
+    c = mix(c, GOLD * (0.35 + fl * 0.9), frenzy * 0.8 * smoothstep(0.18, 0.55, fl));
   }
 
   // Vignette.
@@ -262,6 +271,7 @@ export class PostFx {
     gl.uniform1f(gl.getUniformLocation(p, 'fade'), fx.fade);
     gl.uniform1f(gl.getUniformLocation(p, 'ca'), fx.ca);
     gl.uniform1f(gl.getUniformLocation(p, 'impact'), fx.impact);
+    gl.uniform1f(gl.getUniformLocation(p, 'frenzy'), fx.frenzy);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
   }
 
