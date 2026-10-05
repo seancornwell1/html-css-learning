@@ -54,7 +54,9 @@ export type SimEvent =
   | { type: 'slam'; x: number; y: number; radius: number }
   | { type: 'dash'; x: number; y: number }
   | { type: 'procession' }
-  | { type: 'long_night' };
+  | { type: 'long_night' }
+  | { type: 'flood' }
+  | { type: 'secret'; id: string };
 
 export class EventQueue {
   private items: SimEvent[] = [];

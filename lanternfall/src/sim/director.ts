@@ -1,5 +1,5 @@
 import { DIRECTOR } from '../data/director';
-import { ENEMIES } from '../data/enemies';
+import { ENEMIES, ENEMY_KIND } from '../data/enemies';
 import { TIMELINE_EVENTS, segmentAt } from '../data/timeline';
 import { SPAWN_RADIUS, TICK_RATE } from './constants';
 import type { Sim } from './sim';
@@ -10,6 +10,9 @@ export interface DirectorState {
   nextKind: number;
   nextGroup: number;
 }
+
+/** Ido's secret: while the Sealed Well floods, only the Drowned come. */
+const FLOOD_KINDS = [{ kind: ENEMY_KIND.drowned, weight: 1 }] as const;
 
 /** While a boss lives the director eases off so the fight reads. */
 const BOSS_BUDGET = 0.35;
@@ -22,7 +25,7 @@ export function runDirector(sim: Sim, d: DirectorState): void {
   const minAlive = seg.minAlive * (boss ? BOSS_MIN_ALIVE : 1);
   let spawned = 0;
   while (spawned < DIRECTOR.maxSpawnsPerTick) {
-    if (d.nextKind < 0) rollNextGroup(sim, d, seg.kinds);
+    if (d.nextKind < 0) rollNextGroup(sim, d, sim.flood > 0 ? FLOOD_KINDS : seg.kinds);
     const def = ENEMIES[d.nextKind];
     if (!def) break;
     const cost = def.cost * d.nextGroup;

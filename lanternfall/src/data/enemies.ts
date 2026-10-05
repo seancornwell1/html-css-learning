@@ -48,6 +48,8 @@ export interface EnemyDef {
   boss?: boolean;
   /** Cannot be damaged. */
   invulnerable?: boolean;
+  /** Props only: never cleared for being far from the player. */
+  persistent?: boolean;
 }
 
 export const ENEMIES: readonly EnemyDef[] = [
@@ -224,6 +226,21 @@ export const ENEMIES: readonly EnemyDef[] = [
     lead: 0,
     behaviour: 'prop',
   },
+  {
+    id: 'sealed_well',
+    name: 'The Sealed Well',
+    hp: 120,
+    speed: 0,
+    contactDamage: 0,
+    radius: 18,
+    xp: 0,
+    cost: 0,
+    group: [1, 1],
+    knockback: 0,
+    lead: 0,
+    behaviour: 'prop',
+    persistent: true,
+  },
 ];
 
 const kindOf = (id: string): number => ENEMIES.findIndex((e) => e.id === id);
@@ -241,6 +258,7 @@ export const ENEMY_KIND = {
   mother_of_lanterns: kindOf('mother_of_lanterns'),
   lantern_eater: kindOf('lantern_eater'),
   stone_lantern: kindOf('stone_lantern'),
+  sealed_well: kindOf('sealed_well'),
 } as const;
 
 /** Largest enemy radius (grid queries pad by this). */

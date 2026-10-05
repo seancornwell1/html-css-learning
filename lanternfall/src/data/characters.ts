@@ -14,6 +14,8 @@ export interface CharacterDef {
   innateText: string;
   /** Additive changes to base stats. */
   mods: Partial<PlayerStats>;
+  /** Max HP is fixed at this value whatever else applies (Kagerou). */
+  fixedMaxHp?: number;
   /** Hidden until unlocked by a secret (M8). */
   secret?: boolean;
   /** Plain-language unlock hint (M8). */
@@ -40,7 +42,7 @@ export const CHARACTERS: readonly CharacterDef[] = [
     innate: 'exorcism',
     innateName: 'Exorcism',
     innateText: 'Elites and bosses take 30% more damage. Their reliquaries hold one more gift.',
-    mods: { maxHp: -10 },
+    mods: {},
     unlock: 'Available from the start.',
   },
   {
@@ -66,12 +68,51 @@ export const CHARACTERS: readonly CharacterDef[] = [
     mods: { moveSpeed: 0.1, maxHp: -20 },
     unlock: 'Evolve any weapon once.',
   },
+  {
+    id: 'kagerou',
+    name: 'Kagerou',
+    title: 'the Faceless',
+    startWeapon: 'mirror_shard',
+    innate: 'no_face',
+    innateName: 'No Face',
+    innateText:
+      'Enemies hit you 35% softer. Every 60 s the nearest elite loses sight of you. Max HP is always 60.',
+    mods: { curse: 0.2 },
+    fixedMaxHp: 60,
+    secret: true,
+    unlock: 'A secret. The faceless one follows those who never eat and never mend.',
+  },
+  {
+    id: 'ido',
+    name: 'Ido',
+    title: 'the Well Keeper',
+    startWeapon: 'koi_spirits',
+    innate: 'undertow',
+    innateName: 'Undertow',
+    innateText:
+      'Pickups drift to you from twice your magnet range. At 5:00 and 8:00 a flood hits every enemy for a quarter of its health.',
+    mods: { moveSpeed: -0.15 },
+    secret: true,
+    unlock: 'A secret. The well keeper waits where no lantern was ever lit.',
+  },
 ];
 
 /** Light radius and damage bonus for Lanternlight (GAME_DESIGN §4). */
 export const LANTERNLIGHT = { radius: 140, growthPer10Levels: 0.05, damage: 1.06 } as const;
 export const EXORCISM = { damage: 1.3 } as const;
 export const GRAVE_HUNGER = { killsPerHp: 15 } as const;
+export const NO_FACE = {
+  contactDamage: 0.65,
+  blinkEvery: 60,
+  blinkRange: 500,
+  blinkSeconds: 3,
+} as const;
+export const UNDERTOW = {
+  magnetMult: 2,
+  driftSpeed: 70,
+  floodAt: [300, 480],
+  floodMaxHpFrac: 0.25,
+} as const;
 export const FLUTTER = { distance: 120, time: 0.15, iframes: 0.25, cooldown: 6 } as const;
 
 export function characterDef(id: string): CharacterDef {

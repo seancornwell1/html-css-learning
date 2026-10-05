@@ -34,7 +34,12 @@ export function moveEnemies(sim: Sim): void {
     if (!def) continue;
     if (def.behaviour === 'prop') {
       // Props stand still; ones left far behind are cleared away.
-      if (len2(p.x - (e.x[s] as number), p.y - (e.y[s] as number)) > DESPAWN_RADIUS) e.remove(s);
+      if (
+        !def.persistent &&
+        len2(p.x - (e.x[s] as number), p.y - (e.y[s] as number)) > DESPAWN_RADIUS
+      ) {
+        e.remove(s);
+      }
       continue;
     }
     const x0 = e.x[s] as number;

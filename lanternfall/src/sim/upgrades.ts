@@ -33,6 +33,14 @@ export interface Loadout {
   readonly passives: readonly OwnedPassive[];
   /** Weapon ids that must never be offered as new (e.g. evolved into). */
   readonly retired: ReadonlySet<number>;
+  /** Banished items (`w:<index>` / `p:<index>`): never offered again this run. */
+  readonly banished?: ReadonlySet<string>;
+}
+
+/** The item an option is about, as a banish key. */
+export function optionItem(o: UpgradeOption): string {
+  if (o.type === 'heal') return 'heal';
+  return o.type === 'weapon_new' || o.type === 'weapon_level' ? `w:${o.weapon}` : `p:${o.passive}`;
 }
 
 /** Weapons that can be found on level-up: base weapons only. */
@@ -67,7 +75,8 @@ export function legalOptions(l: Loadout): UpgradeOption[] {
       if (!l.passives.some((p) => p.passive === i)) out.push({ type: 'passive_new', passive: i });
     });
   }
-  return out;
+  const banished = l.banished;
+  return banished && banished.size > 0 ? out.filter((o) => !banished.has(optionItem(o))) : out;
 }
 
 /**

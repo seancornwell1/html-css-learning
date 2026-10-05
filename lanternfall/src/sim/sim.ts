@@ -3,6 +3,8 @@ import {
   FLUTTER,
   GRAVE_HUNGER,
   LANTERNLIGHT,
+  NO_FACE,
+  UNDERTOW,
   characterDef,
   type CharacterDef,
 } from '../data/characters';
@@ -15,6 +17,7 @@ import {
   enemyHpScale,
   enemyXpScale,
 } from '../data/enemies';
+import { SHRINE, type MetaRanks } from '../data/meta';
 import { PASSIVES } from '../data/passives';
 import {
   COIN_POUCH,
@@ -22,6 +25,7 @@ import {
   LANTERN_BURST,
   LANTERN_DROPS,
   ONIGIRI_HEAL,
+  SECRET_RULES,
   STONE_LANTERN,
   type LanternDrop,
 } from '../data/powerups';
@@ -55,6 +59,7 @@ import { ARMOR_CAP, MIN_DAMAGE, baseStats, type PlayerStats } from './stats';
 import {
   evolutionReady,
   legalOptions,
+  optionItem,
   optionLabel,
   rollChoices,
   unionReady,
@@ -73,6 +78,8 @@ export interface SimConfig {
   character?: string;
   /** Emit presentation events (default true). Headless runs turn this off. */
   events?: boolean;
+  /** Shrine ranks bought (GAME_DESIGN §9.1), by rank id. */
+  meta?: MetaRanks;
 }
 
 export type RunStatus = 'running' | 'dead' | 'won';
@@ -168,6 +175,21 @@ export class Sim {
   turretReviveUsed = false;
   /** Frenzy: Festival Night, seconds left (GAME_DESIGN §7.2). */
   frenzy = 0;
+  readonly meta: MetaRanks;
+  /** Run tools left (Shrine: Recast, Patience, Exile). */
+  rerolls = 0;
+  skips = 0;
+  banishes = 0;
+  readonly banished = new Set<string>();
+  /** Secrets found this run (GAME_DESIGN §9.2), in order. */
+  readonly secrets: string[] = [];
+  /** Kagerou's condition: any healing from Onigiri or regen breaks it. */
+  private mended = false;
+  /** Seconds of Sealed Well flood left; outlasting it reveals Ido. */
+  flood = 0;
+  private wellPlaced = false;
+  private nextBlink = 0;
+  private floodsDone = 0;
   private nextLantern: number = STONE_LANTERN.first;
   /** Power-ups and pickups collected, by pickup kind (balance reports). */
   readonly collected: number[] = [0, 0, 0, 0, 0, 0];
@@ -187,6 +209,11 @@ export class Sim {
     this.seed = config.seed;
     this.character = config.character ?? 'akari';
     this.characterDef = characterDef(this.character);
+    this.meta = config.meta ?? {};
+    this.rerolls = this.meta.reroll ?? 0;
+    this.skips = this.meta.skip ?? 0;
+    this.banishes = this.meta.banish ?? 0;
+    this.nextBlink = NO_FACE.blinkEvery;
     this.events = new EventQueue(config.events ?? true);
     const root = new Rng(config.seed);
     this.spawnRng = root.fork();
@@ -228,7 +255,12 @@ export class Sim {
   }
 
   get loadout(): Loadout {
-    return { weapons: this.weapons, passives: this.passives, retired: this.retired };
+    return {
+      weapons: this.weapons,
+      passives: this.passives,
+      retired: this.retired,
+      banished: this.banished,
+    };
   }
 
   /** Advance exactly one fixed tick. No-op once ended or while choosing. */
@@ -237,7 +269,10 @@ export class Sim {
     this.tick++;
     // Regen first: healing after damage would let a lethal hit be undone by
     // a few hundredths of HP before the death check.
-    if (this.stats.regen > 0 && this.player.hp > 0) this.heal(this.stats.regen * DT);
+    if (this.stats.regen > 0 && this.player.hp > 0) {
+      this.heal(this.stats.regen * DT);
+      this.mended = true;
+    }
     if (this.frenzy > 0) this.frenzy = Math.max(0, this.frenzy - DT);
     this.movePlayer(intent);
     runDirector(this, this.director);
@@ -252,6 +287,8 @@ export class Sim {
     this.updateEmbers();
     this.updatePickups();
     this.placeLanterns();
+    this.updateSecrets();
+    this.updateInnates();
 
     if (this.player.hp <= 0 && !this.tryRevive()) {
       this.status = 'dead';
@@ -287,6 +324,36 @@ export class Sim {
     this.pendingLevels--;
     this.choices =
       this.pendingLevels > 0 ? rollChoices(this.loadout, this.upgradeRng, this.stats.luck) : null;
+  }
+
+  /** Shrine run tool: redraw the current cards. */
+  reroll(): boolean {
+    if (!this.choices || this.rerolls <= 0) return false;
+    this.rerolls--;
+    this.choices = rollChoices(this.loadout, this.upgradeRng, this.stats.luck);
+    return true;
+  }
+
+  /** Shrine run tool: pass on this level-up. */
+  skip(): boolean {
+    if (!this.choices || this.skips <= 0) return false;
+    this.skips--;
+    this.pendingLevels--;
+    this.choices =
+      this.pendingLevels > 0 ? rollChoices(this.loadout, this.upgradeRng, this.stats.luck) : null;
+    return true;
+  }
+
+  /** Shrine run tool: remove card `index`'s item from the run, then redraw. */
+  banish(index: number): boolean {
+    const options = this.choices;
+    if (!options || this.banishes <= 0) return false;
+    const option = options[Math.max(0, Math.min(options.length - 1, index))] as UpgradeOption;
+    if (option.type === 'heal') return false;
+    this.banishes--;
+    this.banished.add(optionItem(option));
+    this.choices = rollChoices(this.loadout, this.upgradeRng, this.stats.luck);
+    return true;
   }
 
   /** After Dawn: keep playing into the Long Night (the Lantern-Eater comes). */
@@ -377,7 +444,13 @@ export class Sim {
     if (this.events.enabled) this.events.push({ type: 'enemy_hit', slot, damage, x, y });
     if ((e.hp[slot] as number) > 0) return false;
     if (def.behaviour === 'prop') {
-      this.breakLantern(x, y);
+      if (def.persistent) {
+        // The Sealed Well: the Drowned pour out (Ido's secret).
+        this.flood = SECRET_RULES.floodSeconds;
+        this.events.push({ type: 'flood' });
+      } else {
+        this.breakLantern(x, y);
+      }
       if (this.events.enabled) {
         this.events.push({ type: 'enemy_killed', slot, kind: e.kind[slot] as number, x, y });
       }
@@ -393,7 +466,10 @@ export class Sim {
       this.killsSinceHeal = 0;
       this.heal(1);
     }
-    if (def.id === 'mother_of_lanterns' && !this.longNight) this.motherSlain = true;
+    if (def.id === 'mother_of_lanterns' && !this.longNight) {
+      this.motherSlain = true;
+      if (this.time < SECRET_RULES.dawnEarlyBefore) this.findSecret('dawn_early');
+    }
     if (def.boss) this.events.push({ type: 'boss_slain', kind: e.kind[slot] as number });
     this.embers.drop(
       x,
@@ -464,7 +540,8 @@ export class Sim {
     const d = this.director;
     h.u32v(this.tick).u32v(this.kills).u32v(this.level).num(this.xp).num(d.budget);
     h.u32v(this.pendingLevels).num(d.nextKind).num(d.nextGroup).num(this.coins);
-    h.num(this.frenzy).num(this.nextLantern);
+    h.num(this.frenzy).num(this.nextLantern).num(this.flood);
+    h.u32v(this.rerolls).u32v(this.skips).u32v(this.banishes).u32v(this.secrets.length);
     for (const rng of [this.spawnRng, this.upgradeRng, this.combatRng, this.propRng]) {
       for (const word of rng.state()) h.u32v(word);
     }
@@ -594,6 +671,11 @@ export class Sim {
       for (let i = 0; i < owned.level; i++) s[def.stat] += def.perLevel[i] ?? 0;
     }
     for (const w of this.weapons) s.armor += WEAPONS[w.weapon]?.effects?.armor ?? 0;
+    for (const rank of SHRINE) {
+      const n = this.meta?.[rank.id] ?? 0;
+      if (rank.stat && n > 0) s[rank.stat] += rank.perRank * Math.min(n, rank.maxRank);
+    }
+    if (this.characterDef.fixedMaxHp) s.maxHp = this.characterDef.fixedMaxHp;
     s.cooldown = Math.max(0.35, s.cooldown);
     Object.assign(this.stats, s);
     if (this.player) this.player.hp = Math.max(0, this.player.hp + (s.maxHp - before));
@@ -763,7 +845,9 @@ export class Sim {
       if (def.contactDamage <= 0) continue;
       if (dx * dx + dy * dy <= r * r) {
         this.hurtPlayer(
-          (e.damage[s] as number) * (this.frenzy > 0 ? FRENZY.contactDamage : 1),
+          (e.damage[s] as number) *
+            (this.frenzy > 0 ? FRENZY.contactDamage : 1) *
+            (this.characterDef.innate === 'no_face' ? NO_FACE.contactDamage : 1),
           def.id,
         );
         return;
@@ -851,6 +935,7 @@ export class Sim {
         break;
       case PICKUP.onigiri:
         this.heal(ONIGIRI_HEAL);
+        this.mended = true;
         break;
       case PICKUP.coin:
         this.coins += (value || 1) * this.stats.greed;
@@ -932,6 +1017,80 @@ export class Sim {
       const s = em.slots[i] as number;
       em.attracted[s] = 1;
       em.speed[s] = Math.max(em.speed[s] as number, 300);
+    }
+  }
+
+  // ---- secrets & late innates (GAME_DESIGN §4, §9.2) --------------------------
+
+  private findSecret(id: string): void {
+    if (this.secrets.includes(id)) return;
+    this.secrets.push(id);
+    this.events.push({ type: 'secret', id });
+  }
+
+  private updateSecrets(): void {
+    if (!this.mended && this.time >= SECRET_RULES.kagerouAt) this.findSecret('kagerou');
+    if (!this.wellPlaced && this.time >= SECRET_RULES.wellAt) {
+      this.wellPlaced = true;
+      const a = this.propRng.range(0, Math.PI * 2);
+      const p = this.player;
+      const d = SECRET_RULES.wellDistance;
+      this.spawnEnemy(ENEMY_KIND.sealed_well, p.x + Math.cos(a) * d, p.y + Math.sin(a) * d, true);
+    }
+    if (this.flood > 0) {
+      this.flood = Math.max(0, this.flood - DT);
+      if (this.flood === 0 && this.player.hp > 0) this.findSecret('ido');
+    }
+  }
+
+  private updateInnates(): void {
+    const innate = this.characterDef.innate;
+    if (innate === 'no_face' && this.time >= this.nextBlink) {
+      // The nearest elite loses sight of Kagerou for a moment.
+      this.nextBlink += NO_FACE.blinkEvery;
+      const e = this.enemies;
+      const p = this.player;
+      let best = -1;
+      let bestD: number = NO_FACE.blinkRange;
+      for (let i = 0; i < e.count; i++) {
+        const s = e.slots[i] as number;
+        const def = ENEMIES[e.kind[s] as number];
+        if (!def?.elite) continue;
+        const d = len2((e.x[s] as number) - p.x, (e.y[s] as number) - p.y);
+        if (d < bestD) {
+          bestD = d;
+          best = s;
+        }
+      }
+      if (best >= 0) e.freezeT[best] = Math.max(e.freezeT[best] as number, NO_FACE.blinkSeconds);
+    }
+    if (innate === 'undertow') {
+      // Pickups drift in from twice the magnet range.
+      const pk = this.pickups;
+      const p = this.player;
+      const reach = this.magnetRadius * UNDERTOW.magnetMult;
+      for (let i = 0; i < pk.count; i++) {
+        const s = pk.slots[i] as number;
+        const dx = p.x - (pk.x[s] as number);
+        const dy = p.y - (pk.y[s] as number);
+        const d = len2(dx, dy);
+        if (d > reach || d < 1) continue;
+        const step = Math.min(d, UNDERTOW.driftSpeed * DT);
+        pk.x[s] = (pk.x[s] as number) + (dx / d) * step;
+        pk.y[s] = (pk.y[s] as number) + (dy / d) * step;
+      }
+      const at = UNDERTOW.floodAt[this.floodsDone];
+      if (at !== undefined && this.time >= at) {
+        this.floodsDone++;
+        this.events.push({ type: 'flood' });
+        const e = this.enemies;
+        for (let i = e.count - 1; i >= 0; i--) {
+          const s = e.slots[i] as number;
+          const def = ENEMIES[e.kind[s] as number];
+          if (!def || def.invulnerable || def.behaviour === 'prop') continue;
+          this.damageEnemy(s, (e.maxHp[s] as number) * UNDERTOW.floodMaxHpFrac, 0, 0, NO_WEAPON);
+        }
+      }
     }
   }
 }

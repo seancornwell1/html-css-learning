@@ -41,3 +41,18 @@ export const FRENZY = {
   moveSpeed: 1.3,
   contactDamage: 0.5,
 } as const;
+
+/**
+ * Secrets in the night (GAME_DESIGN §9.2). Kagerou: reach `kagerouAt`
+ * without any healing from Onigiri or regen. Ido: the Sealed Well appears
+ * once, far from the player; breaking it floods the night with the Drowned,
+ * and outlasting the flood counts. Dawn early: the Mother falls before
+ * `dawnEarlyBefore`.
+ */
+export const SECRET_RULES = {
+  kagerouAt: 480,
+  wellAt: 150,
+  wellDistance: 1100,
+  floodSeconds: 120,
+  dawnEarlyBefore: 585,
+} as const;
