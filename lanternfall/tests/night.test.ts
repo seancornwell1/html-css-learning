@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CHARACTERS } from '../src/data/characters';
+import { CHARACTERS, LANTERNLIGHT } from '../src/data/characters';
 import { BEHAVIOUR, ENEMIES, ENEMY_KIND } from '../src/data/enemies';
 import { WEAPONS, weaponIndex } from '../src/data/weapons';
 import { RUN_SECONDS, TICK_RATE } from '../src/sim/constants';
@@ -53,7 +53,7 @@ describe('characters', () => {
     const before = [sim.enemies.hp[near] as number, sim.enemies.hp[far] as number];
     sim.damageEnemy(near, 5, 0, 0, 0);
     sim.damageEnemy(far, 5, 0, 0, 0);
-    expect(before[0]! - (sim.enemies.hp[near] as number)).toBeCloseTo(5.6);
+    expect(before[0]! - (sim.enemies.hp[near] as number)).toBeCloseTo(5 * LANTERNLIGHT.damage);
     expect(before[1]! - (sim.enemies.hp[far] as number)).toBeCloseTo(5);
   });
 });
