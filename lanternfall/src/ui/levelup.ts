@@ -24,6 +24,16 @@ function passiveName(id: string): string {
   return PASSIVES.find((p) => p.id === id)?.name ?? id;
 }
 
+/** Run tools bought at the Shrine (GAME_DESIGN §9.1). */
+export interface LevelUpTools {
+  rerolls: number;
+  skips: number;
+  banishes: number;
+  reroll(): void;
+  skip(): void;
+  banish(index: number): void;
+}
+
 /** Ignore taps this soon after the cards appear (thumb still on the stick). */
 const TAP_GUARD_MS = 350;
 
@@ -36,6 +46,9 @@ export class LevelUpUi {
   private focused = 0;
   private shownAt = 0;
   private readonly cards: HTMLButtonElement[] = [];
+  private tools: LevelUpTools | null = null;
+  /** Next card tap/key banishes instead of picking. */
+  private banishing = false;
 
   constructor(
     private readonly root: HTMLElement,
@@ -49,8 +62,10 @@ export class LevelUpUi {
     return this.options !== null;
   }
 
-  show(options: readonly UpgradeOption[], level: number): void {
+  show(options: readonly UpgradeOption[], level: number, tools?: LevelUpTools): void {
     this.options = options;
+    this.tools = tools ?? null;
+    this.banishing = false;
     this.focused = 0;
     this.shownAt = performance.now();
     this.list.replaceChildren();
@@ -80,12 +95,65 @@ export class LevelUpUi {
       this.cards.push(card);
       this.list.append(card);
     });
+    this.renderTools();
     this.root.hidden = false;
     this.render();
   }
 
+  private renderTools(): void {
+    let row = this.root.querySelector<HTMLElement>('.levelup-tools');
+    if (!row) {
+      row = document.createElement('div');
+      row.className = 'levelup-tools actions';
+      this.list.after(row);
+    }
+    const t = this.tools;
+    const buttons: HTMLButtonElement[] = [];
+    const add = (label: string, count: number, key: string, run: () => void): void => {
+      if (count <= 0) return;
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'btn secondary';
+      b.textContent = `${label} ${count} · ${key}`;
+      b.addEventListener('click', run);
+      buttons.push(b);
+    };
+    if (t) {
+      add('Reroll', t.rerolls, 'R', () => this.useReroll());
+      add('Skip', t.skips, 'X', () => this.useSkip());
+      add(this.banishing ? 'Banish: pick a card' : 'Banish', t.banishes, 'B', () =>
+        this.toggleBanish(),
+      );
+    }
+    row.replaceChildren(...buttons);
+    row.hidden = buttons.length === 0;
+  }
+
+  private useReroll(): void {
+    const t = this.tools;
+    if (!t || t.rerolls <= 0) return;
+    this.hide();
+    t.reroll();
+  }
+
+  private useSkip(): void {
+    const t = this.tools;
+    if (!t || t.skips <= 0) return;
+    this.hide();
+    t.skip();
+  }
+
+  private toggleBanish(): void {
+    if (!this.tools || this.tools.banishes <= 0) return;
+    this.banishing = !this.banishing;
+    this.root.classList.toggle('banishing', this.banishing);
+    this.renderTools();
+  }
+
   hide(): void {
     this.options = null;
+    this.banishing = false;
+    this.root.classList.remove('banishing');
     this.root.hidden = true;
   }
 
@@ -122,6 +190,12 @@ export class LevelUpUi {
       this.render(true);
     } else if (e.code === 'Enter' || e.code === 'Space') {
       this.pick(this.focused);
+    } else if (e.code === 'KeyR') {
+      this.useReroll();
+    } else if (e.code === 'KeyX') {
+      this.useSkip();
+    } else if (e.code === 'KeyB') {
+      this.toggleBanish();
     } else {
       return;
     }
@@ -130,8 +204,11 @@ export class LevelUpUi {
 
   private pick(i: number): void {
     if (!this.options) return;
+    const tools = this.tools;
+    const banish = this.banishing && tools !== null && tools.banishes > 0;
     this.hide();
-    this.onPick(i);
+    if (banish) tools.banish(i);
+    else this.onPick(i);
   }
 
   private render(selected = false): void {

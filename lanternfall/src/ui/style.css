@@ -615,3 +615,53 @@ body {
 .shrine-info {
   text-align: left;
 }
+
+/* Level-up run tools */
+#levelup.banishing .card {
+  border-style: dashed;
+}
+
+#levelup.banishing .card.focused {
+  border-color: var(--bone);
+}
+
+/* Lantern Register */
+.register-count {
+  margin: 0;
+  color: var(--ash);
+  letter-spacing: 0.08em;
+}
+
+#register-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 6px;
+  width: min(100%, 900px);
+  max-height: min(60vh, 560px);
+  overflow-y: auto;
+}
+
+.register-row {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--ink-2, #121218);
+  border-radius: 4px;
+  color: var(--ash);
+  text-align: left;
+}
+
+.register-row.known {
+  border-color: var(--gold);
+  color: var(--bone);
+}
+
+.register-name {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}
+
+.register-recipe {
+  font-size: 12px;
+  color: var(--ash);
+}

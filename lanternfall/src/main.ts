@@ -15,6 +15,7 @@ import { Banner, Inventory } from './ui/hud';
 import { LevelUpUi } from './ui/levelup';
 import { CharacterSelect } from './ui/select';
 import { Shrine } from './ui/shrine';
+import { Register } from './ui/register';
 import { runPayout } from './data/meta';
 import { bindSettings, showNotice } from './ui/settings-ui';
 
@@ -104,6 +105,7 @@ const select = new CharacterSelect(el('select'), el('select-cards'));
 const shrine = new Shrine(el('shrine'), el('shrine-list'), el('shrine-coins'), save.profile, () =>
   writeSave(save),
 );
+const register = new Register(el('register'), el('register-list'), () => save.profile.register);
 /** What this run has already paid out (the Long Night pays only the rest). */
 const paid = { time: 0, kills: 0, coins: 0, won: false };
 /** Touch dash button held (Hotaru). */
@@ -128,7 +130,8 @@ function setPaused(value: boolean): void {
 
 const loop = new FixedStepLoop({
   step() {
-    if (paused || blocked || levelUp.open || select.isOpen || shrine.isOpen) return;
+    if (paused || blocked || levelUp.open || select.isOpen || shrine.isOpen || register.isOpen)
+      return;
     if (renderer.hitStop.active(performance.now())) return;
     renderer.beforeStep(sim);
     controller.read(intent);
@@ -153,8 +156,9 @@ const loop = new FixedStepLoop({
     lastFrame = now;
     // Multiple level-ups in a row: show the next set as soon as one is picked.
     if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level);
-    stick.enabled = !levelUp.open && !paused && !blocked && !select.isOpen && !shrine.isOpen;
-    audio.menu = select.isOpen || shrine.isOpen || blocked;
+    stick.enabled =
+      !levelUp.open && !paused && !blocked && !select.isOpen && !shrine.isOpen && !register.isOpen;
+    audio.menu = select.isOpen || shrine.isOpen || register.isOpen || blocked;
     audio.update(sim);
     updateBossBar();
     dashBtn.hidden = sim.characterDef.innate !== 'flutter' || select.isOpen;
@@ -275,6 +279,11 @@ el('shrine-btn').addEventListener('click', () => {
   shrine.show(() => chooseCharacter());
 });
 el('shrine-close').addEventListener('click', () => shrine.close());
+el('register-btn').addEventListener('click', () => {
+  select.hide();
+  register.show(() => chooseCharacter());
+});
+el('register-close').addEventListener('click', () => register.close());
 el('longnight-btn').addEventListener('click', () => {
   sim.continueLongNight();
   gameover.hidden = true;
