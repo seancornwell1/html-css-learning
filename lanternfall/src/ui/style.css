@@ -33,6 +33,14 @@ body {
 #stage {
   position: fixed;
   inset: 0;
+  /* Set on the play surface itself too: iOS Safari doesn't reliably apply
+     body's touch-action to descendants, and a pan would cancel the stick. */
+  touch-action: none;
+  overscroll-behavior: none;
+}
+
+#stage canvas {
+  touch-action: none;
 }
 
 #game {

@@ -64,7 +64,7 @@ renderer.onBanner = (title, detail) => banner.show(title, detail);
 
 const audio = new AudioDirector();
 // Browsers only allow audio after a gesture; any press/tap/key unlocks it.
-for (const ev of ['pointerdown', 'keydown'] as const) {
+for (const ev of ['pointerdown', 'touchend', 'keydown'] as const) {
   window.addEventListener(ev, () => audio.unlock(), { capture: true });
 }
 
@@ -108,6 +108,22 @@ function newSim(): Sim {
   return s;
 }
 let sim = newSim();
+// Debug: ?debug exposes live state to test scripts (read-only use).
+if (params.has('debug')) {
+  Object.defineProperty(window, '__lf', {
+    value: {
+      get sim() {
+        return sim;
+      },
+      get intent() {
+        return intent;
+      },
+      get stick() {
+        return stick;
+      },
+    },
+  });
+}
 // Debug: ?evolve=<weapon id> plays the evolution cut-in.
 const evolveParam = params.get('evolve');
 if (evolveParam) {
