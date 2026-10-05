@@ -82,15 +82,19 @@ function scratch(w: number, h: number): HTMLCanvasElement {
 const tiles = new Map<string, HTMLCanvasElement>();
 
 /** Repeating textile motif tile, ink lines on transparent, device px. */
-export function motifTile(motif: Motif, scale: number): HTMLCanvasElement {
-  const key = `${motif}@${scale.toFixed(3)}`;
+export function motifTile(
+  motif: Motif,
+  scale: number,
+  color: string = PALETTE.ink,
+): HTMLCanvasElement {
+  const key = `${motif}@${scale.toFixed(3)}:${color}`;
   const cached = tiles.get(key);
   if (cached) return cached;
   const u = 6 * scale; // motif unit: 6 world units
   const c = document.createElement('canvas');
   const ctx = c.getContext('2d') as CanvasRenderingContext2D;
-  ctx.strokeStyle = PALETTE.ink;
-  ctx.fillStyle = PALETTE.ink;
+  ctx.strokeStyle = color;
+  ctx.fillStyle = color;
   ctx.lineWidth = Math.max(1, 0.45 * scale);
   ctx.lineCap = 'round';
   switch (motif) {

@@ -80,6 +80,10 @@ await extra.goto(url.replace(/[?&]notice=skip/, '').replace(/[?&]char=\w+/, ''))
 await extra.waitForSelector('#notice:not([hidden])', { timeout: 5000 });
 await extra.screenshot({ path: `${outDir}/notice.png` });
 await extra.click('#notice-ok');
+await extra.waitForSelector('#title:not([hidden])', { timeout: 5000 });
+await extra.waitForTimeout(400);
+await extra.screenshot({ path: `${outDir}/title.png` });
+await extra.click('#title-begin');
 await extra.waitForSelector('#select:not([hidden])', { timeout: 5000 });
 await extra.screenshot({ path: `${outDir}/select.png` });
 await extra.goto(`${url}&fx=off`);

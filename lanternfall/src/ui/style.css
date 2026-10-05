@@ -4,6 +4,9 @@
   --ash: #6e6e78;
   --bone: #f2f0ea;
   --gold: #f5b83d;
+  /* Print tones: illustration and ornament only (GAME_DESIGN §7.3.1). */
+  --washi: #e9e1cf;
+  --shu: #c8322a;
   --safe-top: max(10px, env(safe-area-inset-top));
   --safe-left: max(16px, env(safe-area-inset-left));
   --safe-right: max(16px, env(safe-area-inset-right));
@@ -695,5 +698,108 @@ body {
   .char-card .portrait {
     width: 64px !important;
     height: 80px !important;
+  }
+}
+
+/* Title */
+#title {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  padding: calc(var(--safe-top, 0px) + 24px) 16px calc(var(--safe-bottom, 0px) + 28px);
+  background: var(--ink);
+  overflow: hidden;
+}
+
+#title[hidden] {
+  display: none;
+}
+
+#title-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title-cartouche {
+  position: relative;
+  align-self: start;
+  justify-self: start;
+  margin-left: max(16px, 8vw);
+  padding: 18px 10px 54px;
+  background: var(--washi);
+  border: 3px solid var(--shu);
+  box-shadow: 0 0 0 4px var(--ink);
+}
+
+.title-name {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(18px, min(4.2vh, 6vw), 40px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.title-seal {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 30px;
+  height: 30px;
+  transform: translateX(-50%) rotate(-4deg);
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--washi), var(--washi)) center / 14px 3px no-repeat,
+    linear-gradient(var(--washi), var(--washi)) center / 3px 14px no-repeat,
+    var(--shu);
+}
+
+.title-sub {
+  position: relative;
+  margin: 0 0 14px;
+  color: var(--bone);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.title-menu {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (orientation: portrait) {
+  .title-menu {
+    flex-direction: column;
+    width: min(100%, 320px);
+  }
+}
+
+@media (max-height: 520px) {
+  .title-cartouche {
+    padding: 8px 52px 8px 14px;
+  }
+
+  .title-name {
+    writing-mode: horizontal-tb;
+    font-size: 24px;
+  }
+
+  .title-seal {
+    left: auto;
+    right: 10px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%) rotate(-4deg);
   }
 }

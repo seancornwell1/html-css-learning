@@ -16,6 +16,7 @@ import { LevelUpUi } from './ui/levelup';
 import { CharacterSelect } from './ui/select';
 import { Shrine } from './ui/shrine';
 import { Register } from './ui/register';
+import { TitleScreen } from './ui/title';
 import { runPayout } from './data/meta';
 import { bindSettings, showNotice } from './ui/settings-ui';
 
@@ -105,6 +106,7 @@ const select = new CharacterSelect(el('select'), el('select-cards'));
 const shrine = new Shrine(el('shrine'), el('shrine-list'), el('shrine-coins'), save.profile, () =>
   writeSave(save),
 );
+const title = new TitleScreen(el('title'), el<HTMLCanvasElement>('title-art'));
 const register = new Register(el('register'), el('register-list'), () => save.profile.register);
 /** What this run has already paid out (the Long Night pays only the rest). */
 const paid = { time: 0, kills: 0, coins: 0, won: false };
@@ -130,7 +132,15 @@ function setPaused(value: boolean): void {
 
 const loop = new FixedStepLoop({
   step() {
-    if (paused || blocked || levelUp.open || select.isOpen || shrine.isOpen || register.isOpen)
+    if (
+      paused ||
+      blocked ||
+      levelUp.open ||
+      select.isOpen ||
+      shrine.isOpen ||
+      register.isOpen ||
+      title.isOpen
+    )
       return;
     if (renderer.hitStop.active(performance.now())) return;
     renderer.beforeStep(sim);
@@ -157,8 +167,14 @@ const loop = new FixedStepLoop({
     // Multiple level-ups in a row: show the next set as soon as one is picked.
     if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level);
     stick.enabled =
-      !levelUp.open && !paused && !blocked && !select.isOpen && !shrine.isOpen && !register.isOpen;
-    audio.menu = select.isOpen || shrine.isOpen || register.isOpen || blocked;
+      !levelUp.open &&
+      !paused &&
+      !blocked &&
+      !select.isOpen &&
+      !shrine.isOpen &&
+      !register.isOpen &&
+      !title.isOpen;
+    audio.menu = select.isOpen || shrine.isOpen || register.isOpen || title.isOpen || blocked;
     audio.update(sim);
     updateBossBar();
     dashBtn.hidden = sim.characterDef.innate !== 'flutter' || select.isOpen;
@@ -306,8 +322,20 @@ document.addEventListener('visibilitychange', () => {
 });
 
 const startSelect = (): void => {
-  if (!charParam) chooseCharacter();
+  if (!charParam) title.show();
 };
+el('title-begin').addEventListener('click', () => {
+  title.hide();
+  chooseCharacter();
+});
+el('title-shrine').addEventListener('click', () => {
+  title.hide();
+  shrine.show(() => title.show());
+});
+el('title-register').addEventListener('click', () => {
+  title.hide();
+  register.show(() => title.show());
+});
 if (!settings.noticeSeen && params.get('notice') !== 'skip') {
   blocked = true;
   void showNotice(settings).then(() => {
