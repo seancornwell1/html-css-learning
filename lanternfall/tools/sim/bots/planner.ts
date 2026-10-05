@@ -2,7 +2,7 @@ import { ENEMIES } from '../../../src/data/enemies';
 import type { Intent } from '../../../src/sim/intent';
 import type { Sim } from '../../../src/sim/sim';
 import type { Bot } from './bot';
-import { hazardRisk, isProp, meleeReach, predictEnemy, priorityChoice, shotRisk } from './sense';
+import { hazardRisk, isProp, meleeReach, predictEnemy, priorityChoice } from './sense';
 
 /** Reaction: re-plans every 3 ticks (50 ms), like the skilled bot. */
 const THINK_EVERY = 3;
@@ -20,6 +20,8 @@ export interface PlannerParams {
   comfort: number;
   /** Weight of XP and pickups reachable along the path. */
   loot: number;
+  /** Weight of a predicted shot hit, relative to contact. */
+  shot: number;
   /** Weight of enemies inside weapon reach (offence: kills feed XP). */
   engage: number;
   /** Weight of open escape directions at the path's end (anti-boxing). */
@@ -34,12 +36,20 @@ export const DEFAULT_PLANNER: PlannerParams = {
   contact: 60,
   crowd: 1.2,
   comfort: 45,
+  shot: 1.5,
   engage: 1.2,
   loot: 2.5,
   space: 3,
   inertia: 0.6,
   focusWeapons: 4,
 };
+
+/** Defaults, overridable as JSON in PLANNER_PARAMS (for searches). */
+export function plannerParams(): PlannerParams {
+  const raw = typeof process !== 'undefined' ? process.env.PLANNER_PARAMS : undefined;
+  if (!raw) return DEFAULT_PLANNER;
+  return { ...DEFAULT_PLANNER, ...(JSON.parse(raw) as Partial<PlannerParams>) };
+}
 
 /**
  * Planner (M10 skilled bot candidate): instead of a potential field, it
@@ -60,7 +70,7 @@ export class PlannerBot implements Bot {
 
   constructor(
     _seed: number,
-    private readonly p: PlannerParams = DEFAULT_PLANNER,
+    private readonly p: PlannerParams = plannerParams(),
   ) {
     for (let i = 0; i < HEADINGS; i++) {
       const a = (i / HEADINGS) * Math.PI * 2;
@@ -139,7 +149,25 @@ export class PlannerBot implements Bot {
         else if (d < comfort) crowd += ((comfort - d) / comfort) * urgency * heavy;
         else if (h === 1 && d < reach) engage += 1;
       }
-      danger += (hazardRisk(sim, px, py, t) + shotRisk(sim, px, py, t)) * P.contact * 0.3 * urgency;
+      danger += hazardRisk(sim, px, py, t) * P.contact * 0.3 * urgency;
+    }
+    // Shots are fast: sweep the path finely and count any crossing as a hit.
+    const sh = sim.enemyShots;
+    for (let i = 0; i < sh.count; i++) {
+      const k = sh.slots[i] as number;
+      if (sh.reflected[k]) continue;
+      const r = (sh.radius[k] as number) + pl.radius + 3;
+      for (let step = 1; step <= 10; step++) {
+        const t = step * 0.1;
+        const px = pl.x + dx * speed * t;
+        const py = pl.y + dy * speed * t;
+        const ox = px - ((sh.x[k] as number) + (sh.vx[k] as number) * t);
+        const oy = py - ((sh.y[k] as number) + (sh.vy[k] as number) * t);
+        if (ox * ox + oy * oy < r * r) {
+          danger += P.contact * P.shot * (1.2 - t);
+          break;
+        }
+      }
     }
     // Room to escape at the end of the path: free directions among 8.
     const t = HORIZON[HORIZON.length - 1] as number;
