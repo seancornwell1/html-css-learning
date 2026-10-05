@@ -42,30 +42,51 @@ function bake(scale: number, halfW: number, halfH: number, draw: Draw, ink?: Ink
 
 // ---- Shapes (world units, anchor at the origin) ---------------------------
 
-/** Hitodama-like wisp: round head, wavering tail along +x. */
+/** Hitodama wisp: a soul-flame whose tail breaks into flame lobes and a curl. */
 function wisp(ctx: CanvasRenderingContext2D, frame: number, fill: string): void {
-  const wob = frame === 0 ? 3 : -3;
+  const wob = frame === 0 ? 2.5 : -2.5;
   ctx.fillStyle = fill;
   ctx.beginPath();
-  ctx.moveTo(0, -7);
-  ctx.bezierCurveTo(9, -8, 14, -2 + wob, 24, wob);
-  ctx.bezierCurveTo(14, 3 + wob, 9, 8, 0, 7);
-  ctx.arc(0, 0, 7, Math.PI / 2, -Math.PI / 2);
+  ctx.moveTo(0, -7.5);
+  // Upper edge: two flame lobes trailing back.
+  ctx.quadraticCurveTo(6, -9, 9, -6 + wob * 0.3);
+  ctx.quadraticCurveTo(11, -8 + wob * 0.5, 14, -4 + wob * 0.6);
+  ctx.quadraticCurveTo(17, -5 + wob, 22, wob);
+  // Lower edge back to the head.
+  ctx.quadraticCurveTo(16, 2 + wob, 13, 4 + wob * 0.6);
+  ctx.quadraticCurveTo(10, 7 + wob * 0.4, 7, 6);
+  ctx.quadraticCurveTo(4, 8.5, 0, 7.5);
+  ctx.arc(0, 0, 7.5, Math.PI / 2, -Math.PI / 2);
   ctx.closePath();
+  ctx.fill();
+  // The tip curls over, drawn as one tapering brush stroke.
+  ctx.strokeStyle = fill;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(21, wob);
+  ctx.quadraticCurveTo(25, wob - 3, 22.5, wob - 5);
+  ctx.quadraticCurveTo(20.5, wob - 5.5, 21, wob - 3.5);
+  ctx.stroke();
+  // Hollow eyes.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.beginPath();
+  ctx.ellipse(-2.6, -2.4, 1.2, 2, 0, 0, Math.PI * 2);
+  ctx.ellipse(-2.6, 2.4, 1.2, 2, 0, 0, Math.PI * 2);
   ctx.fill();
 }
 
-/** Faceless walker: hunched robed figure with a blank oval head. */
+/**
+ * Faceless walker: a hunched yurei in a white burial robe. Blank face, long
+ * ink hair hanging forward (rimmed in the fill colour so it reads at
+ * night), limp hands held out.
+ */
 function walker(ctx: CanvasRenderingContext2D, frame: number, fill: string): void {
   const sway = [0, 1.2, 0, -1.2][frame] ?? 0;
   const bob = frame % 2 === 0 ? 0 : -0.8;
   ctx.fillStyle = fill;
-  ctx.beginPath();
-  // Head, leaning forward (+x).
-  ctx.ellipse(2.5 + sway * 0.5, -15 + bob, 5, 6.4, 0.15, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.beginPath();
   // Robe: narrow shoulders, wide ragged hem.
+  ctx.beginPath();
   ctx.moveTo(-5 + sway, -8 + bob);
   ctx.quadraticCurveTo(3 + sway, -10 + bob, 6 + sway, -7 + bob);
   ctx.lineTo(9, 13);
@@ -78,13 +99,51 @@ function walker(ctx: CanvasRenderingContext2D, frame: number, fill: string): voi
   ctx.lineTo(-10, 13);
   ctx.closePath();
   ctx.fill();
-  // Dangling arm.
+  // Limp arms held forward from long sleeves (the yurei pose).
   ctx.beginPath();
-  ctx.moveTo(4 + sway, -6 + bob);
-  ctx.quadraticCurveTo(9 + sway, 0, 7 + sway * 1.5, 7);
-  ctx.lineWidth = 2.2;
+  ctx.moveTo(3 + sway, -6 + bob);
+  ctx.quadraticCurveTo(10 + sway, -6 + bob, 10 + sway, -1 + bob);
+  ctx.lineTo(6 + sway, 0 + bob);
+  ctx.closePath();
+  ctx.fill();
+  ctx.lineWidth = 1.4;
   ctx.strokeStyle = fill;
   ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.moveTo(9.5 + sway, -1 + bob);
+  ctx.lineTo(11 + sway, 3 + bob);
+  ctx.moveTo(8.5 + sway, -0.5 + bob);
+  ctx.lineTo(9.5 + sway, 3.5 + bob);
+  ctx.stroke();
+  // Head, leaning forward (+x).
+  ctx.beginPath();
+  ctx.ellipse(2.5 + sway * 0.5, -15 + bob, 5, 6.4, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  // Collar crossed right over left: dressed for burial.
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(4 + sway, -8 + bob);
+  ctx.lineTo(-0.5 + sway * 0.6, -2 + bob);
+  ctx.lineTo(-3 + sway, -8 + bob);
+  ctx.stroke();
+  // Long hair over the back and face.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.strokeStyle = fill;
+  ctx.lineWidth = 0.8;
+  ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(-2.5 + sway * 0.5, -19 + bob);
+  ctx.quadraticCurveTo(3 + sway * 0.5, -23 + bob, 7.5 + sway * 0.5, -17 + bob);
+  ctx.lineTo(8 + sway * 0.6, -6 + bob);
+  ctx.lineTo(5.5 + sway * 0.6, -9 + bob);
+  ctx.lineTo(4 + sway * 0.6, -5 + bob);
+  ctx.lineTo(2.5 + sway * 0.5, -12 + bob);
+  ctx.lineTo(-1 + sway * 0.5, -10 + bob);
+  ctx.quadraticCurveTo(-5 + sway, -6 + bob, -6 + sway, 1 + bob);
+  ctx.quadraticCurveTo(-4 + sway, -10 + bob, -2.5 + sway * 0.5, -19 + bob);
+  ctx.closePath();
+  ctx.fill();
   ctx.stroke();
 }
 
@@ -253,7 +312,7 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     frames: WISP_FRAMES,
     layout: 'rotate',
     draw: wisp,
-    ink: { thin: 0.5, thick: 1.2 },
+    ink: { thin: 0, thick: 0 },
   },
   faceless_walker: {
     halfW: 16,
@@ -261,7 +320,7 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     frames: WALKER_FRAMES,
     layout: 'mirror',
     draw: walker,
-    ink: { motif: 'asanoha' },
+    ink: { motif: 'asanoha', thin: 0, thick: 0 },
   },
   hopping_kasa: {
     halfW: 16,
