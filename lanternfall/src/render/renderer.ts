@@ -12,7 +12,7 @@ import { Camera } from './camera';
 import type { Display } from './display';
 import { Decals, HitStop, ScreenFx, Shake, type FxParams } from './effects';
 import { GROUND_TILE, bakeGround } from './ground';
-import { PALETTE, withAlpha } from './palette';
+import { PALETTE, PRINT, withAlpha } from './palette';
 import {
   DECAL_VARIANTS,
   ENEMY_ART,
@@ -21,6 +21,7 @@ import {
   LOOK_ROTATIONS,
   PLAYER_FRAMES,
   SpriteCache,
+  bake,
   rotationIndex,
   type Sprite,
 } from './sprites';
@@ -95,6 +96,7 @@ export class Renderer {
   }
 
   reset(): void {
+    this.cutIn = null;
     this.enemyFlash.fill(0);
     this.weaponFx.reset();
     this.decals.reset();
@@ -182,7 +184,9 @@ export class Renderer {
         this.fx.impactFrame(1);
         this.shake.add(0.7);
         this.hitStop.trigger(160, now);
-        this.onBanner('It comes', ENEMIES[e.kind]?.name ?? '');
+        const def = ENEMIES[e.kind];
+        if (def && !def.invulnerable) this.cutIn = { id: def.id, name: def.name, age: 0 };
+        else this.onBanner('It comes', def?.name ?? '');
         break;
       }
       case 'boss_slain':
@@ -286,6 +290,7 @@ export class Renderer {
     display.ctx.setTransform(1, 0, 0, 1, 0, 0);
     this.drawPlayer(sim, px, py);
     this.drawPulse(px, py, dt);
+    this.drawCutIn(dt);
 
     display.present(this.fx.params(this.fxParams));
   }
@@ -620,6 +625,101 @@ export class Renderer {
     ctx.lineTo(lx + 4.8, ly + 2);
     ctx.stroke();
     ctx.setTransform(1, 0, 0, 1, 0, 0);
+  }
+
+  /** Boss intro: an anime cut-in band slashing across the screen. */
+  private cutIn: { id: string; name: string; age: number; art?: Sprite } | null = null;
+
+  private drawCutIn(dt: number): void {
+    const c = this.cutIn;
+    if (!c) return;
+    c.age += dt;
+    const life = 1.9;
+    if (c.age >= life) {
+      this.cutIn = null;
+      return;
+    }
+    const ctx = this.display.ctx;
+    const { width: w, height: h } = this.display;
+    // Slide in fast, hold, slide out.
+    const t = c.age;
+    const slide =
+      t < 0.22 ? 1 - (t / 0.22) ** 2 : t > life - 0.3 ? -(((t - (life - 0.3)) / 0.3) ** 2) : 0;
+    const bandH = Math.min(h * 0.34, w * (h > w ? 0.62 : 0.42));
+    // Boss on the left, name to its right; tighter on narrow screens.
+    const bossX = -Math.min(bandH * 0.9, w * 0.3);
+    const bossH = bandH * (h > w ? 0.95 : 1.15);
+    if (!c.art) {
+      // Bake the boss at cut-in size: sharp, not an upscaled play sprite.
+      const art = ENEMY_ART[c.id];
+      if (art) {
+        const k = bossH / (art.halfH * 2);
+        c.art = bake(k, art.halfW, art.halfH, (g) => art.draw(g, 0, PALETTE.bone), art.ink ?? {});
+      }
+    }
+    ctx.save();
+    ctx.translate(w / 2 + slide * w * 1.1, h * 0.46);
+    ctx.rotate(-0.14);
+    const bw = Math.hypot(w, h) * 1.2;
+    ctx.fillStyle = withAlpha(PALETTE.ink, 0.94);
+    ctx.fillRect(-bw / 2, -bandH / 2, bw, bandH);
+    // Speed lines racing through the band.
+    ctx.strokeStyle = withAlpha(PALETTE.ash, 0.5);
+    ctx.lineWidth = Math.max(1, bandH * 0.01);
+    for (let i = 0; i < 26; i++) {
+      const y = -bandH / 2 + (((i * 37) % 100) / 100) * bandH;
+      const len = bw * (0.08 + ((i * 53) % 10) / 60);
+      const x = ((i * 211 + t * bw * 1.6) % bw) - bw / 2;
+      ctx.beginPath();
+      ctx.moveTo(x, y);
+      ctx.lineTo(x - len, y);
+      ctx.stroke();
+    }
+    // Bone edges, like the border lines of a print panel.
+    ctx.fillStyle = PALETTE.bone;
+    ctx.fillRect(-bw / 2, -bandH / 2, bw, Math.max(2, bandH * 0.025));
+    ctx.fillRect(-bw / 2, bandH / 2 - Math.max(2, bandH * 0.025), bw, Math.max(2, bandH * 0.025));
+    // The boss, huge.
+    const sprite = c.art;
+    if (sprite) {
+      const s = 1;
+      ctx.drawImage(
+        sprite.canvas,
+        bossX - sprite.canvas.width * s * 0.5,
+        -sprite.canvas.height * s * 0.52,
+        sprite.canvas.width * s,
+        sprite.canvas.height * s,
+      );
+    }
+    // Name with a vermilion seal.
+    const textX = bossX + bandH * 0.55;
+    // Fit the name between the boss and the screen edge, one line if it
+    // fits, otherwise a word per line (narrow portrait screens).
+    const name = c.name.toUpperCase();
+    let size = Math.round(bandH * 0.2);
+    ctx.font = `700 ${size}px system-ui, sans-serif`;
+    const room = w * 0.47 - textX - size * 1.6;
+    let lines = [name];
+    if (ctx.measureText(name).width > room) lines = name.split(' ');
+    const widest = Math.max(...lines.map((l) => ctx.measureText(l).width));
+    if (widest > room) size = Math.max(10, Math.floor((size * room) / widest));
+    size = Math.min(size, Math.floor((bandH * 0.62) / lines.length));
+    const top = -((lines.length - 1) * size * 1.05) / 2 + size * 0.2;
+    ctx.textBaseline = 'middle';
+    ctx.font = `600 ${Math.round(size * 0.42)}px system-ui, sans-serif`;
+    ctx.fillStyle = PALETTE.ash;
+    ctx.fillText('IT COMES', textX, top - size * 1.05);
+    ctx.font = `700 ${size}px system-ui, sans-serif`;
+    ctx.fillStyle = PALETTE.bone;
+    lines.forEach((line, i) => ctx.fillText(line, textX, top + i * size * 1.05));
+    const last = lines[lines.length - 1] ?? '';
+    const tw = ctx.measureText(last).width;
+    const sy = top + (lines.length - 1) * size * 1.05 - size * 0.45;
+    ctx.fillStyle = PRINT.shu;
+    ctx.fillRect(textX + tw + size * 0.4, sy, size * 0.9, size * 0.9);
+    ctx.fillStyle = PRINT.washi;
+    ctx.fillRect(textX + tw + size * 0.75, sy + size * 0.15, size * 0.2, size * 0.6);
+    ctx.restore();
   }
 
   private drawPulse(px: number, py: number, dt: number): void {

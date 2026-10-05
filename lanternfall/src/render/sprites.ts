@@ -28,7 +28,13 @@ export const KASA_POSE = { rest: 0, crouch: 1, air: 2 } as const;
 type Tint = 'bone' | 'ash';
 type Draw = (ctx: CanvasRenderingContext2D) => void;
 
-function bake(scale: number, halfW: number, halfH: number, draw: Draw, ink?: InkOptions): Sprite {
+export function bake(
+  scale: number,
+  halfW: number,
+  halfH: number,
+  draw: Draw,
+  ink?: InkOptions,
+): Sprite {
   const canvas = document.createElement('canvas');
   canvas.width = Math.max(1, Math.ceil(halfW * 2 * scale));
   canvas.height = Math.max(1, Math.ceil(halfH * 2 * scale));

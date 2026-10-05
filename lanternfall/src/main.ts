@@ -105,6 +105,11 @@ function newSim(): Sim {
   return s;
 }
 let sim = newSim();
+// Debug: spawned bosses still get their cut-in.
+for (const id of spawnIds) {
+  const kind = ENEMIES.findIndex((d) => d.id === id);
+  if (ENEMIES[kind]?.boss) renderer.onEvent({ type: 'boss', kind }, performance.now());
+}
 const select = new CharacterSelect(el('select'), el('select-cards'));
 const shrine = new Shrine(el('shrine'), el('shrine-list'), el('shrine-coins'), save.profile, () =>
   writeSave(save),
