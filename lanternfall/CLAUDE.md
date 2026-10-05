@@ -149,7 +149,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M7 | Audio | ✅ done (`sim-reports/M7.md`, bit-identical to M6) |
 | M8 | Meta & secrets | ✅ done (`sim-reports/M8.md`, full); skilled band deviation carried; Kagerou average 7% and skilled_meta 60–91.5% tuned in M10 |
 | M9 | Art pass, UI & mobile polish | ✅ done (`sim-reports/M9.md`, bit-identical to M8); real-phone perf pending the human playtest |
-| M10 | Balance & release | not started |
+| M10 | Balance & release | 🟡 sim done (`sim-reports/M10.md`, full): 16/24 bands pass, rest near edges; awaiting the human playtest (`PLAYTEST.md`) and deploy setup |
 
 ## CI & deploy
 - `.github/workflows/lanternfall.yml` runs check, tests and build on every
