@@ -90,7 +90,7 @@ export const CHARACTERS: readonly CharacterDef[] = [
     innate: 'undertow',
     innateName: 'Undertow',
     innateText:
-      'Pickups drift to you from twice your magnet range. At 5:00 and 8:00 a flood hits every enemy for a quarter of its health.',
+      'Pickups drift to you from twice your magnet range. At 5:00 and 8:00 a flood hits every enemy for a fifth of its health.',
     mods: { moveSpeed: -0.15 },
     secret: true,
     unlock: 'A secret. The well keeper waits where no lantern was ever lit.',
@@ -111,7 +111,7 @@ export const UNDERTOW = {
   magnetMult: 2,
   driftSpeed: 70,
   floodAt: [300, 480],
-  floodMaxHpFrac: 0.25,
+  floodMaxHpFrac: 0.2,
 } as const;
 export const FLUTTER = { distance: 120, time: 0.15, iframes: 0.25, cooldown: 6 } as const;
 

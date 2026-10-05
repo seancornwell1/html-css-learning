@@ -88,7 +88,7 @@ deliberately simple to simulate.
 | 3 | **Tetsu**, the Gravedigger | Chain Sickle | **Grave Hunger:** heals 1 HP per 15 kills. | +40 MaxHP, +1 Armor, −5% MoveSpeed | Survive to 5:00 with anyone |
 | 4 | **Hotaru**, the Moth Child | Spirit Moths | **Flutter:** an active dash (120 px, 0.25 s of i-frames, 6 s cooldown). Shift / Space on keyboard; on-screen button on touch. | +10% MoveSpeed, −20 MaxHP | Evolve any weapon once |
 | 5 | ??? **Kagerou**, the Faceless *(secret)* | Mirror Shard | **No Face:** enemy contact damage −35%, and every 60 s a blink makes the nearest elite lose track of you. | MaxHP fixed at 60, +20% Curse | Secret (§9) |
-| 6 | ??? **Ido**, the Well Keeper *(secret)* | Koi Spirits | **Undertow:** pickups within 2× magnet radius drift toward you. At 5:00 and 8:00 a flood wave sweeps the screen and damages all enemies for 25% of their max HP. | −15% MoveSpeed | Secret (§9) |
+| 6 | ??? **Ido**, the Well Keeper *(secret)* | Koi Spirits | **Undertow:** pickups within 2× magnet radius drift toward you. At 5:00 and 8:00 a flood wave sweeps the screen and damages all enemies for 20% of their max HP. | −15% MoveSpeed | Secret (§9) |
 
 The unlock path takes four to six runs. That is enough to teach the game without
 gating the roster for long.
@@ -358,10 +358,17 @@ see the same threat density.
 ## 9. Meta-progression & secrets
 
 ### 9.1 Shrine (meta shop, light)
-Spend coins on small permanent ranks: Might, Armor, MaxHP, Regen, Cooldown,
-Area, Duration, MoveSpeed, Magnet, Luck, Growth, Greed (5 ranks each), Amount
-(1 rank), Revival (1 rank), and the run tools **Reroll**, **Skip** and
+Spend coins on small permanent ranks: Might, MaxHP, Regen, Cooldown, Area,
+Duration, MoveSpeed, Magnet, Luck, Growth, Greed (5 ranks each), Armor
+(2 ranks), Revival (1 rank), and the run tools **Reroll**, **Skip** and
 **Banish** (3 ranks each). Costs rise per rank, with a full-refund respec.
+
+*M8 calibration:*
+- **Per-rank values are small:** for example +1.5% Might and +4 MaxHP per rank.
+- **Amount (+1 projectile) was cut.** It was the single strongest purchase.
+- **Measured gain:** with the original values, max meta lifted the skilled bot from about 25% survival to about 100%.
+- **Target:** max meta should add about 25 points of survival over the same bot, matching the band midpoints (60% → 85%).
+- **Final tuning is at M10**, against the stronger skilled bot.
 
 Total meta power is capped so that a fully upgraded skilled bot sits around
 80–90% survival (§10). Meta helps but does not trivialise the game.
