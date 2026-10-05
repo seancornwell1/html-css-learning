@@ -85,9 +85,9 @@ deliberately simple to simulate.
 |---|---|---|---|---|---|
 | 1 | **Akari**, the Lamplighter | Lantern Flail | **Lanternlight:** enemies inside her light radius (140 px, +5% per 10 levels) take +8% damage. | — | Default |
 | 2 | **Ren**, the Exorcist | Ofuda Volley | **Exorcism:** +30% damage to elites and bosses. Elites drop +1 extra Reliquary roll. | −10% MaxHP | Default |
-| 3 | **Tetsu**, the Gravedigger | Chain Sickle | **Grave Hunger:** heals 1 HP per 25 kills. | +30 MaxHP, −8% MoveSpeed | Survive to 5:00 with anyone |
+| 3 | **Tetsu**, the Gravedigger | Chain Sickle | **Grave Hunger:** heals 1 HP per 40 kills. | +30 MaxHP, −8% MoveSpeed | Survive to 5:00 with anyone |
 | 4 | **Hotaru**, the Moth Child | Spirit Moths | **Flutter:** an active dash (120 px, 0.25 s of i-frames, 6 s cooldown). Shift / Space on keyboard; on-screen button on touch. | +10% MoveSpeed, −20 MaxHP | Evolve any weapon once |
-| 5 | ??? **Kagerou**, the Faceless *(secret)* | Mirror Shard | **No Face:** enemy contact damage −35%, and every 60 s a blink makes the nearest elite lose track of you. | MaxHP fixed at 75, +20% Curse | Secret (§9) |
+| 5 | ??? **Kagerou**, the Faceless *(secret)* | Mirror Shard | **No Face:** enemy contact damage −45%, and every 60 s a blink makes the nearest elite lose track of you. | MaxHP fixed at 75, +20% Curse | Secret (§9) |
 | 6 | ??? **Ido**, the Well Keeper *(secret)* | Koi Spirits | **Undertow:** pickups within 2× magnet radius drift toward you. At 5:00 and 8:00 a flood wave sweeps the screen and damages all enemies for 20% of their max HP. | −15% MoveSpeed | Secret (§9) |
 
 The unlock path takes four to six runs. That is enough to teach the game without

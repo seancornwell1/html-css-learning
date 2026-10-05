@@ -52,7 +52,7 @@ export const CHARACTERS: readonly CharacterDef[] = [
     startWeapon: 'chain_sickle',
     innate: 'grave_hunger',
     innateName: 'Grave Hunger',
-    innateText: 'Heal 1 HP for every 25 spirits laid to rest. Tough, but slow.',
+    innateText: 'Heal 1 HP for every 40 spirits laid to rest. Tough, but slow.',
     mods: { maxHp: 30, moveSpeed: -0.08 },
     unlock: 'Survive to 5:00 with anyone.',
   },
@@ -76,7 +76,7 @@ export const CHARACTERS: readonly CharacterDef[] = [
     innate: 'no_face',
     innateName: 'No Face',
     innateText:
-      'Enemies hit you 35% softer. Every 60 s the nearest elite loses sight of you. Max HP is always 75.',
+      'Enemies hit you 45% softer. Every 60 s the nearest elite loses sight of you. Max HP is always 75.',
     mods: { curse: 0.2 },
     fixedMaxHp: 75,
     secret: true,
@@ -100,9 +100,9 @@ export const CHARACTERS: readonly CharacterDef[] = [
 /** Light radius and damage bonus for Lanternlight (GAME_DESIGN §4). */
 export const LANTERNLIGHT = { radius: 140, growthPer10Levels: 0.05, damage: 1.08 } as const;
 export const EXORCISM = { damage: 1.3 } as const;
-export const GRAVE_HUNGER = { killsPerHp: 25 } as const;
+export const GRAVE_HUNGER = { killsPerHp: 40 } as const;
 export const NO_FACE = {
-  contactDamage: 0.65,
+  contactDamage: 0.55,
   blinkEvery: 60,
   blinkRange: 500,
   blinkSeconds: 3,
