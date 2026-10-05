@@ -140,7 +140,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M4 | Arsenal II | ✅ done (`sim-reports/M4.md`) |
 | M5 | Night & roster | ✅ done with accepted deviation: skilled band unmet (`sim-reports/M5.md`); stronger skilled bot planned for M10 |
 | M6 | Power-ups | ✅ done (`sim-reports/M6.md`); skilled band deviation carried from M5; Ren average 8% (tune in M8) |
-| M7 | Audio | not started |
+| M7 | Audio | ✅ done (`sim-reports/M7.md`, bit-identical to M6) |
 | M8 | Meta & secrets | not started |
 | M9 | Art pass, UI & mobile polish | not started |
 | M10 | Balance & release | not started |
