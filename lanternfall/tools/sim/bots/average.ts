@@ -4,7 +4,7 @@ import type { Intent } from '../../../src/sim/intent';
 import { Rng } from '../../../src/sim/rng';
 import type { Sim } from '../../../src/sim/sim';
 import type { Bot } from './bot';
-import { nearestEmber, nearestPickup, priorityChoice } from './sense';
+import { nearestEmber, nearestPickup, nearestProp, priorityChoice } from './sense';
 
 /** Reaction time: re-decides every 6 ticks (100 ms). */
 const THINK_EVERY = 6;
@@ -100,6 +100,15 @@ export class AverageBot implements Bot {
         const d = len2(dx, dy) || 1;
         fx += (dx / d) * 0.8;
         fy += (dy / d) * 0.8;
+      }
+      // Players walk over to stone lanterns they can see to break them.
+      const lantern = pk >= 0 ? -1 : nearestProp(sim, 420);
+      if (lantern >= 0) {
+        const dx = (sim.enemies.x[lantern] as number) - p.x;
+        const dy = (sim.enemies.y[lantern] as number) - p.y;
+        const d = len2(dx, dy) || 1;
+        fx += (dx / d) * 0.6;
+        fy += (dy / d) * 0.6;
       }
     }
     // A little hesitation/noise, like a human thumb.

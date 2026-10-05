@@ -9,6 +9,7 @@ import {
   meleeReach,
   nearestEmber,
   nearestPickup,
+  nearestProp,
   predictEnemy,
   priorityChoice,
   shotRisk,
@@ -127,6 +128,15 @@ export class SkilledBot implements Bot {
         const d = len2(dx, dy) || 1;
         fx += (dx / d) * P.emberPull;
         fy += (dy / d) * P.emberPull;
+      }
+      // Break visible stone lanterns for their power-ups.
+      const lantern = nearestProp(sim, 420);
+      if (lantern >= 0) {
+        const dx = (sim.enemies.x[lantern] as number) - p.x;
+        const dy = (sim.enemies.y[lantern] as number) - p.y;
+        const d = len2(dx, dy) || 1;
+        fx += (dx / d) * P.emberPull * 0.75;
+        fy += (dy / d) * P.emberPull * 0.75;
       }
     }
     if (P.jitter > 0) {

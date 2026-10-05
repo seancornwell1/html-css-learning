@@ -46,6 +46,26 @@ export function nearestEmber(sim: Sim, range: number): number {
   return best;
 }
 
+/** Nearest standing stone lantern within `range`, or -1. */
+export function nearestProp(sim: Sim, range: number): number {
+  const p = sim.player;
+  const e = sim.enemies;
+  let best = -1;
+  let bestD2 = range * range;
+  for (let i = 0; i < e.count; i++) {
+    const s = e.slots[i] as number;
+    if (!isProp(e.kind[s] as number)) continue;
+    const dx = (e.x[s] as number) - p.x;
+    const dy = (e.y[s] as number) - p.y;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < bestD2) {
+      bestD2 = d2;
+      best = s;
+    }
+  }
+  return best;
+}
+
 /** Stone lanterns and other props: not threats (GAME_DESIGN §7.2). */
 export function isProp(kind: number): boolean {
   return ENEMIES[kind]?.behaviour === 'prop';
