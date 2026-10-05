@@ -3,7 +3,11 @@ import type { Bot } from './bot';
 import { NaiveBot } from './naive';
 import { SkilledBot } from './skilled';
 
-export const BOT_NAMES = ['naive', 'average', 'skilled'] as const;
+/**
+ * `skilled_meta` is the skilled bot playing with every Shrine rank bought
+ * (GAME_DESIGN §10's fourth band); run.ts passes the ranks to the sim.
+ */
+export const BOT_NAMES = ['naive', 'average', 'skilled', 'skilled_meta'] as const;
 export type BotName = (typeof BOT_NAMES)[number];
 
 export function isBotName(name: string): name is BotName {
@@ -17,6 +21,7 @@ export function createBot(name: BotName, seed: number): Bot {
     case 'average':
       return new AverageBot(seed);
     case 'skilled':
+    case 'skilled_meta':
       return new SkilledBot(seed);
   }
 }

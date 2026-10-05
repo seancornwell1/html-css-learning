@@ -21,9 +21,9 @@ import {
 } from './report';
 import { runOne, type RunJob, type RunResult } from './run';
 
-/** Characters simulated by default: everyone not hidden behind a secret. */
-const CHARACTERS = CHARACTER_DEFS.filter((c) => !c.secret).map((c) => c.id);
+/** Characters simulated by default: the whole roster, secrets included (M8). */
 const ALL_CHARACTERS = CHARACTER_DEFS.map((c) => c.id);
+const CHARACTERS = ALL_CHARACTERS;
 const MIN_SPEED = 30;
 const DETERMINISM_SAMPLES = 10;
 

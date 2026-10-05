@@ -1,5 +1,6 @@
 import { RUN_SECONDS, TICK_RATE } from '../../src/sim/constants';
 import type { Intent } from '../../src/sim/intent';
+import { maxRanks } from '../../src/data/meta';
 import { PICKUP } from '../../src/sim/pickup-pool';
 import { Sim, type RunStatus } from '../../src/sim/sim';
 import { WEAPONS } from '../../src/data/weapons';
@@ -44,7 +45,12 @@ const FIVE_MINUTES = 300 * TICK_RATE;
 
 export function runOne(job: RunJob): RunResult {
   const start = process.hrtime.bigint();
-  const sim = new Sim({ seed: job.seed, character: job.character, events: false });
+  const sim = new Sim({
+    seed: job.seed,
+    character: job.character,
+    events: false,
+    ...(job.bot === 'skilled_meta' ? { meta: maxRanks() } : {}),
+  });
   const bot = createBot(job.bot, job.seed);
   const intent: Intent = { moveX: 0, moveY: 0, action: false };
   let levelAt5 = 0;
