@@ -446,10 +446,28 @@ export function lanternMouth(ctx: Ctx, frame: number, fill: string): void {
   for (let i = 6; i >= 0; i--) ctx.lineTo(-7 + (i * 14) / 6, 2 + open - (i % 2 === 0 ? 0 : 2));
   ctx.closePath();
   ctx.fill();
+  // One great eye (chochin-obake), lid drooping, with a bone catchlight.
   ctx.beginPath();
-  ctx.arc(-4, -4, 1.6, 0, Math.PI * 2);
-  ctx.arc(4, -4, 1.6, 0, Math.PI * 2);
+  ctx.ellipse(1, -4, 4.2, 3.2, -0.15, 0, Math.PI * 2);
   ctx.fill();
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.arc(2.2, -4.8, 1.2, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillRect(-3.4, -8.2, 8.6, 1.6);
+  // A long tongue spilling from the split when it opens to spit.
+  if (frame === 1) {
+    ctx.strokeStyle = PALETTE.ink;
+    ctx.lineWidth = 0.7;
+    ctx.beginPath();
+    ctx.moveTo(-2, 6);
+    ctx.quadraticCurveTo(-3, 14, 2, 18);
+    ctx.quadraticCurveTo(5, 18, 3, 12);
+    ctx.quadraticCurveTo(2, 9, 2, 6.5);
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
+  }
 }
 
 /** Bone Colossus: a towering skeleton; frame 1 raises its arms to slam. */

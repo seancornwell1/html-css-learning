@@ -190,6 +190,21 @@ function kasa(ctx: CanvasRenderingContext2D, pose: number, fill: string): void {
   ctx.beginPath();
   ctx.arc(4.4, -10, 1, 0, Math.PI * 2);
   ctx.fill();
+  // The karakasa's long tongue lolling out of a slit in the paper.
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillRect(4, -6.6, 6, 1.2);
+  ctx.fillStyle = fill;
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 0.7;
+  const lick = pose === KASA_POSE.air ? 2 : 0;
+  ctx.beginPath();
+  ctx.moveTo(7, -6);
+  ctx.quadraticCurveTo(12, -4 + lick, 11 + lick, 2);
+  ctx.quadraticCurveTo(9 + lick, 3, 8.5, 0);
+  ctx.quadraticCurveTo(8.5, -3, 6, -5.5);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
   // Leg and geta.
   ctx.strokeStyle = fill;
   ctx.lineWidth = 2;
