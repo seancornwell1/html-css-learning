@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover"
+    />
+    <meta name="theme-color" content="#07070A" />
+    <title>Lanternfall</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%2307070A'/%3E%3Crect x='10' y='8' width='12' height='16' rx='5' fill='%23F5B83D'/%3E%3Crect x='13' y='4' width='6' height='3' fill='%23F2F0EA'/%3E%3Crect x='13' y='25' width='6' height='3' fill='%23F2F0EA'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./src/ui/style.css" />
+  </head>
+  <body>
+    <div id="stage"></div>
+    <div id="hud">
+      <div id="xp-bar"><div id="xp-fill"></div></div>
+      <div id="hud-row">
+        <span id="hud-level">Lv 1</span>
+        <span id="hud-time">0:00</span>
+        <div id="hp-bar" role="meter" aria-label="Health" aria-valuemin="0" aria-valuemax="100">
+          <div id="hp-fill"></div>
+        </div>
+      </div>
+    </div>
+    <div id="inventory" aria-label="Weapons and passives"></div>
+    <div id="banner" hidden aria-live="polite">
+      <p id="banner-title"></p>
+      <p id="banner-detail"></p>
+    </div>
+    <button id="pause-btn" type="button" aria-label="Pause">II</button>
+    <div id="stick-base" hidden><div id="stick-knob"></div></div>
+    <div id="levelup" class="modal" hidden>
+      <p class="levelup-title">Level 2</p>
+      <div id="levelup-cards"></div>
+      <p class="hint">Tap a card, then tap again to take it · keys 1–3</p>
+    </div>
+    <div id="pause" class="modal" hidden>
+      <p class="modal-title">Paused</p>
+      <div class="settings">
+        <label class="setting">
+          <span>Reduce flashing</span>
+          <input type="checkbox" id="set-reduce-flash" />
+        </label>
+        <label class="setting">
+          <span>Screen shake</span>
+          <input type="range" id="set-shake" min="0" max="100" step="10" />
+        </label>
+        <label class="setting">
+          <span>Volume</span>
+          <input type="range" id="set-vol-master" min="0" max="100" step="5" />
+        </label>
+        <label class="setting">
+          <span>Music</span>
+          <input type="range" id="set-vol-music" min="0" max="100" step="5" />
+        </label>
+        <label class="setting">
+          <span>Sound effects</span>
+          <input type="range" id="set-vol-sfx" min="0" max="100" step="5" />
+        </label>
+        <label class="setting">
+          <span>Effects</span>
+          <select id="set-effects">
+            <option value="high">High</option>
+            <option value="low">Low</option>
+            <option value="off">Off</option>
+          </select>
+        </label>
+      </div>
+      <button id="resume-btn" class="btn" type="button">Resume</button>
+      <p class="hint">Esc / P</p>
+    </div>
+    <div id="notice" class="modal" hidden>
+      <p class="modal-title">Before you play</p>
+      <p class="notice-text">
+        Lanternfall uses flashing light, full-screen inversion and screen shake. If you are
+        sensitive to flashing images, turn on Reduce flashing. You can change this any time from the
+        pause menu.
+      </p>
+      <label class="setting">
+        <span>Reduce flashing</span>
+        <input type="checkbox" id="notice-reduce-flash" />
+      </label>
+      <button id="notice-ok" class="btn" type="button">Light the lantern</button>
+    </div>
+    <div id="gameover" class="modal" hidden>
+      <div id="gameover-portrait"></div>
+      <p class="modal-title" id="gameover-title"></p>
+      <p id="gameover-stats"></p>
+      <p id="gameover-fragment" class="fragment"></p>
+      <div class="actions">
+        <button id="again-btn" class="btn" type="button">Try again</button>
+        <button id="longnight-btn" class="btn" type="button" hidden>Keep the lantern lit</button>
+        <button id="change-btn" class="btn secondary" type="button">Change character</button>
+      </div>
+      <p class="hint">R to try again</p>
+    </div>
+    <div id="title" hidden>
+      <canvas id="title-art" aria-hidden="true"></canvas>
+      <div class="title-cartouche">
+        <h1 class="title-name">Lanternfall</h1>
+        <span class="title-seal" aria-hidden="true"></span>
+      </div>
+      <p class="title-sub">Carry the light until dawn.</p>
+      <div class="title-menu">
+        <button id="title-begin" class="btn" type="button">Begin the night</button>
+        <button id="title-shrine" class="btn secondary" type="button">The Shrine</button>
+        <button id="title-register" class="btn secondary" type="button">Lantern Register</button>
+      </div>
+    </div>
+    <div id="select" class="modal" hidden>
+      <p class="modal-title">Who carries the lantern?</p>
+      <div id="select-cards"></div>
+      <p class="hint">Tap a card twice, or keys 1–4 and Enter</p>
+      <div class="actions">
+        <button id="shrine-btn" class="btn secondary" type="button">The Shrine</button>
+        <button id="register-btn" class="btn secondary" type="button">Lantern Register</button>
+      </div>
+    </div>
+    <div id="register" class="modal" hidden>
+      <p class="modal-title">Lantern Register</p>
+      <p class="register-count"></p>
+      <div id="register-list"></div>
+      <button id="register-close" class="btn" type="button">Back</button>
+    </div>
+    <div id="shrine" class="modal" hidden>
+      <p class="modal-title">The Shrine</p>
+      <p id="shrine-coins" class="shrine-coins"></p>
+      <div id="shrine-list"></div>
+      <div class="actions">
+        <button id="shrine-close" class="btn" type="button">Back</button>
+        <button id="shrine-refund" class="btn secondary" type="button">Refund all</button>
+      </div>
+    </div>
+    <div id="boss-bar" hidden>
+      <p id="boss-name"></p>
+      <div id="boss-track"><div id="boss-fill"></div></div>
+    </div>
+    <button id="dash-btn" type="button" aria-label="Dash" hidden>Dash</button>
+    <script type="module" src="./src/main.ts"></script>
+  </body>
+</html>

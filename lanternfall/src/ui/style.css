@@ -1,0 +1,850 @@
+:root {
+  --ink: #07070a;
+  --ink-2: #121218;
+  --ash: #6e6e78;
+  --bone: #f2f0ea;
+  --gold: #f5b83d;
+  /* Print tones: illustration and ornament only (GAME_DESIGN §7.3.1). */
+  --washi: #e9e1cf;
+  --shu: #c8322a;
+  /* Display face: Shippori Mincho (OFL, bundled; licence in public/licenses). */
+  --display: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
+  --safe-top: max(10px, env(safe-area-inset-top));
+  --safe-left: max(16px, env(safe-area-inset-left));
+  --safe-right: max(16px, env(safe-area-inset-right));
+  --safe-bottom: max(16px, env(safe-area-inset-bottom));
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--ink);
+  color: var(--bone);
+  font-family: system-ui, sans-serif;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+#stage {
+  position: fixed;
+  inset: 0;
+}
+
+#game {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* HUD */
+#hud {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+}
+
+#xp-bar {
+  height: 4px;
+  background: var(--ink-2);
+}
+
+#xp-fill {
+  height: 100%;
+  width: 0;
+  background: var(--gold);
+}
+
+#hud-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  padding: 8px calc(var(--safe-right) + 56px) 0 var(--safe-left);
+  padding-top: calc(var(--safe-top) - 2px);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
+
+#hud-level {
+  font-size: 15px;
+  color: var(--ash);
+}
+
+#hud-time {
+  font-size: 22px;
+  color: var(--gold);
+}
+
+#hp-bar {
+  justify-self: end;
+  width: min(30vw, 140px);
+  height: 8px;
+  border: 1px solid var(--bone);
+}
+
+#hp-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--bone);
+}
+
+#pause-btn {
+  position: fixed;
+  top: var(--safe-top);
+  right: var(--safe-right);
+  width: 48px;
+  height: 48px;
+  border: 1px solid var(--ash);
+  border-radius: 50%;
+  background: transparent;
+  color: var(--bone);
+  font:
+    600 14px system-ui,
+    sans-serif;
+  letter-spacing: 0.1em;
+}
+
+/* Floating joystick */
+#stick-base {
+  position: fixed;
+  left: -64px;
+  top: -64px;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: 2px solid rgb(242 240 234 / 0.35);
+  pointer-events: none;
+}
+
+#stick-base[hidden] {
+  display: none;
+}
+
+#stick-knob {
+  position: absolute;
+  left: 40px;
+  top: 40px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgb(242 240 234 / 0.6);
+}
+
+/* Modals */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: var(--safe-top) var(--safe-right) var(--safe-bottom) var(--safe-left);
+  background: rgb(7 7 10 / 0.82);
+  text-align: center;
+}
+
+.modal[hidden] {
+  display: none;
+}
+
+.modal-title,
+.levelup-title {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+}
+
+.levelup-title {
+  color: var(--gold);
+}
+
+.hint {
+  margin: 0;
+  color: var(--ash);
+  font-size: 13px;
+}
+
+#gameover-stats {
+  margin: 0;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+}
+
+#levelup-cards {
+  display: flex;
+  gap: 12px;
+  width: min(100%, 760px);
+}
+
+@media (orientation: portrait) {
+  #levelup-cards {
+    flex-direction: column;
+  }
+
+  #levelup-cards .card {
+    flex: 0 0 auto;
+  }
+}
+
+.card {
+  position: relative;
+  flex: 1 1 0;
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-content: start;
+  gap: 4px 8px;
+  padding: 14px 16px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--bone);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.card.focused {
+  border-color: var(--bone);
+}
+
+.card.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.card-key {
+  display: none;
+}
+
+@media (hover: hover) {
+  .card-key {
+    display: block;
+    position: absolute;
+    right: 10px;
+    bottom: 8px;
+    color: var(--ash);
+    font-size: 12px;
+  }
+}
+
+.card-name {
+  font-size: 17px;
+  letter-spacing: 0.04em;
+}
+
+.card-badge {
+  grid-column: 2;
+  grid-row: 1;
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.card-kind {
+  grid-column: 1 / -1;
+  color: var(--ash);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.card-desc {
+  grid-column: 1 / -1;
+  font-size: 14px;
+  line-height: 1.35;
+}
+
+/* Settings and notice */
+.settings {
+  display: grid;
+  gap: 10px;
+  width: min(100%, 340px);
+}
+
+.setting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+  font-size: 15px;
+  letter-spacing: 0.04em;
+}
+
+.setting input[type='checkbox'] {
+  width: 22px;
+  height: 22px;
+  accent-color: var(--gold);
+}
+
+.setting input[type='range'] {
+  width: 140px;
+  accent-color: var(--gold);
+}
+
+.setting select {
+  min-height: 36px;
+  padding: 0 8px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--bone);
+  font: inherit;
+}
+
+.btn {
+  min-width: 200px;
+  min-height: 48px;
+  padding: 0 24px;
+  border: 1px solid var(--gold);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--gold);
+  font:
+    600 15px system-ui,
+    sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.notice-text {
+  max-width: 420px;
+  margin: 0;
+  line-height: 1.5;
+  color: var(--bone);
+}
+
+/* Inventory chips under the HUD */
+#inventory {
+  position: fixed;
+  top: calc(var(--safe-top) + 34px);
+  left: var(--safe-left);
+  right: calc(var(--safe-right) + 56px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  pointer-events: none;
+}
+
+.chip {
+  padding: 2px 6px;
+  border: 1px solid var(--ash);
+  border-radius: 3px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--bone);
+  background: rgb(7 7 10 / 0.6);
+}
+
+.chip.passive {
+  color: var(--ash);
+}
+
+.chip.evolved {
+  border-color: var(--gold);
+  color: var(--gold);
+}
+
+/* Evolution / reliquary banner */
+#banner {
+  position: fixed;
+  left: 50%;
+  top: 22%;
+  transform: translateX(-50%);
+  width: min(90vw, 520px);
+  text-align: center;
+  pointer-events: none;
+  animation: banner 2.6s ease-out forwards;
+}
+
+#banner[hidden] {
+  display: none;
+}
+
+#banner-title {
+  margin: 0;
+  color: var(--gold);
+  font-size: 14px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+}
+
+#banner-detail {
+  margin: 6px 0 0;
+  font-size: 22px;
+  letter-spacing: 0.08em;
+}
+
+@keyframes banner {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 8px);
+  }
+  10%,
+  75% {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #banner {
+    animation-duration: 3s;
+    animation-name: banner-fade;
+  }
+
+  @keyframes banner-fade {
+    0%,
+    80% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+}
+
+/* Character select */
+#select-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 10px;
+  width: min(100%, 860px);
+}
+
+.char-card {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: 1fr;
+  column-gap: 12px;
+  row-gap: 4px;
+  align-content: start;
+  padding: 14px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+  background: var(--ink);
+  color: var(--bone);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.char-card.focused {
+  border-color: var(--bone);
+}
+
+.char-card.selected {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 1px var(--gold);
+}
+
+.char-name {
+  font-size: 18px;
+  letter-spacing: 0.06em;
+}
+
+.char-title,
+.char-start {
+  color: var(--ash);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.char-innate {
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.char-innate strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+
+@media (orientation: portrait) {
+  #select-cards {
+    grid-template-columns: 1fr;
+  }
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+.btn.secondary {
+  border-color: var(--ash);
+  color: var(--bone);
+}
+
+/* Boss bar */
+#boss-bar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--safe-bottom) + 8px);
+  transform: translateX(-50%);
+  width: min(80vw, 520px);
+  text-align: center;
+  pointer-events: none;
+}
+
+#boss-bar[hidden] {
+  display: none;
+}
+
+#boss-name {
+  margin: 0 0 4px;
+  font-size: 12px;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+#boss-track {
+  height: 6px;
+  border: 1px solid var(--bone);
+}
+
+#boss-fill {
+  height: 100%;
+  width: 100%;
+  background: var(--bone);
+}
+
+/* Touch dash button (Hotaru) */
+#dash-btn {
+  position: fixed;
+  right: calc(var(--safe-right) + 8px);
+  bottom: calc(var(--safe-bottom) + 40px);
+  width: 72px;
+  height: 72px;
+  border: 1px solid var(--gold);
+  border-radius: 50%;
+  background: rgb(7 7 10 / 0.5);
+  color: var(--gold);
+  font:
+    600 13px system-ui,
+    sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+#dash-btn[hidden] {
+  display: none;
+}
+
+#dash-btn.cooling {
+  border-color: var(--ash);
+  color: var(--ash);
+}
+
+/* Shrine */
+.shrine-coins {
+  margin: 0;
+  color: var(--gold);
+  letter-spacing: 0.08em;
+}
+
+#shrine-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 8px;
+  width: min(100%, 900px);
+  max-height: min(60vh, 560px);
+  overflow-y: auto;
+  padding: 2px;
+}
+
+.shrine-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ash);
+  border-radius: 4px;
+}
+
+.shrine-info {
+  display: grid;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.shrine-name {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}
+
+.shrine-text {
+  color: var(--ash);
+  font-size: 12px;
+}
+
+.shrine-pips {
+  color: var(--gold);
+  font-size: 11px;
+  letter-spacing: 0.2em;
+}
+
+.shrine-buy {
+  min-width: 72px;
+  min-height: 48px;
+}
+
+.btn:disabled {
+  border-color: var(--ash);
+  color: var(--ash);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.shrine-info {
+  text-align: left;
+}
+
+/* Level-up run tools */
+#levelup.banishing .card {
+  border-style: dashed;
+}
+
+#levelup.banishing .card.focused {
+  border-color: var(--bone);
+}
+
+/* Lantern Register */
+.register-count {
+  margin: 0;
+  color: var(--ash);
+  letter-spacing: 0.08em;
+}
+
+#register-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 6px;
+  width: min(100%, 900px);
+  max-height: min(60vh, 560px);
+  overflow-y: auto;
+}
+
+.register-row {
+  display: grid;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 1px solid var(--ink-2, #121218);
+  border-radius: 4px;
+  color: var(--ash);
+  text-align: left;
+}
+
+.register-row.known {
+  border-color: var(--gold);
+  color: var(--bone);
+}
+
+.register-name {
+  font-size: 15px;
+  letter-spacing: 0.05em;
+}
+
+.register-recipe {
+  font-size: 12px;
+  color: var(--ash);
+}
+
+.char-card .portrait {
+  justify-self: center;
+  border-radius: 3px;
+}
+
+.char-card .portrait.locked {
+  filter: brightness(0) opacity(0.6);
+}
+
+@media (orientation: portrait) {
+  .char-card {
+    grid-template-columns: auto 1fr;
+  }
+
+  .char-card .portrait {
+    grid-row: 1 / span 4;
+  }
+
+  .char-card > span {
+    grid-column: 2;
+  }
+}
+
+@media (max-height: 500px) {
+  .char-card .portrait {
+    width: 64px !important;
+    height: 80px !important;
+  }
+}
+
+/* Title */
+#title {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  grid-template-rows: 1fr auto auto;
+  justify-items: center;
+  padding: calc(var(--safe-top, 0px) + 24px) 16px calc(var(--safe-bottom, 0px) + 28px);
+  background: var(--ink);
+  overflow: hidden;
+}
+
+#title[hidden] {
+  display: none;
+}
+
+#title-art {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.title-cartouche {
+  position: relative;
+  align-self: start;
+  justify-self: start;
+  margin-left: max(16px, 8vw);
+  padding: 18px 10px 54px;
+  background: var(--washi);
+  border: 3px solid var(--shu);
+  box-shadow: 0 0 0 4px var(--ink);
+}
+
+.title-name {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(18px, min(4.2vh, 6vw), 40px);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  writing-mode: vertical-rl;
+  text-orientation: upright;
+}
+
+.title-seal {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  width: 30px;
+  height: 30px;
+  transform: translateX(-50%) rotate(-4deg);
+  border-radius: 3px;
+  background:
+    linear-gradient(var(--washi), var(--washi)) center / 14px 3px no-repeat,
+    linear-gradient(var(--washi), var(--washi)) center / 3px 14px no-repeat,
+    var(--shu);
+}
+
+.title-sub {
+  position: relative;
+  margin: 0 0 14px;
+  color: var(--bone);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  font-size: 13px;
+}
+
+.title-menu {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 10px;
+}
+
+@media (orientation: portrait) {
+  .title-menu {
+    flex-direction: column;
+    width: min(100%, 320px);
+  }
+}
+
+@media (max-height: 520px) {
+  .title-cartouche {
+    padding: 8px 52px 8px 14px;
+  }
+
+  .title-name {
+    writing-mode: horizontal-tb;
+    font-size: 24px;
+  }
+
+  .title-seal {
+    left: auto;
+    right: 10px;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%) rotate(-4deg);
+  }
+}
+
+.fragment {
+  max-width: 36em;
+  margin: 0;
+  color: var(--ash);
+  font-style: italic;
+  text-align: center;
+}
+
+.fragment:empty {
+  display: none;
+}
+
+#gameover-portrait .portrait {
+  display: block;
+  border: 1px solid var(--ash);
+  border-radius: 3px;
+}
+
+#gameover-portrait .portrait.golden {
+  border: 2px solid var(--gold);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 4px var(--gold);
+}
+
+@media (max-height: 500px) {
+  #gameover-portrait {
+    display: none;
+  }
+}
+
+/* Display typography: mincho for titles, names and banners (GAME_DESIGN §7.3.1). */
+.modal-title,
+.card-name,
+#banner-title,
+.char-name,
+.title-name,
+.shrine-name,
+.register-name,
+#boss-name {
+  font-family: var(--display);
+}
