@@ -36,7 +36,7 @@ describe('Shrine ranks', () => {
     expect(meta.stats.might).toBeCloseTo(plain.stats.might + (might?.perRank ?? 0) * 5);
     expect(meta.stats.maxHp).toBe(plain.stats.maxHp + 15);
     expect(meta.player.hp).toBe(meta.stats.maxHp);
-    expect(meta.stats.revival).toBe(plain.stats.revival + 1);
+    expect(meta.stats.revival).toBe(plain.stats.revival);
     expect([meta.rerolls, meta.skips, meta.banishes]).toEqual([3, 3, 3]);
   });
 

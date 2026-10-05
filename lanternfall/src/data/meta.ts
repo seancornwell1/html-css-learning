@@ -127,15 +127,6 @@ export const SHRINE: readonly ShrineRank[] = [
     text: '+10% coins per rank.',
   },
   {
-    id: 'revival',
-    name: 'Paper Ancestor',
-    stat: 'revival',
-    perRank: 1,
-    maxRank: 1,
-    baseCost: 500,
-    text: 'Revive once per night.',
-  },
-  {
     id: 'reroll',
     name: 'Recast',
     perRank: 1,

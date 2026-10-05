@@ -30,7 +30,7 @@ describe('characters', () => {
     }
     const tetsu = new Sim({ seed: 1, character: 'tetsu', events: false });
     expect(tetsu.stats.maxHp).toBe(130);
-    expect(tetsu.stats.armor).toBe(1);
+    expect(tetsu.stats.armor).toBe(0);
     expect(tetsu.player.hp).toBe(130);
   });
 
