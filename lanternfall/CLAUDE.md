@@ -105,8 +105,12 @@ decision changes, update the doc in the same commit.
   seeds re-run in the main thread from source, so bundle and source must
   agree), speed ≥ 30× real time, and `--compare` when given.
 - Bots are deliberately human-like: reaction delays (naive 200 ms, average
-  100 ms, skilled 50 ms) and comfort zones. Skilled = the average kiting field
-  plus a 1 s lookahead veto and an open-space scan.
+  100 ms, skilled 50 ms) and comfort zones.
+- Skilled (from M10) is a planner (`bots/planner.ts`). It scores 16 headings
+  plus standing still by rolling the player forward 1.2 s against predicted
+  enemies, with fine sweeps for shots and telegraphed lunges. The score weighs
+  crowding (scaled to weapon reach), enemies inside reach, loot along the path
+  and escape room. The old potential-field skilled bot remains as `--bot kiter`.
 - A quick sim (50 seeds × 3 bots) takes ~5 min on 4 cores; run it in the
   background and wait on the report file. **Don't edit `src/sim` or
   `src/data` while a sim runs**: the final determinism re-check runs from

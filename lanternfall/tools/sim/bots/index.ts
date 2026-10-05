@@ -9,8 +9,9 @@ import { SkilledBot } from './skilled';
  * (GAME_DESIGN §10's fourth band); run.ts passes the ranks to the sim.
  */
 export const BOT_NAMES = ['naive', 'average', 'skilled', 'skilled_meta'] as const;
-/** Selectable with --bot but not run by default (candidates under evaluation). */
-export const EXTRA_BOTS = ['planner'] as const;
+/** Selectable with --bot but not run by default: `kiter` is the pre-M10
+ *  potential-field skilled bot, kept for comparison. */
+export const EXTRA_BOTS = ['kiter'] as const;
 export type BotName = (typeof BOT_NAMES)[number] | (typeof EXTRA_BOTS)[number];
 
 export function isBotName(name: string): name is BotName {
@@ -25,8 +26,8 @@ export function createBot(name: BotName, seed: number): Bot {
       return new AverageBot(seed);
     case 'skilled':
     case 'skilled_meta':
-      return new SkilledBot(seed);
-    case 'planner':
       return new PlannerBot(seed);
+    case 'kiter':
+      return new SkilledBot(seed);
   }
 }

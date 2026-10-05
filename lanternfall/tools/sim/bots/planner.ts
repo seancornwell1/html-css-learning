@@ -53,7 +53,7 @@ export function plannerParams(): PlannerParams {
 }
 
 /**
- * Planner (M10 skilled bot candidate): instead of a potential field, it
+ * Skilled (M10 on, GAME_DESIGN §10): a planner. Instead of a potential field, it
  * scores a fan of headings by rolling the player forward over a 1.2 s
  * lookahead against predicted enemy, shot and hazard positions, and picks
  * the best trade between danger, crowding, loot on the way and room to
@@ -61,7 +61,7 @@ export function plannerParams(): PlannerParams {
  * only (CLAUDE.md rule 3).
  */
 export class PlannerBot implements Bot {
-  readonly name = 'planner';
+  readonly name = 'skilled';
   private mx = 0;
   private my = 0;
   private dash = false;
