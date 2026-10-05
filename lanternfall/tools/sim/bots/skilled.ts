@@ -75,6 +75,7 @@ export class SkilledBot implements Bot {
       const s = this.near[k] as number;
       if (!e.isAlive(s)) continue;
       const def = ENEMIES[e.kind[s] as number];
+      if (def?.behaviour === 'prop') continue;
       const heavy = isHeavy(def);
       const ax = p.x - (e.x[s] as number);
       const ay = p.y - (e.y[s] as number);

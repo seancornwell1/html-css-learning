@@ -15,7 +15,7 @@ export function nearestEnemy(sim: Sim, range: number): number {
   let bestD2 = range * range;
   for (let k = 0; k < n; k++) {
     const s = sim.scratch[k] as number;
-    if (!e.isAlive(s)) continue;
+    if (!e.isAlive(s) || isProp(e.kind[s] as number)) continue;
     const dx = (e.x[s] as number) - p.x;
     const dy = (e.y[s] as number) - p.y;
     const d2 = dx * dx + dy * dy;
@@ -44,6 +44,11 @@ export function nearestEmber(sim: Sim, range: number): number {
     }
   }
   return best;
+}
+
+/** Stone lanterns and other props: not threats (GAME_DESIGN §7.2). */
+export function isProp(kind: number): boolean {
+  return ENEMIES[kind]?.behaviour === 'prop';
 }
 
 /** Average move speed of an enemy kind, accounting for hopping pauses. */

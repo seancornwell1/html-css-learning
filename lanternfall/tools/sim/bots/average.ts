@@ -46,6 +46,7 @@ export class AverageBot implements Bot {
       const s = sim.scratch[k] as number;
       if (!e.isAlive(s)) continue;
       const def = ENEMIES[e.kind[s] as number];
+      if (def?.behaviour === 'prop') continue;
       const dx = p.x - (e.x[s] as number);
       const dy = p.y - (e.y[s] as number);
       const d = len2(dx, dy) - (def?.radius ?? 10);
