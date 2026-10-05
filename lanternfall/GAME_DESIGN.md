@@ -294,10 +294,22 @@ the *style*: nothing is traced or copied from them.
   and portrait backdrops) and `shu` (vermilion, for seals, cartouche borders
   and blood spatter in illustrations). `shu` never marks player damage
   (inversion still does).
-- **Production.** All art stays code-drawn (Canvas paths baked by
-  `SpriteCache`) or hand-authored SVG in the repo. Portraits are large SVG
-  illustrations built from path data, written by hand. The art pass happens
-  in M9.
+- **Production.** All art stays code-drawn: Canvas paths baked by
+  `SpriteCache`, plus large code-drawn illustrations. Review it on the dev
+  sheet at `art.html`.
+- **M9 implementation:**
+  - **Post-FX:** washi paper (pulp and fibres), an indigo cast in the darks, and a misregistered gold ghost. Only clearly gold pixels count as gold, so bone never picks up a tint.
+  - **Sprite finish (`ink.ts`):** a brush-tapered inner keyline and textile motifs (asanoha, seigaiha, kikko, sakura).
+    - Figures with hair drop the keyline and give their ink hair a thin rim, because ink on the night ground would vanish.
+  - **Characters:** per-character in-play figures (`player-art.ts`) and bust portraits (`portraits.ts`) for the select and results screens.
+  - **Enemies:**
+    - Hitodama wisp, yurei walker, karakasa and chochin-obake.
+    - Bride, Drowned and Long-Neck detail passes.
+    - The Mother of Lanterns in an uchikake with a lantern face.
+  - **Staging:**
+    - Title scene (`title-art.ts`): moon, torii, seigaiha sea, lantern procession, vertical cartouche and seal.
+    - Boss cut-in band.
+  - **Type:** Shippori Mincho (OFL, bundled) for display text.
 
 ### 7.4 Screen effects ("heavy, but switchable")
 - **WebGL2 post-FX pass** (`src/render/postfx.ts`): bloom on gold only (a
