@@ -143,7 +143,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M5 | Night & roster | ✅ done with accepted deviation: skilled band unmet (`sim-reports/M5.md`); stronger skilled bot planned for M10 |
 | M6 | Power-ups | ✅ done (`sim-reports/M6.md`); skilled band deviation carried from M5; Ren average 8% (tune in M8) |
 | M7 | Audio | ✅ done (`sim-reports/M7.md`, bit-identical to M6) |
-| M8 | Meta & secrets | not started |
+| M8 | Meta & secrets | ✅ done (`sim-reports/M8.md`, full); skilled band deviation carried; Kagerou average 7% and skilled_meta 60–91.5% tuned in M10 |
 | M9 | Art pass, UI & mobile polish | not started |
 | M10 | Balance & release | not started |
 
