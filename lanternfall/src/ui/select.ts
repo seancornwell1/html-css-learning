@@ -61,6 +61,12 @@ export class CharacterSelect {
     this.render(false);
   }
 
+  /** Close without picking (e.g. to visit the Shrine). */
+  hide(): void {
+    this.open = false;
+    this.root.hidden = true;
+  }
+
   private tap(i: number): void {
     if (this.focused === i && this.cards[i]?.classList.contains('selected')) this.pick(i);
     else {

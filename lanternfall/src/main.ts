@@ -14,6 +14,8 @@ import { formatTime } from './ui/format';
 import { Banner, Inventory } from './ui/hud';
 import { LevelUpUi } from './ui/levelup';
 import { CharacterSelect } from './ui/select';
+import { Shrine } from './ui/shrine';
+import { runPayout } from './data/meta';
 import { bindSettings, showNotice } from './ui/settings-ui';
 
 function el<T extends HTMLElement = HTMLElement>(id: string): T {
@@ -99,6 +101,11 @@ function newSim(): Sim {
 }
 let sim = newSim();
 const select = new CharacterSelect(el('select'), el('select-cards'));
+const shrine = new Shrine(el('shrine'), el('shrine-list'), el('shrine-coins'), save.profile, () =>
+  writeSave(save),
+);
+/** What this run has already paid out (the Long Night pays only the rest). */
+const paid = { time: 0, kills: 0, coins: 0, won: false };
 /** Touch dash button held (Hotaru). */
 let dashHeld = false;
 let paused = false;
@@ -121,7 +128,7 @@ function setPaused(value: boolean): void {
 
 const loop = new FixedStepLoop({
   step() {
-    if (paused || blocked || levelUp.open || select.isOpen) return;
+    if (paused || blocked || levelUp.open || select.isOpen || shrine.isOpen) return;
     if (renderer.hitStop.active(performance.now())) return;
     renderer.beforeStep(sim);
     controller.read(intent);
@@ -146,8 +153,8 @@ const loop = new FixedStepLoop({
     lastFrame = now;
     // Multiple level-ups in a row: show the next set as soon as one is picked.
     if (sim.choices && !levelUp.open) levelUp.show(sim.choices, sim.level);
-    stick.enabled = !levelUp.open && !paused && !blocked && !select.isOpen;
-    audio.menu = select.isOpen || blocked;
+    stick.enabled = !levelUp.open && !paused && !blocked && !select.isOpen && !shrine.isOpen;
+    audio.menu = select.isOpen || shrine.isOpen || blocked;
     audio.update(sim);
     updateBossBar();
     dashBtn.hidden = sim.characterDef.innate !== 'flutter' || select.isOpen;
@@ -189,15 +196,45 @@ function showGameOver(): void {
     : sim.longNight
       ? 'Eaten by the night'
       : 'The lantern went out';
+  const earned = settleRun(won);
   el('gameover-stats').textContent =
-    `${formatTime(sim.time)} · Level ${sim.level} · ${sim.kills} spirits laid to rest`;
+    `${formatTime(sim.time)} · Level ${sim.level} · ${sim.kills} spirits laid to rest · ` +
+    `+${earned} coins`;
   el('longnight-btn').hidden = !won;
   gameover.hidden = false;
   el('again-btn').focus();
 }
 
+/**
+ * Bank coins and progress at the end of a run (GAME_DESIGN §9). Called once
+ * per ending; after a Long Night only the extra time, kills and coins pay.
+ */
+function settleRun(won: boolean): number {
+  const pr = save.profile;
+  const firstWin = won && !paid.won;
+  const earned =
+    runPayout(sim.time - paid.time, sim.kills - paid.kills, firstWin) +
+    Math.floor(sim.coins - paid.coins);
+  if (paid.time === 0) pr.stats.runs++;
+  if (firstWin) pr.stats.wins++;
+  pr.stats.kills += sim.kills - paid.kills;
+  pr.stats.bestTime = Math.max(pr.stats.bestTime, sim.time);
+  pr.coins += earned;
+  Object.assign(paid, { time: sim.time, kills: sim.kills, coins: sim.coins, won: paid.won || won });
+  // Unlocks (GAME_DESIGN §4): Tetsu by surviving 5:00, Hotaru by evolving.
+  const unlock = (id: string): void => {
+    if (!pr.unlocked.includes(id)) pr.unlocked.push(id);
+  };
+  if (sim.time >= 300) unlock('tetsu');
+  if (sim.evolutions.length > 0) unlock('hotaru');
+  for (const e of sim.evolutions) if (!pr.register.includes(e.weapon)) pr.register.push(e.weapon);
+  writeSave(save);
+  return earned;
+}
+
 function restart(): void {
   sim = newSim();
+  Object.assign(paid, { time: 0, kills: 0, coins: 0, won: false });
   renderer.reset();
   levelUp.hide();
   gameover.hidden = true;
@@ -208,12 +245,13 @@ function chooseCharacter(): void {
   stick.release();
   select.show(
     character,
-    () => true,
+    (c) => save.profile.unlocked.includes(c.id),
     (id) => {
       character = id;
       save.profile.lastCharacter = id;
       writeSave(save);
       sim = newSim();
+      Object.assign(paid, { time: 0, kills: 0, coins: 0, won: false });
       renderer.reset();
       levelUp.hide();
     },
@@ -232,6 +270,11 @@ el('pause-btn').addEventListener('click', () => setPaused(!paused));
 el('resume-btn').addEventListener('click', () => setPaused(false));
 el('again-btn').addEventListener('click', restart);
 el('change-btn').addEventListener('click', chooseCharacter);
+el('shrine-btn').addEventListener('click', () => {
+  select.hide();
+  shrine.show(() => chooseCharacter());
+});
+el('shrine-close').addEventListener('click', () => shrine.close());
 el('longnight-btn').addEventListener('click', () => {
   sim.continueLongNight();
   gameover.hidden = true;
