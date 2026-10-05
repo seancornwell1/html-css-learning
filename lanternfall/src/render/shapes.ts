@@ -21,8 +21,34 @@ export function bride(ctx: Ctx, frame: number, fill: string): void {
   ctx.quadraticCurveTo(-10, -26, 4, -30);
   ctx.closePath();
   ctx.fill();
-  // Long black hair spilling from the veil (ink).
+  // Brushed folds in the veil, like a print's key block.
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 0.9;
+  for (const [x0, y0, cx, cy, x1, y1] of [
+    [-4, -12, -14, 4, -22 - sway, 20],
+    [2, -6, -2, 8, -6, 22],
+    [10, -10, 13, 6, 10, 21],
+  ] as const) {
+    ctx.beginPath();
+    ctx.moveTo(x0, y0);
+    ctx.quadraticCurveTo(cx, cy, x1, y1);
+    ctx.stroke();
+  }
+  // Hood brim over a hidden face: only a thin, too-wide smile shows.
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-2, -22);
+  ctx.quadraticCurveTo(6, -26, 13, -19);
+  ctx.stroke();
+  ctx.lineWidth = 0.8;
+  ctx.beginPath();
+  ctx.moveTo(6, -13);
+  ctx.quadraticCurveTo(9, -11, 12, -14);
+  ctx.stroke();
+  // Long black hair spilling from the veil (rimmed so it reads at night).
   ctx.fillStyle = PALETTE.ink;
+  ctx.strokeStyle = fill;
   ctx.beginPath();
   ctx.moveTo(8, -20);
   ctx.quadraticCurveTo(10, -8, 6, 4);
@@ -30,6 +56,7 @@ export function bride(ctx: Ctx, frame: number, fill: string): void {
   ctx.quadraticCurveTo(5, -8, 4, -20);
   ctx.closePath();
   ctx.fill();
+  ctx.stroke();
 }
 
 /** Moth with two flap frames. */
@@ -285,10 +312,30 @@ export function drowned(ctx: Ctx, frame: number, fill: string): void {
   ] as const) {
     ctx.fillRect(x - 0.8, 16, 1.6, len + sway);
   }
+  // Sunken eyes and a slack mouth.
   ctx.fillStyle = PALETTE.ink;
   ctx.beginPath();
-  ctx.arc(6 + sway, -13, 1.4, 0, Math.PI * 2);
+  ctx.ellipse(6 + sway, -13.5, 1.3, 1.8, 0, 0, Math.PI * 2);
+  ctx.ellipse(6.5 + sway, -8.6, 1.2, 1.6, 0, 0, Math.PI * 2);
   ctx.fill();
+  // Wet hair plastered over the skull and down the back, in rimmed strands.
+  ctx.strokeStyle = fill;
+  ctx.lineCap = 'round';
+  for (const [x0, x1, len] of [
+    [-2, -6, 14],
+    [1, -2, 18],
+    [4, 2, 10],
+  ] as const) {
+    ctx.beginPath();
+    ctx.moveTo(x0 + sway, -18);
+    ctx.quadraticCurveTo(x1 - 2, -10, x1, -18 + len);
+    ctx.lineWidth = 2.6;
+    ctx.strokeStyle = fill;
+    ctx.stroke();
+    ctx.lineWidth = 1.5;
+    ctx.strokeStyle = PALETTE.ink;
+    ctx.stroke();
+  }
 }
 
 /** Carrion crow, flying toward +x. Frames flap. */
@@ -344,11 +391,33 @@ export function longNeck(ctx: Ctx, pose: number, fill: string): void {
   ctx.beginPath();
   ctx.ellipse(head.x, head.y, 5, 6, 0, 0, Math.PI * 2);
   ctx.fill();
-  // Hair.
+  // Hair: a crown and a long tress trailing from the back of the head.
   ctx.fillStyle = PALETTE.ink;
+  ctx.strokeStyle = fill;
+  ctx.lineWidth = 0.7;
   ctx.beginPath();
   ctx.ellipse(head.x - 1, head.y - 1, 4.2, 5, 0, Math.PI * 0.9, Math.PI * 2.1);
   ctx.fill();
+  ctx.beginPath();
+  ctx.moveTo(head.x - 4, head.y - 2);
+  ctx.quadraticCurveTo(head.x - 12, head.y + 2, head.x - 14, head.y + 10);
+  ctx.quadraticCurveTo(head.x - 8, head.y + 3, head.x - 2, head.y + 2);
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  // Narrow eyes; the mouth splits open on the strike.
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineWidth = 0.9;
+  ctx.beginPath();
+  ctx.moveTo(head.x + 1, head.y + 0.5);
+  ctx.lineTo(head.x + 3.6, head.y - 0.4);
+  ctx.stroke();
+  if (pose === 2) {
+    ctx.fillStyle = PALETTE.ink;
+    ctx.beginPath();
+    ctx.ellipse(head.x + 2.5, head.y + 3.5, 1.6, 1.2, 0, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 /** Lantern Mouth: a paper lantern with a jagged mouth (open while spitting). */

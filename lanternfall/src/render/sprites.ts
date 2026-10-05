@@ -336,7 +336,7 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     frames: 2,
     layout: 'mirror',
     draw: shapes.bride,
-    ink: { motif: 'sakura', motifAlpha: 0.45, thick: 2.4 },
+    ink: { motif: 'sakura', motifAlpha: 0.45, thin: 0, thick: 0 },
   },
   drowned: {
     halfW: 20,
@@ -344,7 +344,7 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     frames: 2,
     layout: 'mirror',
     draw: shapes.drowned,
-    ink: { motif: 'seigaiha' },
+    ink: { motif: 'seigaiha', thin: 0, thick: 0 },
   },
   carrion_crow: {
     halfW: 15,
@@ -360,7 +360,7 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     frames: 3,
     layout: 'mirror',
     draw: shapes.longNeck,
-    ink: { motif: 'asanoha', thin: 0.4, thick: 0.9 },
+    ink: { motif: 'asanoha', thin: 0, thick: 0 },
   },
   lantern_mouth: {
     halfW: 14,
