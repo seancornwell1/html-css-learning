@@ -379,12 +379,12 @@ export const ENEMY_ART: Record<string, EnemyArt> = {
     ink: { motif: 'kikko', thin: 0.4, thick: 1 },
   },
   mother_of_lanterns: {
-    halfW: 46,
-    halfH: 46,
+    halfW: 52,
+    halfH: 50,
     frames: 2,
     layout: 'mirror',
     draw: shapes.mother,
-    ink: { motif: 'seigaiha', motifAlpha: 0.4, thick: 3 },
+    ink: { motif: 'seigaiha', motifAlpha: 0.35, thin: 0, thick: 0 },
   },
   stone_lantern: {
     halfW: 12,

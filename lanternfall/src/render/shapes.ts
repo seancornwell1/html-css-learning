@@ -499,36 +499,102 @@ export function colossus(ctx: Ctx, frame: number, fill: string): void {
 
 /** Mother of Lanterns: a towering veiled woman crowned with dark lanterns. */
 export function mother(ctx: Ctx, frame: number, fill: string): void {
-  ctx.fillStyle = fill;
+  const lift = frame === 1 ? -3 : 0;
+  // Hair: a great ink mass sweeping out behind her in ukiyo-e curls (rimmed).
+  ctx.fillStyle = PALETTE.ink;
+  ctx.strokeStyle = fill;
+  ctx.lineWidth = 1.2;
+  ctx.lineJoin = 'round';
   ctx.beginPath();
-  ctx.moveTo(0, -40);
-  ctx.quadraticCurveTo(20, -36, 22, -10);
-  ctx.quadraticCurveTo(30, 20, 34, 40);
-  ctx.lineTo(-34, 40);
-  ctx.quadraticCurveTo(-30, 20, -22, -10);
-  ctx.quadraticCurveTo(-20, -36, 0, -40);
+  ctx.moveTo(-8, -40);
+  ctx.bezierCurveTo(-30, -44, -44, -30, -40, -12);
+  ctx.bezierCurveTo(-46, -14, -46, -24, -42, -26);
+  ctx.bezierCurveTo(-48, -16, -40, -2, -30, -6);
+  ctx.lineTo(-14, -20);
+  ctx.lineTo(14, -20);
+  ctx.lineTo(30, -6);
+  ctx.bezierCurveTo(40, -2, 48, -16, 42, -26);
+  ctx.bezierCurveTo(46, -24, 46, -14, 40, -12);
+  ctx.bezierCurveTo(44, -30, 30, -44, 8, -40);
   ctx.closePath();
   ctx.fill();
-  // Face: a hollow oval.
-  ctx.fillStyle = PALETTE.ink;
+  ctx.stroke();
+  // Uchikake: a towering over-robe with a flared, padded hem.
+  ctx.fillStyle = fill;
   ctx.beginPath();
-  ctx.ellipse(0, -22, 7, 10, 0, 0, Math.PI * 2);
+  ctx.moveTo(-10, -22);
+  ctx.quadraticCurveTo(0, -26, 10, -22);
+  ctx.quadraticCurveTo(22, 10, 36, 40);
+  ctx.quadraticCurveTo(0, 46, -36, 40);
+  ctx.quadraticCurveTo(-22, 10, -10, -22);
+  ctx.closePath();
   ctx.fill();
-  // Unlit lanterns (ink) hanging around her.
-  const lift = frame === 1 ? -4 : 0;
-  for (const [x, y] of [
-    [-30, -30],
-    [30, -30],
-    [-38, -4],
-    [38, -4],
-  ] as const) {
-    ctx.fillStyle = fill;
-    ctx.fillRect(x - 0.6, y - 12 + lift, 1.2, 8);
+  // Furisode sleeves spread like wings, swaying with the frame.
+  for (const side of [-1, 1]) {
     ctx.beginPath();
-    ctx.ellipse(x, y + lift, 5, 6.5, 0, 0, Math.PI * 2);
+    ctx.moveTo(side * 9, -18);
+    ctx.quadraticCurveTo(side * 30, -26 + lift, side * 44, -14 + lift);
+    ctx.lineTo(side * 40, 8 + lift);
+    ctx.quadraticCurveTo(side * 26, 0, side * 14, 4);
+    ctx.closePath();
+    ctx.fill();
+  }
+  // Ink key lines: collar, sleeve hems, robe folds.
+  ctx.strokeStyle = PALETTE.ink;
+  ctx.lineCap = 'round';
+  ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  ctx.moveTo(-7, -21);
+  ctx.lineTo(0, -6);
+  ctx.lineTo(7, -21);
+  ctx.moveTo(-40, 8 + lift);
+  ctx.quadraticCurveTo(-26, 0, -14, 4);
+  ctx.moveTo(40, 8 + lift);
+  ctx.quadraticCurveTo(26, 0, 14, 4);
+  ctx.moveTo(-6, 4);
+  ctx.quadraticCurveTo(-14, 22, -22, 40);
+  ctx.moveTo(6, 4);
+  ctx.quadraticCurveTo(12, 24, 16, 41);
+  ctx.stroke();
+  // Her face is a paper lantern: ribbed, with a hollow, hungry mouth.
+  const fy = -30;
+  ctx.fillStyle = fill;
+  ctx.beginPath();
+  ctx.ellipse(0, fy, 9, 11, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.lineWidth = 0.8;
+  for (const dy of [-6, -2, 2, 6]) {
+    const w = Math.sqrt(Math.max(0, 1 - (dy / 11) ** 2)) * 9;
+    ctx.beginPath();
+    ctx.moveTo(-w, fy + dy);
+    ctx.lineTo(w, fy + dy);
+    ctx.stroke();
+  }
+  ctx.fillStyle = PALETTE.ink;
+  ctx.fillRect(-5, fy - 13, 10, 2.4);
+  ctx.beginPath();
+  ctx.ellipse(0, fy + 3, 4.5, 3 + (frame === 1 ? 1.2 : 0), 0, 0, Math.PI * 2);
+  ctx.fill();
+  // Unlit lanterns hanging from the sleeves on cords.
+  for (const [x, y] of [
+    [-38, 14],
+    [-28, 18],
+    [28, 18],
+    [38, 14],
+  ] as const) {
+    ctx.strokeStyle = fill;
+    ctx.lineWidth = 0.8;
+    ctx.beginPath();
+    ctx.moveTo(x, y - 10 + lift);
+    ctx.lineTo(x, y - 5 + lift);
+    ctx.stroke();
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.ellipse(x, y + lift, 4, 5.2, 0, 0, Math.PI * 2);
     ctx.fill();
     ctx.fillStyle = PALETTE.ink;
-    ctx.fillRect(x - 4, y - 1 + lift, 8, 1);
+    ctx.fillRect(x - 3.2, y - 1.4 + lift, 6.4, 0.9);
+    ctx.fillRect(x - 3.2, y + 1.6 + lift, 6.4, 0.9);
   }
 }
 
