@@ -4,7 +4,8 @@ import { KeyboardInput } from './input/keyboard';
 import { TouchStick } from './input/touch';
 import { AudioDirector } from './audio/director';
 import { loadSave, writeSave, type Settings } from './meta/save';
-import { Display } from './render/display';
+import { Display, ResolutionGovernor } from './render/display';
+import { portraitCanvas } from './render/portraits';
 import { Renderer } from './render/renderer';
 import type { Intent } from './sim/intent';
 import { CHARACTERS } from './data/characters';
@@ -53,6 +54,7 @@ settings.effects = display.setQuality(
   fxParam === 'off' || fxParam === 'low' || fxParam === 'high' ? fxParam : settings.effects,
 );
 const renderer = new Renderer(display);
+const governor = new ResolutionGovernor();
 const inventory = new Inventory(el('inventory'));
 const banner = new Banner(el('banner'), el('banner-title'), el('banner-detail'));
 renderer.onBanner = (title, detail) => banner.show(title, detail);
@@ -179,6 +181,10 @@ const loop = new FixedStepLoop({
     const frozen = paused || blocked || levelUp.open || renderer.hitStop.active(now);
     renderer.draw(sim, frozen ? 1 : alpha, (now - lastFrame) / 1000);
     frameMs += (now - lastFrame - frameMs) * 0.05;
+    // Headless/automation runs use software GL; never downscale there.
+    if (!navigator.webdriver && governor.update(display, frameMs, (now - lastFrame) / 1000)) {
+      renderer.resize();
+    }
     (window as { __frameMs?: number }).__frameMs = frameMs;
     lastFrame = now;
     // Multiple level-ups in a row: show the next set as soon as one is picked.
@@ -238,6 +244,9 @@ function showGameOver(): void {
     `${formatTime(sim.time)} · Level ${sim.level} · ${sim.kills} spirits laid to rest · ` +
     `+${earned} coins`;
   el('gameover-fragment').textContent = pickFragment();
+  const art = portraitCanvas(sim.character, 112, 140);
+  art.classList.toggle('golden', save.profile.secrets.includes('dawn_early'));
+  el('gameover-portrait').replaceChildren(art);
   el('longnight-btn').hidden = !won;
   gameover.hidden = false;
   el('again-btn').focus();

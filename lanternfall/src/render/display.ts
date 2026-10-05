@@ -20,6 +20,8 @@ export class Display {
   /** CSS px → device px for the current quality. */
   dpr = 1;
   quality: EffectsQuality = 'off';
+  /** Dynamic resolution multiplier (1, 0.85 or 0.7), set by `ResolutionGovernor`. */
+  dynamicScale = 1;
   private visible!: HTMLCanvasElement;
   private target!: HTMLCanvasElement;
   private postfx: PostFx | null = null;
@@ -61,7 +63,10 @@ export class Display {
 
   /** Match the backing store to the stage size. Returns true if it changed. */
   resize(): boolean {
-    this.dpr = Math.min(window.devicePixelRatio || 1, DPR_CAP[this.quality]);
+    this.dpr = Math.max(
+      0.5,
+      Math.min(window.devicePixelRatio || 1, DPR_CAP[this.quality]) * this.dynamicScale,
+    );
     const w = Math.max(1, Math.round(this.stage.clientWidth * this.dpr));
     const h = Math.max(1, Math.round(this.stage.clientHeight * this.dpr));
     if (w === this.width && h === this.height) return false;
@@ -124,4 +129,40 @@ function drawSpeedLines(
   }
   ctx.stroke();
   ctx.globalAlpha = 1;
+}
+
+const STEPS = [1, 0.85, 0.7] as const;
+
+/**
+ * Dynamic resolution (GAME_DESIGN §12.3): steps the render scale down when
+ * frames stay slow and back up when there is headroom. Hysteresis and a
+ * dwell time keep it from flapping (each change re-bakes sprites).
+ */
+export class ResolutionGovernor {
+  private step = 0;
+  private slowFor = 0;
+  private fastFor = 0;
+
+  /** Feed the smoothed frame time; returns true when the scale changed. */
+  update(display: Display, frameMs: number, dt: number): boolean {
+    if (frameMs > 22) {
+      this.slowFor += dt;
+      this.fastFor = 0;
+    } else if (frameMs < 13) {
+      this.fastFor += dt;
+      this.slowFor = 0;
+    } else {
+      this.slowFor = 0;
+      this.fastFor = 0;
+    }
+    let next = this.step;
+    if (this.slowFor > 3 && this.step < STEPS.length - 1) next++;
+    else if (this.fastFor > 8 && this.step > 0) next--;
+    if (next === this.step) return false;
+    this.step = next;
+    this.slowFor = 0;
+    this.fastFor = 0;
+    display.dynamicScale = STEPS[next] ?? 1;
+    return true;
+  }
 }

@@ -815,3 +815,22 @@ body {
 .fragment:empty {
   display: none;
 }
+
+#gameover-portrait .portrait {
+  display: block;
+  border: 1px solid var(--ash);
+  border-radius: 3px;
+}
+
+#gameover-portrait .portrait.golden {
+  border: 2px solid var(--gold);
+  box-shadow:
+    0 0 0 3px var(--ink),
+    0 0 0 4px var(--gold);
+}
+
+@media (max-height: 500px) {
+  #gameover-portrait {
+    display: none;
+  }
+}
