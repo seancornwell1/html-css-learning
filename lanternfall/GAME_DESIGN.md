@@ -377,6 +377,18 @@ Total meta power is capped so that a fully upgraded skilled bot sits around
 Hints come from cryptic death-screen fragments (for example, *"The well keeper
 waits where no lantern was ever lit."*).
 
+**Implementation (M8).** Rules live in `SECRET_RULES` (`src/data/powerups.ts`); reveal text and fragments in `src/data/secrets.ts`.
+- **Kagerou:** reach 8:00 with no Onigiri picked up and no regen healing.
+- **Ido:**
+  - At 2:30 the **Sealed Well** (a 120 HP persistent prop) appears 1100 px from the player, off screen.
+  - Breaking it starts a **Flood**: for 2:00 the director spawns only the Drowned.
+  - Outlasting the flood alive counts.
+- **Dawn early:** the Mother falls before 9:45.
+- **Death screen:** shows a hint fragment for an unfound secret 60% of the time, otherwise night lore.
+- **Shrine ranks:** `SimConfig.meta` applies them to the stat block, capped at each rank's maximum.
+- **Run tools:** Recast, Patience and Exile give `reroll()`, `skip()` and `banish()`; a banished item never appears again that run.
+- **Respec:** the Shrine's *Refund all* returns every coin spent.
+
 ## 10. Difficulty targets & balance simulation
 
 "Hard on the first try" is defined as **bot survival-rate bands**. These apply

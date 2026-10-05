@@ -18,6 +18,8 @@ decision changes, update the doc in the same commit.
 | `npm run sim -- --note "..."` | Add an observation to the report (repeatable) |
 | `npm run sim -- --gate share\|evolutions\|bands` | Milestone gates (repeatable) |
 | `npm run sim -- --rescore M4 --gate ...` | Re-apply gates to a saved report without re-simulating |
+| `npm run sim -- --bot skilled_meta` | Skilled bot with every Shrine rank bought (the fourth band) |
+| `npm run dev`, then `/art.html?scale=5` | Dev-only art sheet: every baked sprite and the character portraits |
 | `npx tsx tools/sim/diag-evo.ts <bot> <seed>` | Trace reliquaries, loadouts and evolutions in one run |
 | `npx tsx tools/sim/diag.ts <bot> <seed>` | Per-30 s trace of one run (alive, kills, level, HP, distance), for tuning |
 | `npm run shot -- <url> <outDir>` | Playwright screenshots (portrait, landscape, desktop); fails on console errors. Serve first with `npm run build && npx vite preview --port 4173` |
