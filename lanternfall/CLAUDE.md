@@ -144,7 +144,7 @@ Work through the milestones in GAME_DESIGN §14, in order. For each one:
 | M6 | Power-ups | ✅ done (`sim-reports/M6.md`); skilled band deviation carried from M5; Ren average 8% (tune in M8) |
 | M7 | Audio | ✅ done (`sim-reports/M7.md`, bit-identical to M6) |
 | M8 | Meta & secrets | ✅ done (`sim-reports/M8.md`, full); skilled band deviation carried; Kagerou average 7% and skilled_meta 60–91.5% tuned in M10 |
-| M9 | Art pass, UI & mobile polish | not started |
+| M9 | Art pass, UI & mobile polish | ✅ done (`sim-reports/M9.md`, bit-identical to M8); real-phone perf pending the human playtest |
 | M10 | Balance & release | not started |
 
 ## CI & deploy
