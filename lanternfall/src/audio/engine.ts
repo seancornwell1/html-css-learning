@@ -10,6 +10,7 @@ export class AudioEngine {
   sfx!: GainNode;
   private volumes = { master: 0.8, music: 0.6, sfx: 0.8 };
   private noise: AudioBuffer | null = null;
+  private silence: HTMLAudioElement | null = null;
 
   /** Create/resume the context. Call from a user gesture handler. */
   unlock(): void {
@@ -31,7 +32,39 @@ export class AudioEngine {
       this.master.connect(comp).connect(ctx.destination);
       this.applyVolumes();
     }
-    if (this.ctx.state === 'suspended') void this.ctx.resume();
+    // iOS can leave the context 'interrupted' (not just 'suspended') after
+    // the tab is hidden or the phone locks; resume from any stopped state.
+    if (this.ctx.state !== 'running') void this.ctx.resume();
+    this.keepAwake();
+  }
+
+  /**
+   * iOS plays Web Audio on the ringer channel, so the silent switch mutes it.
+   * Ask for the media ('playback') session where supported, and otherwise
+   * keep a looping, generated silent <audio> element playing: an active
+   * media element moves the page onto the playback session. Must run inside
+   * a user gesture, which `unlock` callers guarantee.
+   */
+  private keepAwake(): void {
+    const session = (navigator as unknown as { audioSession?: { type: string } }).audioSession;
+    if (session && session.type !== 'playback') {
+      try {
+        session.type = 'playback';
+      } catch {
+        // Older WebKit: fall through to the silent element.
+      }
+    }
+    if (this.silence) {
+      if (this.silence.paused) void this.silence.play().catch(() => undefined);
+      return;
+    }
+    const el = document.createElement('audio');
+    el.src = silentWavUrl();
+    el.loop = true;
+    el.setAttribute('playsinline', '');
+    el.setAttribute('aria-hidden', 'true');
+    this.silence = el;
+    void el.play().catch(() => undefined);
   }
 
   get ready(): boolean {
@@ -81,4 +114,30 @@ export class AudioEngine {
     this.music.gain.setTargetAtTime(this.volumes.music, t, 0.05);
     this.sfx.gain.setTargetAtTime(this.volumes.sfx, t, 0.05);
   }
+}
+
+/** Half a second of generated silence as a WAV blob URL (no sample files). */
+function silentWavUrl(): string {
+  const rate = 8000;
+  const samples = rate / 2;
+  const buf = new ArrayBuffer(44 + samples);
+  const v = new DataView(buf);
+  const text = (o: number, str: string): void => {
+    for (let i = 0; i < str.length; i++) v.setUint8(o + i, str.charCodeAt(i));
+  };
+  text(0, 'RIFF');
+  v.setUint32(4, 36 + samples, true);
+  text(8, 'WAVE');
+  text(12, 'fmt ');
+  v.setUint32(16, 16, true);
+  v.setUint16(20, 1, true); // PCM
+  v.setUint16(22, 1, true); // mono
+  v.setUint32(24, rate, true);
+  v.setUint32(28, rate, true);
+  v.setUint16(32, 1, true);
+  v.setUint16(34, 8, true); // 8-bit
+  text(36, 'data');
+  v.setUint32(40, samples, true);
+  for (let i = 0; i < samples; i++) v.setUint8(44 + i, 128); // 8-bit silence
+  return URL.createObjectURL(new Blob([buf], { type: 'audio/wav' }));
 }

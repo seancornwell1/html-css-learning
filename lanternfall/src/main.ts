@@ -64,7 +64,7 @@ renderer.onBanner = (title, detail) => banner.show(title, detail);
 
 const audio = new AudioDirector();
 // Browsers only allow audio after a gesture; any press/tap/key unlocks it.
-for (const ev of ['pointerdown', 'touchend', 'keydown'] as const) {
+for (const ev of ['pointerdown', 'touchend', 'click', 'keydown'] as const) {
   window.addEventListener(ev, () => audio.unlock(), { capture: true });
 }
 
@@ -120,6 +120,9 @@ if (params.has('debug')) {
       },
       get stick() {
         return stick;
+      },
+      get audio() {
+        return audio;
       },
     },
   });
