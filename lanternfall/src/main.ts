@@ -12,6 +12,7 @@ import { Renderer } from './render/renderer';
 import type { Intent } from './sim/intent';
 import { CHARACTERS } from './data/characters';
 import { ENEMIES } from './data/enemies';
+import { WEAPONS } from './data/weapons';
 import { Sim } from './sim/sim';
 import { formatTime } from './ui/format';
 import { Banner, Inventory } from './ui/hud';
@@ -107,6 +108,12 @@ function newSim(): Sim {
   return s;
 }
 let sim = newSim();
+// Debug: ?evolve=<weapon id> plays the evolution cut-in.
+const evolveParam = params.get('evolve');
+if (evolveParam) {
+  const weapon = WEAPONS.findIndex((w) => w.id === evolveParam);
+  if (weapon >= 0) renderer.onEvent({ type: 'evolution', weapon, union: false }, performance.now());
+}
 // Debug: spawned bosses still get their cut-in.
 for (const id of spawnIds) {
   const kind = ENEMIES.findIndex((d) => d.id === id);

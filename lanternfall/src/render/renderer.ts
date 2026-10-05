@@ -164,7 +164,7 @@ export class Renderer {
         this.shake.add(0.6);
         this.hitStop.trigger(180, now);
         const name = WEAPONS[e.weapon]?.name ?? '';
-        this.onBanner(e.union ? 'Union' : 'Evolution', name);
+        this.cutIn = { id: '', name, age: 0, label: e.union ? 'UNION' : 'EVOLVED', gold: true };
         break;
       }
       case 'reliquary':
@@ -185,8 +185,9 @@ export class Renderer {
         this.shake.add(0.7);
         this.hitStop.trigger(160, now);
         const def = ENEMIES[e.kind];
-        if (def && !def.invulnerable) this.cutIn = { id: def.id, name: def.name, age: 0 };
-        else this.onBanner('It comes', def?.name ?? '');
+        if (def && !def.invulnerable) {
+          this.cutIn = { id: def.id, name: def.name, age: 0, label: 'IT COMES', gold: false };
+        } else this.onBanner('It comes', def?.name ?? '');
         break;
       }
       case 'boss_slain':
@@ -628,7 +629,16 @@ export class Renderer {
   }
 
   /** Boss intro: an anime cut-in band slashing across the screen. */
-  private cutIn: { id: string; name: string; age: number; art?: Sprite } | null = null;
+  private cutIn: {
+    id: string;
+    name: string;
+    age: number;
+    /** Small caption above the name. */
+    label: string;
+    /** Evolutions: gold name, no figure (gold means good for you). */
+    gold: boolean;
+    art?: Sprite;
+  } | null = null;
 
   private drawCutIn(dt: number): void {
     const c = this.cutIn;
@@ -649,7 +659,7 @@ export class Renderer {
     // Boss on the left, name to its right; tighter on narrow screens.
     const bossX = -Math.min(bandH * 0.9, w * 0.3);
     const bossH = bandH * (h > w ? 0.95 : 1.15);
-    if (!c.art) {
+    if (!c.art && c.id) {
       // Bake the boss at cut-in size: sharp, not an upscaled play sprite.
       const art = ENEMY_ART[c.id];
       if (art) {
@@ -692,7 +702,7 @@ export class Renderer {
       );
     }
     // Name with a vermilion seal.
-    const textX = bossX + bandH * 0.55;
+    const textX = c.id ? bossX + bandH * 0.55 : -w * 0.32;
     // Fit the name between the boss and the screen edge, one line if it
     // fits, otherwise a word per line (narrow portrait screens).
     const name = c.name.toUpperCase();
@@ -708,9 +718,9 @@ export class Renderer {
     ctx.textBaseline = 'middle';
     ctx.font = `600 ${Math.round(size * 0.42)}px 'Shippori Mincho', serif`;
     ctx.fillStyle = PALETTE.ash;
-    ctx.fillText('IT COMES', textX, top - size * 1.05);
+    ctx.fillText(c.label, textX, top - size * 1.05);
     ctx.font = `700 ${size}px 'Shippori Mincho', serif`;
-    ctx.fillStyle = PALETTE.bone;
+    ctx.fillStyle = c.gold ? PALETTE.gold : PALETTE.bone;
     lines.forEach((line, i) => ctx.fillText(line, textX, top + i * size * 1.05));
     const last = lines[lines.length - 1] ?? '';
     const tw = ctx.measureText(last).width;
