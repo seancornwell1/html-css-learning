@@ -7,6 +7,8 @@
   /* Print tones: illustration and ornament only (GAME_DESIGN §7.3.1). */
   --washi: #e9e1cf;
   --shu: #c8322a;
+  /* Display face: Shippori Mincho (OFL, bundled; licence in public/licenses). */
+  --display: 'Shippori Mincho', 'Hiragino Mincho ProN', 'Yu Mincho', serif;
   --safe-top: max(10px, env(safe-area-inset-top));
   --safe-left: max(16px, env(safe-area-inset-left));
   --safe-right: max(16px, env(safe-area-inset-right));
@@ -833,4 +835,16 @@ body {
   #gameover-portrait {
     display: none;
   }
+}
+
+/* Display typography: mincho for titles, names and banners (GAME_DESIGN §7.3.1). */
+.modal-title,
+.card-name,
+#banner-title,
+.char-name,
+.title-name,
+.shrine-name,
+.register-name,
+#boss-name {
+  font-family: var(--display);
 }

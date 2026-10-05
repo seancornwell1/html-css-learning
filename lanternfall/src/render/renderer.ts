@@ -697,7 +697,7 @@ export class Renderer {
     // fits, otherwise a word per line (narrow portrait screens).
     const name = c.name.toUpperCase();
     let size = Math.round(bandH * 0.2);
-    ctx.font = `700 ${size}px system-ui, sans-serif`;
+    ctx.font = `700 ${size}px 'Shippori Mincho', serif`;
     const room = w * 0.47 - textX - size * 1.6;
     let lines = [name];
     if (ctx.measureText(name).width > room) lines = name.split(' ');
@@ -706,10 +706,10 @@ export class Renderer {
     size = Math.min(size, Math.floor((bandH * 0.62) / lines.length));
     const top = -((lines.length - 1) * size * 1.05) / 2 + size * 0.2;
     ctx.textBaseline = 'middle';
-    ctx.font = `600 ${Math.round(size * 0.42)}px system-ui, sans-serif`;
+    ctx.font = `600 ${Math.round(size * 0.42)}px 'Shippori Mincho', serif`;
     ctx.fillStyle = PALETTE.ash;
     ctx.fillText('IT COMES', textX, top - size * 1.05);
-    ctx.font = `700 ${size}px system-ui, sans-serif`;
+    ctx.font = `700 ${size}px 'Shippori Mincho', serif`;
     ctx.fillStyle = PALETTE.bone;
     lines.forEach((line, i) => ctx.fillText(line, textX, top + i * size * 1.05));
     const last = lines[lines.length - 1] ?? '';

@@ -1,3 +1,5 @@
+import '@fontsource/shippori-mincho/latin-400.css';
+import '@fontsource/shippori-mincho/latin-700.css';
 import { FixedStepLoop } from './core/loop';
 import { Controller } from './input/controller';
 import { KeyboardInput } from './input/keyboard';
