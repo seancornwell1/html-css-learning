@@ -1,5 +1,6 @@
 import { CHARACTERS, type CharacterDef } from '../data/characters';
 import { WEAPONS } from '../data/weapons';
+import { portraitCanvas } from '../render/portraits';
 
 /** Character select (GAME_DESIGN §4): tap-select + tap-confirm, keys 1–4 + Enter. */
 export class CharacterSelect {
@@ -52,6 +53,9 @@ export class CharacterSelect {
       (card.querySelector('.char-start') as HTMLElement).textContent = locked
         ? ''
         : `Starts with ${start}`;
+      const art = portraitCanvas(c.id, 96, 120);
+      if (locked) art.classList.add('locked');
+      card.prepend(art);
       card.addEventListener('click', () => this.tap(i));
       return card;
     });

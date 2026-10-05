@@ -1,6 +1,7 @@
 import { SFX, type SfxDef, type SfxId } from '../data/sfx';
 import { ENEMIES } from '../data/enemies';
 import type { SimEvent } from '../sim/events';
+import { PICKUP } from '../sim/pickup-pool';
 import type { AudioEngine } from './engine';
 
 /** Plays synthesized SFX with per-effect voice limits (GAME_DESIGN §11.2). */
@@ -93,7 +94,8 @@ export class SfxPlayer {
         this.play('hit');
         break;
       case 'enemy_killed':
-        this.play(ENEMIES[e.kind]?.elite || ENEMIES[e.kind]?.boss ? 'slam' : 'kill');
+        if (ENEMIES[e.kind]?.behaviour === 'prop') this.play('strike', 0.8);
+        else this.play(ENEMIES[e.kind]?.elite || ENEMIES[e.kind]?.boss ? 'slam' : 'kill');
         break;
       case 'sweep':
       case 'whip':
@@ -112,7 +114,24 @@ export class SfxPlayer {
         this.play('ember');
         break;
       case 'pickup':
-        this.play('pickup');
+        switch (e.kind) {
+          case PICKUP.lantern_burst:
+            this.play('evolution');
+            this.play('slam', 0.7);
+            break;
+          case PICKUP.spirit_call:
+            this.play('reliquary');
+            break;
+          case PICKUP.frenzy:
+            this.play('level_up');
+            this.play('boss', 0.5);
+            break;
+          case PICKUP.coin:
+            this.play('ember', 1.4);
+            break;
+          default:
+            this.play('pickup');
+        }
         break;
       case 'level_up':
         this.play('level_up');

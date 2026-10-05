@@ -1,4 +1,5 @@
 import { SpriteCache, type Sprite } from '../render/sprites';
+import { portraitCanvas } from '../render/portraits';
 
 /**
  * Dev-only art sheet (`npm run dev`, then /art.html?scale=6): every baked
@@ -26,3 +27,11 @@ function show(label: string, sprite: Sprite | undefined): void {
 
 show('player', cache.player[0]);
 for (const [id, tints] of cache.enemy) show(id, tints[0]?.[0]);
+
+for (const id of ['akari', 'ren', 'tetsu', 'hotaru', 'kagerou', 'ido']) {
+  const fig = document.createElement('figure');
+  const cap = document.createElement('figcaption');
+  cap.textContent = id;
+  fig.append(portraitCanvas(id, 240, 300), cap);
+  sheet.append(fig);
+}
